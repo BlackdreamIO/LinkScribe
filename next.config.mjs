@@ -2,14 +2,20 @@
 const nextConfig = {
     async headers() {
         return [
-          {
-            source: '/api/section/get',
-            headers: [
-              { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-            ],
-          },
+            {
+                source: "/(.*)",
+                headers: [
+                  {
+                    key: "Set-Cookie",
+                    value: "HttpOnly;Secure;SameSite=None",
+                  },
+                ],
+              },
         ];
-      },
+    },
+    images: {
+        domains: ['img.clerk.com']
+      }
 };
 
 export default nextConfig;

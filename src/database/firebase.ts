@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore, initializeFirestore } from "firebase/firestore";
-import { FIREBASE } from '@/utils/envExporter';
+import { FIREBASE } from '@/lib/envExporter';
 
 const firebaseConfig = {
   apiKey: FIREBASE.FIREBASE_API,

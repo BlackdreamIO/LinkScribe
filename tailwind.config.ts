@@ -21,9 +21,17 @@ const config = {
       extend: {
         colors: {
             theme : {
-                bgPrimary : "rgba(5,5,5,255)",
-                bgSecondary : "rgba(18,18,18,255)",
+                bgPrimary : "rgba(1,1,1,255)",
+                bgSecondary : "#09090A",
                 bgThird : "rgba(38,38,38,255)",
+                bgFourth : "rgba(10,10,10,255)",
+                bgFifth : "rgba(15,15,15,255)",
+
+                textPrimary : "rgb(255,255,255,255)",
+                textSecondary : "#C8BCF6",
+                textThird : "rgb(150,150,150,255)",
+
+                borderSecondary : "#C8BCF6"
             },
             border: "hsl(var(--border))",
             input: "hsl(var(--input))",
