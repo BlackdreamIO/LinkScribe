@@ -33,7 +33,13 @@ export const Account = () => {
                     {
                         isSignedIn && isLoaded ? (
                             <>
-                                <Text fontWeight={"bold"} className="truncate">{user.firstName}</Text>
+                                {
+                                    user && user.username ? (
+                                        <Text fontWeight={"bold"} className="truncate">{user.username.replaceAll("_", " ")}</Text>
+                                    )
+                                    :
+                                    <Text fontWeight={"bold"} className="truncate">{`${user.firstName} ${user.lastName}`}</Text>
+                                }
                                 <Text className="truncate mr-3">{user.primaryEmailAddress?.emailAddress}</Text>
                             </>
                         )

@@ -21,7 +21,7 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
                     <div>
                         <Sidebar />
                     </div>
-                    <div className="w-full">
+                    <div className="w-full p-0">
                         {children}
                     </div>
                 </Flex>

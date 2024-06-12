@@ -38,10 +38,10 @@ export const FooterList = () => {
             {
                 isSignedIn ? 
                     <>
-                        <Button variant={'ghost'} className={buttonStyle} onClick={handleAccountProfile}>
+                        {/* <Button variant={'ghost'} className={buttonStyle} onClick={handleAccountProfile}>
                             <CircleUserRound className="text-theme-textSecondary"/>
                             Account Profile
-                        </Button>
+                        </Button> */}
                         <Button variant={'ghost'} className={buttonStyle} onClick={handleSignOut}>
                             <LogOut className="text-theme-textSecondary"/>
                             Log Out

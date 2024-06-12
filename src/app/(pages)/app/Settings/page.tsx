@@ -57,9 +57,9 @@ export default function SettingPage()
     `;
 
     return (
-        <Box className='w-full h-screen p-6 dark:bg-theme-bgPrimary bg-neutral-900 space-y-16'>
+        <Box className='w-full h-screen overflow-scroll overflow-x-hidden p-6 max-sm:p-0 dark:bg-theme-bgPrimary bg-neutral-900 space-y-16'>
             <Text className='text-4xl'>SETTING PAGE</Text>
-            <VStack>
+            <VStack className="w-full p-0">
                 <AccountSetting/>
             </VStack>
         </Box>

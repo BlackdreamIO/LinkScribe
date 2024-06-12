@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { EmailAddressResource } from "@clerk/types";
 import { useRouter } from "next/navigation";
@@ -7,13 +8,19 @@ import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
 
 import { ToastAction } from "@/components/ui/toast";
-import { AtSign, ChevronRight, CircleCheck, Clipboard } from "lucide-react";
+import { AtSign, ChevronRight, CircleCheck, Clipboard, Pencil, Save } from "lucide-react";
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const AccountProfileSection = () => {
     
+    const [originalUsername, setOriginalUsername] = useState("");
+    const [currentUserName, setCurrentName] = useState("");
+    const [userNameChanged, setUserNameChanged] = useState(false);
+
     const { session } = useClerk();
     const { isSignedIn, user } = useUser();
 
@@ -47,6 +54,56 @@ export const AccountProfileSection = () => {
         }
     }
 
+    const handleRename = async () => {
+        if (!user) {
+            console.error("No user is logged in.");
+            return;
+        }
+        try 
+        {
+            const filteredUsername = currentUserName.replaceAll(" ", "_");
+            await user.update({ username : filteredUsername });
+            setCurrentName(filteredUsername)
+            setOriginalUsername(filteredUsername);
+            toast({
+                title: "Username updated successfully",
+                action: <ToastAction altText="Ok">Ok</ToastAction>,
+                className: "fixed bottom-5 right-2 w-6/12 rounded-xl border-2 border-purple-400",
+                duration : 5000
+            });
+        } 
+        catch (error : any) {
+            const errorMessage = error?.errors?.[0]?.longMessage || 
+                    error?.message || "Unknown error : could be [Internal Server Error] apolozize for that we will soon fix this problem please stay by";
+            toast({
+                title: "Rename Failed",
+                description: typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage),
+                action: <ToastAction altText="Ok">Ok</ToastAction>,
+                className: "fixed bottom-5 right-2 w-6/12 rounded-xl border-2 border-yellow-400",
+                duration : 10000
+            });
+        }
+      };
+
+    useEffect(() => {
+        if(!user) return;
+
+        if(user.username) {
+            const currentUsername = user.username.replaceAll("_", " ");
+            setCurrentName(currentUsername);    
+            setOriginalUsername(currentUsername);
+        }
+        else {
+            setCurrentName(`${user?.firstName} ${user?.lastName}`);
+            setOriginalUsername(`${user?.username} ${user?.lastName}`);
+        }
+    }, [user])
+
+    useEffect(() => {
+        setUserNameChanged(currentUserName != originalUsername);
+    }, [currentUserName])
+    
+
     return (
         <Box className="flex flex-row items-center justify-start space-x-8 max-sm:flex-col max-sm:justify-center max-sm:space-x-0 w-full max-sm:space-y-4  overflow-hidden">
             {
@@ -61,7 +118,21 @@ export const AccountProfileSection = () => {
                         />
                         <Box className="flex flex-col items-start justify-center">
                             <Flex flexDir={"column"} justifyContent={"center"} alignItems={"start"} className="space-y-2 max-sm:!items-center">
-                                <Text className="dark:text-neutral-300 text-2xl max-tiny:truncate">{user.firstName}</Text>
+                                <Box className="w-full flex flex-row items-center space-x-3 group">
+                                    <Input
+                                        value={currentUserName}
+                                        onChange={(e) => setCurrentName(e.target.value)}
+                                        className="w-auto dark:text-neutral-300 text-3xl max-tiny:truncate p-0 !outline-none !ring-0 !border-transparent focus-visible:!border-blue-500 focus-visible:selection:bg-transparent"
+                                        onKeyDown={(e) => {
+                                            if(e.key == "Enter") {
+                                                handleRename();
+                                            }
+                                        }}
+                                    />
+                                    <Button onClick={() => handleRename()} variant={"ghost"} className={`p-0 w-4 h-4 ${userNameChanged ? "flex" : "hidden"}`}>
+                                        <Save />
+                                    </Button>
+                                </Box>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger className="dark:text-neutral-300 flex flex-row gap-2 items-center border-2 dark:border-transparent border-transparent focus-visible:!border-blue-500 !ring-0 !outline-none rounded-xl">
                                         {user.primaryEmailAddress?.emailAddress}
@@ -87,9 +158,9 @@ export const AccountProfileSection = () => {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                                 <Text className="dark:text-neutral-600 flex flex-row items-center gap-2 max-tiny:truncate">
-                                    {user.primaryEmailAddressId} 
-                                    <Clipboard 
-                                        className="cursor-pointer dark:hover:text-white"
+                                    {user.primaryEmailAddressId}
+                                    <Button 
+                                        className="!bg-transparent p-0 border-2 border-transparent focus-visible:!border-blue-500 !ring-0 !outline-none"
                                         onClick={() => {
                                             navigator.clipboard.writeText(user.primaryEmailAddressId ?? "")
                                                 .then((e) => {
@@ -100,8 +171,12 @@ export const AccountProfileSection = () => {
                                                         action : <ToastAction altText="Ok">Ok</ToastAction>,
                                                     })
                                                 })
-                                        }} 
-                                    />
+                                        }}     
+                                    >
+                                        <Clipboard 
+                                            className="cursor-pointer dark:text-neutral-500 dark:hover:text-white"
+                                        />
+                                    </Button>
                                 </Text>
                             </Flex>
                         </Box>
