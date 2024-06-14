@@ -7,7 +7,7 @@ import { Box, Text, VStack } from "@chakra-ui/react"
 import { LayoutGrid, Rows3, Search, Settings } from 'lucide-react';
 
 
-export const ListItems = () => {
+export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
     const router = useRouter();
     const pathName = usePathname();
@@ -20,14 +20,21 @@ export const ListItems = () => {
         return (
             <Button 
                 variant={"ghost"} 
-                className={`w-full flex flex-row items-center justify-start gap-4 px-4 h-14 rounded-lg !ring-0 focus-visible:!outline-blue-500 cursor-default
-                ${pathName.includes(label) ? "dark:bg-theme-bgThird/20 bg-neutral-100 dark:border-neutral-800 border border-neutral-300" : "dark:hover:bg-theme-bgThird/40"}`}
+                className={`w-full flex flex-row items-center gap-4 px-4 h-14 rounded-lg !ring-0 focus-visible:!outline-blue-500 cursor-default
+                    ${ minimizeMode ? "h-10" : "h-14"}
+                    ${ minimizeMode ? "justify-center" : "justify-start"}
+                    ${pathName.includes(label) ? "dark:bg-theme-bgThird/20 bg-neutral-100 dark:border-neutral-800 border border-neutral-300" : "dark:hover:bg-theme-bgThird/40"}`}
+                
                 onClick={onClick}
             >
                 <div className="text-theme-textSecondary">
                     {icon}
                 </div>
-                <Text>{label}</Text>
+                {
+                    !minimizeMode && (
+                        <Text>{label}</Text>
+                    )
+                }
             </Button>
         )
     }

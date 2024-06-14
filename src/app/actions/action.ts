@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/database/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, getDocs, getDocsFromCache, getDocsFromServer } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 
 export async function getSections() 
@@ -37,4 +37,28 @@ export async function getSections()
     // const documentsJSON = await documents.json();
 
     // return documentsJSON;
+}
+
+export async function getUserSections(userEmail : string) 
+{
+    try 
+    {
+        const documentsCollectionRef = collection(db, userEmail);
+        const documentsSnapshot = await getDocsFromServer(documentsCollectionRef);
+
+        const documents = documentsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+        }));
+    
+        revalidatePath('/app/Links/');
+        return documents;
+    } 
+    catch (error : any) {
+        revalidatePath('/app/Links/');
+        return {
+            data : [],
+            status: error?.message || 'An unknown error occurred'
+        };
+    }
 }

@@ -1,10 +1,16 @@
+
 import type { Metadata } from "next";
+
 import { Inter } from "next/font/google";
 import { GeistSans } from 'geist/font/sans';
-import { Sidebar } from "./components/Sidebar/Sidebar";
-import { Flex } from "@chakra-ui/react";
-import { Toaster } from "@/components/ui/toaster";
 import "@/styles/globals.css";
+
+import { SectionControllerProvider } from "@/context/SectionControllerProviders";
+
+import { Flex } from "@chakra-ui/react";
+
+import { Sidebar } from "./components/Sidebar/Sidebar";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,18 +20,21 @@ export const metadata: Metadata = {
 };
 
 export default function LinksLayout({ children,}: Readonly<{children: React.ReactNode;}>) {
+
     return (
-        <html lang="en" className={GeistSans.className}>
+        <html lang="en" className={inter.className}>
             <body className="dark" id="app">
-                <Flex flexDir="row">
-                    <div>
-                        <Sidebar />
-                    </div>
-                    <div className="w-full p-0">
-                        {children}
-                    </div>
-                </Flex>
-                <Toaster />
+                <SectionControllerProvider>
+                    <Flex flexDir="row">
+                        <div>
+                            <Sidebar />
+                        </div>
+                        <div className="w-full p-0">
+                            {children}
+                        </div>
+                    </Flex>
+                    <Toaster />
+                </SectionControllerProvider>
             </body>
         </html>
     );

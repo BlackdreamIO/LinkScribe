@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, initializeFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore, memoryLocalCache } from "firebase/firestore";
 import { FIREBASE } from '@/lib/envExporter';
 
 const firebaseConfig = {
@@ -15,6 +15,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+
+export const db = initializeFirestore(app, {
+    localCache: memoryLocalCache(),
+});
 
 //const analytics = getAnalytics(app);

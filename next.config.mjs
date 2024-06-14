@@ -14,7 +14,7 @@ const nextConfig = {
         ];
     },
     images: {
-        domains: ['img.clerk.com']
+        domains: ['img.clerk.com', 'cdn-icons-png.freepik.com']
       }
 };
 
