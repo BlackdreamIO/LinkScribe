@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { DBTaskStatus, useDBController } from "@/context/DBContextProvider";
 import { useUser } from "@clerk/nextjs";
 import CheckDbExist from "@/global/dbExist";
+import { useRouter } from "next/navigation";
 
 const override: CSSProperties = {
     display: "block",
@@ -27,14 +28,13 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
     const [windowSize, setWindowSize] = useState({ x : window.innerWidth, y : window.innerHeight });
 
     const { CreateCollection, status } = useDBController()!;
-
     const { isSignedIn, isLoaded } = useUser();
+    const router = useRouter();
 
     useEffect(() => {
         if (isCreating) {
             const updateStatus = async () => {
                 const sleep = (ms : number) => new Promise(resolve => setTimeout(resolve, ms));
-                const getRandomDelay = () => Math.floor(Math.random() * (3000 - 600 + 1)) + 600;
                 
                 await sleep(1000);
                 setStatusText("GET STARTED BY CREATING NEW DB");
@@ -72,6 +72,9 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
             onCreate();
             setTimeout(() => {
                 setHideElement(true);
+                if(window) {
+                    window.location.reload();
+                }
             }, 4000);
         }
         if(status == DBTaskStatus.FailedCreateCollection) 
