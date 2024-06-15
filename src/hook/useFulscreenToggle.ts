@@ -5,22 +5,23 @@ export default function useFullscreenToggle()
 {
     const [isFulscreen, setIsFullscreen] = useState(false);
 
-    const handleToggleFullscreen = () => {
-        if(ScreenFull.isEnabled) {
-            if(isFulscreen) {
-                ScreenFull.request();
-            }
-            else if(!isFulscreen) {
-                ScreenFull.exit();
-            }
-        }
-        else {
-            console.log("Browser does not support fullscreen")
-            alert("Browser does not support fullscreen");
-        }
-    }
-
     useEffect(() => {
+        
+        const handleToggleFullscreen = () => {
+            if(ScreenFull.isEnabled && ScreenFull.request) {
+                if(isFulscreen) {
+                    ScreenFull?.request();
+                }
+                else if(!isFulscreen) {
+                    ScreenFull.exit();
+                }
+            }
+            else {
+                console.log("Browser does not support fullscreen")
+                alert("Browser does not support fullscreen");
+            }
+        }
+
         handleToggleFullscreen();
     }, [isFulscreen])
     

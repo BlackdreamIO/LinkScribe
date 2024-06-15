@@ -189,7 +189,7 @@ export const AccountUpdates = () => {
                 <DropdownMenuTrigger disabled={!isSignedIn} className={`${ProfileButtonStyle} px-4 transition-all duration-150`}>
                     <AtSign /> Add Email
                 </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="start" className="w-96 dark:bg-theme-bgSecondary !bg-opacity-5 backdrop-filter !backdrop-blur-md py-2 border-2 dark:border-neutral-700 p-4 space-y-4">
+                <DropdownMenuContent side="bottom" align="start" className="w-96 dark:bg-theme-bgSecondary !bg-opacity-30 backdrop-filter !backdrop-blur-md py-2 border-2 dark:border-neutral-700 p-4 space-y-4">
                     <Input 
                         type="email"
                         required
@@ -216,7 +216,7 @@ export const AccountUpdates = () => {
                 <DropdownMenuTrigger disabled={!isSignedIn} className={`${ProfileButtonStyle} px-4 transition-all duration-150`}>
                     <Trash /> Remove Email
                 </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="start" className="max-w-96 w-auto max-tiny:w-full max-tiny:max-w-full dark:bg-theme-bgSecondary !bg-opacity-5 backdrop-filter !backdrop-blur-md py-2 border-2 dark:border-neutral-700 p-4 space-y-4 max-tiny:space-y-2">
+                <DropdownMenuContent side="bottom" align="start" className="max-w-96 w-auto max-tiny:w-full max-tiny:max-w-full dark:bg-theme-bgSecondary !bg-opacity-30 backdrop-filter !backdrop-blur-md py-2 border-2 dark:border-neutral-700 p-4 space-y-4 max-tiny:space-y-2">
                     {
                         isSignedIn ? (
                             <>

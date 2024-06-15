@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { GeistSans } from 'geist/font/sans';
 import "@/styles/globals.css";
 
+import { DBContextProvider } from "@/context/DBContextProvider";
 import { SectionControllerProvider } from "@/context/SectionControllerProviders";
 
 import { Flex } from "@chakra-ui/react";
@@ -24,17 +25,17 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
     return (
         <html lang="en" className={inter.className}>
             <body className="dark" id="app">
-                <SectionControllerProvider>
-                    <Flex flexDir="row">
-                        <div>
+                <DBContextProvider>
+                    <SectionControllerProvider>
+                        <Flex flexDir="row" className="no-scrollbar">
                             <Sidebar />
-                        </div>
-                        <div className="w-full p-0">
-                            {children}
-                        </div>
-                    </Flex>
-                    <Toaster />
-                </SectionControllerProvider>
+                            <div className="w-full p-0 overflow-hidden">
+                                {children}
+                            </div>
+                        </Flex>
+                        <Toaster />
+                    </SectionControllerProvider>
+                </DBContextProvider>
             </body>
         </html>
     );

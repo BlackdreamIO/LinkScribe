@@ -2,6 +2,7 @@
 
 import { db } from "@/database/firebase";
 import { addDoc, collection, getDocs } from "firebase/firestore";
+import { revalidatePath } from "next/cache";
 
 export async function createCollection(collectionName : string) : Promise<any> {
     try
@@ -13,8 +14,14 @@ export async function createCollection(collectionName : string) : Promise<any> {
             await addDoc(collectionRef, {
                 title : 'USER DB ACTIVATED' + Math.random() * 10
             });
+
+            revalidatePath("/app/Links");
+            return "CREATED";
         }
-        return "ALREADY EXIST"
+
+        revalidatePath("/app/Links");
+
+        return "ALREADY EXIST";
     }
     catch (error : any) {
         throw new Error(error);

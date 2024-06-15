@@ -38,7 +38,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     const [contextSections, setContextSections] = useState<SectionScheme[]>([]);
     const [originalContextSections, setOriginalContextSections] = useState<SectionScheme[]>([]);
 
-    const [localStorageSections, setLocalStorageSections] = useLocalStorage<SectionScheme[]>('sectionsCache', []);
+    const [_, __, getLocalStorageSectionByKey, setLocalStorageSectionByKey] = useLocalStorage<SectionScheme[]>('sectionsCache', []);
     const [serverOperationInterrupted, setServerOperationInterrupted] = useLocalStorage<boolean>('operationInterrupted', false);
 
     {/* the filteredContextSections data will come from the component that does the filtering */}
@@ -52,21 +52,30 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     };
 
     const GetSections = async (revalidateFetch? : boolean) => {
-        if(localStorageSections && localStorageSections.length > 0 && !revalidateFetch) return localStorageSections;
-
-        if(isSignedIn && isLoaded && user.primaryEmailAddress) 
+        if(isSignedIn && isLoaded && user.primaryEmailAddress)
         {
-            const currentUserEmail = user.primaryEmailAddress.id;
-            const sections = await getSections(currentUserEmail);
-            if(sections) 
+            const currentUserEmail = user.primaryEmailAddress.emailAddress.replaceAll("@", "").replaceAll(".", "");
+            console.log(currentUserEmail, " : ", getLocalStorageSectionByKey(currentUserEmail) && getLocalStorageSectionByKey(currentUserEmail)?.length);
+
+            if(getLocalStorageSectionByKey(currentUserEmail) && !revalidateFetch) return getLocalStorageSectionByKey(currentUserEmail);
+
+            else
             {
-                setContextSections(sections);
-                setLocalStorageSections(sections);
-                return sections;
-            }
+                console.log(`REQUEST HAS BEEN MADE ${new Date().toTimeString()}`);
+                const sections = await getSections(currentUserEmail);
+                if(sections) 
+                {
+                    setContextSections(sections);
+                    setLocalStorageSectionByKey(currentUserEmail, sections);
+                    return sections;
+                }
+                return [];
+            }   
+        }
+        else
+        {
             return [];
         }
-        return [];
     };
 
     const UpdateSection = async ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => {
@@ -84,25 +93,36 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         setContextSections(originalContextSections);
     }
 
-    const handleServerOperationInterrupted = async () => {
-        
-    }
+    useEffect(() => {
+        const getSections = async () => {
+            await GetSections(true);
+        }
+        if(isSignedIn && isLoaded && user.primaryEmailAddress)
+        {
+            const currentUserEmail = user.primaryEmailAddress.emailAddress.replaceAll("@", "").replaceAll(".", "");
+            if(getLocalStorageSectionByKey(currentUserEmail).length < 1)
+            {
+                console.log("response made from useeffect");
+                getSections()
+                return;
+            }
+            else {
+                const sections = GetSections();
+                console.log("use effecr local storage sections : ", sections);
+            }
+            setContextSections(getLocalStorageSectionByKey(currentUserEmail));
+            setOriginalContextSections(getLocalStorageSectionByKey(currentUserEmail));
+        }
+    }, [isSignedIn, isLoaded, user]);
+    
 
     useEffect(() => {
-        if(localStorageSections.length < 1) {
-            GetSections(true);
-            return;
+        if(user?.primaryEmailAddress) 
+        {
+            const currentUserEmail = user.primaryEmailAddress.emailAddress.replaceAll("@", "").replaceAll(".", "");
+            setLocalStorageSectionByKey(currentUserEmail, contextSections);
         }
-        if(serverOperationInterrupted) {
-            handleServerOperationInterrupted();
-        }
-        setContextSections(localStorageSections);
-        setOriginalContextSections(localStorageSections);
-    }, [isSignedIn, isLoaded]);
-
-    useEffect(() => {
-        setLocalStorageSections(contextSections);
-    }, [contextSections]);
+    }, [contextSections, isSignedIn, isLoaded, user]);
     
     
     const contextValue: SectionContextType = {
