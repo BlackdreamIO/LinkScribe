@@ -62,7 +62,7 @@ export const AccountAdvance = () => {
                         <Button onClick={() => setOpenDialog(true)} variant={"destructive"} className="w-full">DELETE THIS ACCOUNT</Button>
                         <Dialog open={openDialog} onOpenChange={() => setOpenDialog(false)}>
                             <DialogContent className="dark:bg-theme-bgFourth">
-                                <Text className="text-xl">Please Enter <span className="!text-yellow-400"> "Delete" </span> In Order To Delete This Account</Text>
+                                <Text className="text-xl">Please Enter <span className="!text-yellow-400"> {`${"Delete"}`} </span> In Order To Delete This Account</Text>
                                 <Input 
                                     className={`w-full border-2 ${canDelete ? "!border-green-400" : "!border-yellow-600"}`}
                                     onChange={(e) => setCurrentConfirmationText(e.target.value)} 

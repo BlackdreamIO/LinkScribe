@@ -112,6 +112,7 @@ export const AccountConnectedDevice = () => {
                                 isMobile={device.latestActivity.isMobile ?? true}
                                 status={device.status ?? 'revoked'}
                                 isPrimary={device.status == "active"}
+                                key={index}
                             />
                         ))
                     )

@@ -2,7 +2,6 @@
 
 import { CSSProperties, useEffect, useState } from 'react';
 import { useSectionController } from '@/context/SectionControllerProviders';
-import { checkDbExist } from './functions/dbExist';
 
 import BarLoader from "react-spinners/BarLoader";
 

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { userDBExist } from "@/app/actions/database/userDBExist";
 
-export const checkDbExist = () => {
+export default function CheckDbExist()
+{
 
     const [dbExist, setDbExist] = useState(false);
     const { isSignedIn, isLoaded, user } = useUser();

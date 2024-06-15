@@ -195,7 +195,7 @@ export const ConnectedProviderAccount = () => {
             :
             (
                 Array(3).fill('').map((x, i) => (
-                    <Skeleton className='w-full h-10 rounded-lg animate-none' />
+                    <Skeleton key={i} className='w-full h-10 rounded-lg animate-none' />
                 ))
             )
         )
