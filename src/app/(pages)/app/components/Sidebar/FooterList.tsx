@@ -31,7 +31,7 @@ export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
     }
 
     const buttonStyle = `w-full dark:text-neutral-500 text-md dark:hover:text-white dark:hover:bg-theme-bgThird/20 
-        flex flex-row items-center gap-4 cursor-default !ring-0 focus-visible:!outline-blue-500
+        flex flex-row items-center gap-4 cursor-default !ring-0 focus-visible:!outline-theme-borderNavigation
         ${minimizeMode ? "h-8" : "h-14"}
         ${minimizeMode ? "justify-center" : "justify-start"}`;
     

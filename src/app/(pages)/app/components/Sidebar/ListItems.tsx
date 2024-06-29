@@ -20,7 +20,7 @@ export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
         return (
             <Button 
                 variant={"ghost"} 
-                className={`w-full flex flex-row items-center gap-4 px-4 h-14 rounded-lg !ring-0 focus-visible:!outline-blue-500 cursor-default
+                className={`w-full flex flex-row items-center gap-4 px-4 h-14 rounded-lg !ring-0 focus-visible:!outline-theme-borderNavigation cursor-default
                     ${ minimizeMode ? "h-10" : "h-14"}
                     ${ minimizeMode ? "justify-center" : "justify-start"}
                     ${pathName.includes(label) ? "dark:bg-theme-bgThird/20 bg-neutral-100 dark:border-neutral-800 border border-neutral-300" : "dark:hover:bg-theme-bgThird/40"}`}

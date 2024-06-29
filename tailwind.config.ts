@@ -30,8 +30,10 @@ const config = {
                 textPrimary : "rgb(255,255,255,255)",
                 textSecondary : "#C8BCF6",
                 textThird : "rgb(150,150,150,255)",
+                textLink : "#90c1f8",
 
-                borderSecondary : "#C8BCF6"
+                borderSecondary : "#C8BCF6",
+                borderNavigation : "#38bdf8",
             },
             border: "hsl(var(--border))",
             input: "hsl(var(--input))",

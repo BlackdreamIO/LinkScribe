@@ -41,7 +41,7 @@ export const Sidebar = () => {
 
     return (
         <Box className={`relative dark:bg-theme-bgSecondary duration-150 max-lg:absolute z-20 transition-all group
-            ${mobileMinimize ? 'w-[0vw]' : computerMinimize ? 'w-20' : 'w-[18vw]'}`}
+            ${mobileMinimize ? 'w-[0vw]' : computerMinimize ? 'w-20' : 'w-[18vw]'} select-none`}
         >
             <Box as={motion.div} variants={varients} animate={mobileMinimize ? "minimize" : "show"} className="relative">
                 <Box className={`dark:bg-theme-bgSecondary min-h-screen max-h-auto flex flex-col justify-between max-lg:absolute max-lg:left-1`}>

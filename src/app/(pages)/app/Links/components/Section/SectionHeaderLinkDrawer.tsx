@@ -32,13 +32,13 @@ export const SectionHeaderLinkDrawer = ({ openLinkCreateDrawer, onOpenChange, on
                     </DrawerHeader>
                     <Box className="h-[150px] px-4 space-y-4">
                         <Input 
-                            className="w-full h-12 dark:bg-theme-bgFifth !ring-0 focus-within:!outline-blue-500"
+                            className="w-full h-12 dark:bg-theme-bgFifth !ring-0 focus-within:!outline-theme-borderNavigation"
                             placeholder="Title"
                             value={linkTitle}
                             onChange={(e) => setLinkTitle(e.target.value)}
                         />
                         <Input 
-                            className="w-full h-12 dark:bg-theme-bgFifth !ring-0 focus-within:!outline-blue-500"
+                            className="w-full h-12 dark:bg-theme-bgFifth !ring-0 focus-within:!outline-theme-borderNavigation"
                             placeholder="Url"
                             value={linkUrl}
                             onChange={(e) => setLinkUrl(e.target.value)}
@@ -48,13 +48,13 @@ export const SectionHeaderLinkDrawer = ({ openLinkCreateDrawer, onOpenChange, on
                         <Button 
                             onClick={() => handleCreateLink()}
                             variant={"secondary"} 
-                            className="w-48 dark:bg-theme-bgFifth dark:hover:bg-neutral-950 dark:hover:text-theme-textSecondary rounded-lg border-2 dark:border-neutral-900 h-11 transition-none !ring-0 focus-within:!outline-blue-500"
+                            className="w-48 dark:bg-theme-bgFifth dark:hover:bg-neutral-950 dark:hover:text-theme-textSecondary rounded-lg border-2 dark:border-neutral-900 h-11 transition-none !ring-0 focus-within:!outline-theme-borderNavigation"
                         >
                             Submit
                         </Button>
                         <DrawerClose 
                             onClick={() => onClose()}
-                            className="w-48 dark:bg-theme-bgFifth dark:hover:bg-neutral-950 dark:hover:text-theme-textSecondary rounded-lg border-2 dark:border-neutral-900 py-2 !ring-0 focus-visible:!border-blue-500 focus-visible:!outline-none"
+                            className="w-48 dark:bg-theme-bgFifth dark:hover:bg-neutral-950 dark:hover:text-theme-textSecondary rounded-lg border-2 dark:border-neutral-900 py-2 !ring-0 focus-visible:!border-theme-borderNavigation focus-visible:!outline-none"
                         >
                             Cancell
                         </DrawerClose>
