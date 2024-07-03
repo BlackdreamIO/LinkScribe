@@ -65,8 +65,8 @@ export const LinkComponent = () => {
         )
     }
 
-    const RenderConditionalChildren = ({ render, children } : { render : boolean, children : React.ReactNode }) => {
-        return render ? children : <></>
+    const RenderConditionalChildren = ({ render, children }: { render: boolean, children: React.ReactNode }) => {
+        return <>{render ? children : null}</>;
     }
 
     const getFaviconUrl = (link: string) => {
@@ -125,7 +125,9 @@ export const LinkComponent = () => {
                 </HStack>
                 <HStack className="w-full" justifyContent={"space-between"}>
                     <Box className="w-full overflow-hidden flex flex-row items-center justify-start">
-                        <RenderConditionalChildren render={!urlEditMode} children={<LinkIcon className="text-theme-textLink mr-2" />} />
+                        <RenderConditionalChildren render={!urlEditMode}>
+                            <LinkIcon className="text-theme-textLink mr-2" />
+                        </RenderConditionalChildren>
                         {
                             urlEditMode && (                        
                                 <Input
