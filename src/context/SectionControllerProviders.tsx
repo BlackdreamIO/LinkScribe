@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { SectionScheme } from '@/scheme/Section';
-import { getSections } from '@/app/actions/sectionAPI';
+import { getSections, updateSection } from '@/app/actions/sectionAPI';
 import useLocalStorage from '@/hook/useLocalStorage';
 
 export const dynamic = 'force-dynamic';
@@ -76,19 +76,32 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         {
             return [];
         }
-    };
+    }
 
     const UpdateSection = async ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => {
-        
-    };
+        const currentUserEmail = user?.primaryEmailAddress?.emailAddress.replaceAll("@", "").replaceAll(".", "") || "";
+        const filteredSections = contextSections.map((section) => section === currentSection ? { ...section, ...updatedSection } : section );
+        setContextSections(filteredSections);
+
+        try
+        {
+            const response = await updateSection(currentUserEmail, currentSection.id, JSON.stringify(updatedSection));
+            console.log(response);
+        }
+        catch (error : any) {
+            throw new Error(error);   
+        }
+    }
     
     const DeleteSections = async (id:string) => {
        
     }
 
+    // SAVE CONTEXT SECTION WHEN SERVER SIDE OPERATION COMPLETE
     const SaveContextSections = () => {
         setOriginalContextSections(contextSections);
     }
+    // RESTORE CONTEXT SECTION WHEN SERVER SIDE OPERATION FAIL
     const RestoreContextSections = () => {
         setContextSections(originalContextSections);
     }

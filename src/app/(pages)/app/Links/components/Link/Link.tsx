@@ -8,6 +8,7 @@ import { Link as LinkIcon, Eye, EllipsisVertical } from "lucide-react";
 import { useWindowResize } from "@/hook/useWindowResize";
 import { Input } from "@/components/ui/input";
 import { LinkContextMenuWrapper } from "./LinkContextMenuWrapper";
+import Image from "next/image";
 
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
@@ -15,6 +16,9 @@ const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transiti
     data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary`;
 
 export const LinkComponent = () => {
+
+    const [faviconUrl, setFaviconUrl] = useState('');
+    const [showContextMenuOutline, setShowContextMenuOutline] = useState(false);
 
     const [linkTitle, setLinkTitle] = useState("Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non molestias quas, quos accusamus optio commodi debitis ducimus recusandae vitae.");
     const [titleEditMode, setTitleEditMode] = useState(false);
@@ -26,23 +30,10 @@ export const LinkComponent = () => {
     const [createdAt, setCreatedAt] = useState<Date>(new Date());
     
     const HandleRenameTitle = (str : string) => {
-        if(str.length > 3) {
-            setLinkTitle(str);
-            return;
-        }
-        else {
-            alert("Title Should Be Atleast 5 Character Long");
-        }
+        setLinkTitle(str);
     }
     const HandleRenameUrl = (str : string) => {
-        if(str.length > 3) {
-            setLinkUrl(str);
-            return;
-        }
-        else {
-            alert("Url Should Be Atleast 5 Character Long");
-            setLinkUrl(linkUrl)
-        }
+        setLinkUrl(str);
     }
 
     useWindowResize({
@@ -78,11 +69,34 @@ export const LinkComponent = () => {
         return render ? children : <></>
     }
 
+    const getFaviconUrl = (link: string) => {
+        try {
+            const domain = new URL(link);
+            return `${domain.origin}/favicon.ico`;
+        } catch (error) {
+            console.error('Invalid URL : Failed To Load favicon');
+            return '';
+        }
+    };
+
+    useEffect(() => {
+        const favicon = getFaviconUrl(linkUrl);
+        setFaviconUrl(favicon);
+    }, [linkUrl]);
+
     return (
-        <LinkContextMenuWrapper onTitleRename={() => setTitleEditMode(true)} onUrlUpdate={() => setUrlEditMode(true)} onDelete={() => {}}>
-            <Box className="w-full dark:bg-[rgb(5,5,5,1)] flex flex-col items-center justify-center py-2 px-4 space-y-4 rounded-xl border-2 dark:border-neutral-900">
+        <LinkContextMenuWrapper onContextMenu={setShowContextMenuOutline} onTitleRename={() => setTitleEditMode(true)} onUrlUpdate={() => setUrlEditMode(true)} onDelete={() => {}}>
+            <Box className={`w-full dark:bg-[rgb(5,5,5,1)] flex flex-col items-center justify-center py-2 px-4 space-y-4 rounded-xl border-2 ${showContextMenuOutline ? "dark:border-indigo-300" : "dark:border-neutral-900"}`}>
                 <HStack className="w-full" justifyContent={"space-between"}>
                     <Box className="flex flex-grow flex-row items-center justify-start">
+                        <Image
+                            src={faviconUrl}
+                            alt="https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg"
+                            width={24}
+                            height={24}
+                            unoptimized
+                            quality={100}
+                        />
                         <Input
                             value={linkTitle}
                             className={`flex flex-grow text-lg max-lg:text-base max-sm:text-xs p-2 dark:border-transparent border-2 border-transparent 

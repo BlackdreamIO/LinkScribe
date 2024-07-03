@@ -14,8 +14,13 @@ const nextConfig = {
         ];
     },
     images: {
-        domains: ['img.clerk.com', 'cdn-icons-png.freepik.com']
-      }
+      remotePatterns: [
+      {
+         protocol: "https",
+         hostname: "**",
+       },
+      ],
+   },
 };
 
 export default nextConfig;

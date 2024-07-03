@@ -14,22 +14,21 @@ import { SectionContainer } from './components/SectionContainer/SectionContainer
 
 export default function LinkPage() 
 {
-    //const { contextSections, GetSections } = useSectionController()!;
+    const { contextSections, GetSections } = useSectionController()!;
     
-    //const dbExist = CheckDbExist();
+    const dbExist = CheckDbExist();
     
     return (
       <Box className="w-full h-screen overflow-scroll no-scrollbar dark:bg-[rgb(5,5,5)] bg-neutral-100">
         
         <LinksNavbar />
-        {/* <DBLoadComponent onCreate={async () => await GetSections(true)} /> */}
-        {/* {
-            contextSections.map((section, index) => (
-                <Button key={index}>{section.id}</Button>
-            ))
-        } */}
+        <DBLoadComponent onCreate={async () => await GetSections(true)} />
 
-        <SectionContainer/>
+        {
+            dbExist && contextSections.length > 0 && (
+                <SectionContainer/>
+            )
+        }
 
       </Box>
     );

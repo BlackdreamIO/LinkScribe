@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 export default function LinksLayout({ children,}: Readonly<{children: React.ReactNode;}>) {
 
     return (
-        <html lang="en" className={inter.className}>
-            <body className="dark" id="app">
+        
+            <section className="dark" id="app">
                 <DBContextProvider>
                     <SectionControllerProvider> { /* CRUD OPERATIONS */ }
                         <SectionContextProvider> { /* UI SIDE */ }
@@ -39,7 +39,7 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
                         </SectionContextProvider>
                     </SectionControllerProvider>
                 </DBContextProvider>
-            </body>
-        </html>
+            </section>
+        
     );
 }
