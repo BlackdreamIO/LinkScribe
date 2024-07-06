@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 
 import { Inter } from "next/font/google";
@@ -24,7 +23,6 @@ export const metadata: Metadata = {
 export default function LinksLayout({ children,}: Readonly<{children: React.ReactNode;}>) {
 
     return (
-        
             <section className="dark" id="app">
                 <DBContextProvider>
                     <SectionControllerProvider> { /* CRUD OPERATIONS */ }
@@ -40,6 +38,5 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
                     </SectionControllerProvider>
                 </DBContextProvider>
             </section>
-        
     );
 }

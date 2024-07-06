@@ -17,7 +17,7 @@ import { SectionHeaderLinkDrawer } from "./SectionHeaderLinkDrawer";
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
-    data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary`;
+    data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary !outline-none`;
 
 type SectionHeaderProps = {
     sectionTitle : string;
@@ -27,7 +27,7 @@ type SectionHeaderProps = {
     onContextMenu : (open : boolean) => void;
     onMinimize : () => void;
     onRename : (newName : string) => void;
-    onDelete : (sectionName : string) => void;
+    onDelete : () => void;
 }
 
 export const SectionHeader = (props : SectionHeaderProps) => {
@@ -72,6 +72,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                             />
                         </Box>
                         <Stack direction={"row"} className="space-x-2">
+                            <Text className="dark:text-neutral-500">{linkCount}</Text>
                             <Button onClick={() => setOpenLinkCreateDrawer(true)} className={buttonStyle}>
                                 <PlusIcon />
                             </Button>
@@ -100,7 +101,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                     <DropdownMenuItem className={dropdownMenuItemStyle}>Collapse/Expand Section</DropdownMenuItem>
                                     <DropdownMenuSeparator/>
                                     <DropdownMenuItem className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>Delete All Links</DropdownMenuItem>
-                                    <DropdownMenuItem className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>Delete Section</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => onDelete()} className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>Delete Section</DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
@@ -123,7 +124,11 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                 <ContextMenuItem onClick={() => setTitleEditMode(true)} className={dropdownMenuItemStyle}>Rename Section</ContextMenuItem>
                 <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>Add Link</ContextMenuItem>
                 <ContextMenuItem className={dropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>
-                <ContextMenuItem className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>Delete</ContextMenuItem>
+                <ContextMenuItem 
+                    onClick={() => onDelete()} 
+                    className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
+                        Delete
+                </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>
     )

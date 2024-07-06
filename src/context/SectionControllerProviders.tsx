@@ -3,8 +3,9 @@
 import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { SectionScheme } from '@/scheme/Section';
-import { getSections, updateSection } from '@/app/actions/sectionAPI';
+import { createSection, deleteSection, getSections, updateSection } from '@/app/actions/sectionAPI';
 import useLocalStorage from '@/hook/useLocalStorage';
+import { ConvertEmailString } from '@/global/convertEmailString';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,7 @@ interface SectionContextData {
 }
 
 export interface SectionContextType extends SectionContextData {
-    CreateSection: (section: SectionScheme) => Promise<void>;
+    CreateSection: ({ newSection } : { newSection: SectionScheme }) => Promise<void>;
     GetSections: (revalidateFetch? : boolean) => Promise<SectionScheme[]>;
     UpdateSection : ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => Promise<void>;
     DeleteSections: (id: string) => Promise<any>;
@@ -46,15 +47,33 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
 
     const { isSignedIn, isLoaded, user } = useUser();
 
-    const CreateSection = async (newSection : SectionScheme) => {
-        setServerOperationInterrupted(true);
-        setContextSections(prev => [...prev, newSection]);
-    };
+    const CreateSection = async ({ newSection } : { newSection: SectionScheme }) => {
+        if(isSignedIn && isLoaded && user.primaryEmailAddress) {
+            
+            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
+
+            setServerOperationInterrupted(true);
+            setContextSections(prev => [...prev, newSection]);
+
+            try
+            {
+                const response = await createSection(currentUserEmail, JSON.stringify(newSection));
+                setServerOperationInterrupted(false);
+                SaveContextSections();
+            }
+            catch (error : any)
+            {
+                setServerOperationInterrupted(false);
+                RestoreContextSections();
+                throw new Error(error);
+            }
+        }
+    }
 
     const GetSections = async (revalidateFetch? : boolean) => {
         if(isSignedIn && isLoaded && user.primaryEmailAddress)
         {
-            const currentUserEmail = user.primaryEmailAddress.emailAddress.replaceAll("@", "").replaceAll(".", "");
+            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
             console.log(currentUserEmail, " : ", getLocalStorageSectionByKey(currentUserEmail) && getLocalStorageSectionByKey(currentUserEmail)?.length);
 
             if(getLocalStorageSectionByKey(currentUserEmail) && !revalidateFetch) return getLocalStorageSectionByKey(currentUserEmail);
@@ -79,22 +98,39 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     }
 
     const UpdateSection = async ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => {
-        const currentUserEmail = user?.primaryEmailAddress?.emailAddress.replaceAll("@", "").replaceAll(".", "") || "";
+        const currentUserEmail = ConvertEmailString(user?.primaryEmailAddress?.emailAddress || "");
         const filteredSections = contextSections.map((section) => section === currentSection ? { ...section, ...updatedSection } : section );
         setContextSections(filteredSections);
 
         try
         {
+            if(currentSection == updatedSection) return;
             const response = await updateSection(currentUserEmail, currentSection.id, JSON.stringify(updatedSection));
-            console.log(response);
+            SaveContextSections();
         }
         catch (error : any) {
-            throw new Error(error);   
+            RestoreContextSections();
+            throw new Error(error);
         }
     }
     
     const DeleteSections = async (id:string) => {
-       
+        if(isSignedIn && isLoaded && user.primaryEmailAddress) {
+            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
+            try
+            {
+                setContextSections(prevSections => {
+                    const updatedSections = prevSections.filter(section => section.id !== id);
+                    return updatedSections;
+                });
+                await deleteSection(currentUserEmail, id);
+                SaveContextSections();
+            }
+            catch (error : any) {
+                RestoreContextSections();
+                throw new Error(error);
+            }
+        }
     }
 
     // SAVE CONTEXT SECTION WHEN SERVER SIDE OPERATION COMPLETE
@@ -112,16 +148,16 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         }
         if(isSignedIn && isLoaded && user.primaryEmailAddress)
         {
-            const currentUserEmail = user.primaryEmailAddress.emailAddress.replaceAll("@", "").replaceAll(".", "");
+            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
             if(getLocalStorageSectionByKey(currentUserEmail).length < 1)
             {
-                console.log("response made from useeffect");
+                console.log("INITIAIED FROM BACKEND");
                 getSections()
                 return;
             }
             else {
-                const sections = GetSections();
-                console.log("use effecr local storage sections : ", sections);
+                GetSections();
+                console.log("INITIAIED FROM LOCAL STORAGE : ");
             }
             setContextSections(getLocalStorageSectionByKey(currentUserEmail));
             setOriginalContextSections(getLocalStorageSectionByKey(currentUserEmail));
@@ -132,7 +168,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     useEffect(() => {
         if(user?.primaryEmailAddress) 
         {
-            const currentUserEmail = user.primaryEmailAddress.emailAddress.replaceAll("@", "").replaceAll(".", "");
+            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
             setLocalStorageSectionByKey(currentUserEmail, contextSections);
         }
     }, [contextSections, isSignedIn, isLoaded, user]);

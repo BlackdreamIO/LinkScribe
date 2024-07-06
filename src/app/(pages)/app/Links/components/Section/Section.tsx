@@ -15,42 +15,54 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
 
     const { id, links, title, totalLinksCount, created_at } = currrentSection;
 
-    const [minimize, setMinimize] = useState(false);
+    const [minimize, setMinimize] = useState(true);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
-    const { highlightContexts } = useSectionContext()!;
-    const { UpdateSection } = useSectionController()!;
+    const { highlightContexts, collapseContexts } = useSectionContext()!;
+    const { UpdateSection, DeleteSections } = useSectionController()!;
+
+    useEffect(() => {
+        setMinimize(collapseContexts);
+    }, [collapseContexts])
 
     return (
-        <Box className={`w-full dark:bg-theme-bgFifth border-2 ${contextMenuOpen && !highlightContexts ? "border-indigo-400" : highlightContexts ? "border-white" : ""} rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300`}>
+        <Box className={`w-full dark:bg-theme-bgFourth border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
+            ${contextMenuOpen && !highlightContexts ? "border-indigo-300" : highlightContexts ? "border-white" : "dark:border-neutral-900"}
+            ${highlightContexts ? "pointer-events-none" : "pointer-events-auto"}`}
+        >
             
             <SectionHeader
                 sectionTitle={title}
-                linkCount={0}
+                linkCount={links?.length || 0}
                 isMinimzied={minimize}
 
                 onContextMenu={(v) => setContextMenuOpen(v)}
                 onMinimize={() => setMinimize(!minimize)}
                 onRename={(newTitle) => {
                     UpdateSection({ 
-                        currentSection : currrentSection, 
+                        currentSection : currrentSection,
                         updatedSection : {
-                            id : id, 
-                            links : links, 
-                            created_at : created_at, 
-                            totalLinksCount : totalLinksCount, 
+                            id : id,
+                            links : links,
+                            created_at : created_at,
+                            totalLinksCount : totalLinksCount,
                             title : newTitle
                         }
                     })}}
-                onDelete={() => {}}
+                onDelete={() => DeleteSections(id)}
             />
             {
                 !minimize && (
                     <motion.div className="w-full p-2 overflow-hidden transition-all duration-200 flex flex-col items-center justify-center space-y-4 select-none">
                         {
-                            (links ?? []).map((link, i) => (
-                                <LinkComponent key={i}/>
-                            ))
+                            (links ?? []).length > 0 ? (
+                                links ?? []).map((link, i) => (
+                                    <LinkComponent key={i}/>
+                                )
+                            )
+                            : (
+                                <Text className="text-lg text-center mb-4">EMPTY</Text>
+                            )
                         }
                     </motion.div>
                 )

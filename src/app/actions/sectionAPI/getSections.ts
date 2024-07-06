@@ -10,7 +10,7 @@ export async function getSections(userEmail : string) : Promise<SectionScheme[]>
     try 
     {
         const documentsCollectionRef = collection(db, userEmail);
-        const documentsSnapshot = await getDocsFromServer(documentsCollectionRef);
+        const documentsSnapshot = await getDocs(documentsCollectionRef);
 
         const documents = documentsSnapshot.docs.map((doc) => {
             const data = doc.data();

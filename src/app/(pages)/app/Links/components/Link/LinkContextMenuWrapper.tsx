@@ -23,7 +23,7 @@ export const LinkContextMenuWrapper = (props : LinkContextMenuWrapperProps) => {
     return (
         <ContextMenu onOpenChange={onContextMenu}>
             <ContextMenuTrigger className="w-full"> {children} </ContextMenuTrigger>
-            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth/40 !backdrop-filter !backdrop-blur-3xl dark:shadow-black border dark:border-neutral-700">
+            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth dark:shadow-black border dark:border-neutral-700">
                 <ContextMenuItem onClick={() => onTitleRename()} className={dropdownMenuItemStyle}>Rename Title</ContextMenuItem>
                 <ContextMenuItem onClick={() => onUrlUpdate()} className={dropdownMenuItemStyle}>Update Url</ContextMenuItem>
                 <ContextMenuItem onClick={() => onDelete()} className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>Delete</ContextMenuItem>

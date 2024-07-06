@@ -40,7 +40,7 @@ export const Sidebar = () => {
     
 
     return (
-        <Box className={`relative dark:bg-theme-bgSecondary duration-150 max-lg:absolute z-20 transition-all group
+        <Box onContextMenu={(e) => e.preventDefault()} className={`relative dark:bg-theme-bgSecondary duration-150 max-lg:absolute z-20 transition-all group
             ${mobileMinimize ? 'w-[0vw]' : computerMinimize ? 'w-20' : 'w-[18vw]'} select-none`}
         >
             <Box as={motion.div} variants={varients} animate={mobileMinimize ? "minimize" : "show"} className="relative">

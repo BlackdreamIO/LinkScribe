@@ -12,7 +12,8 @@ export async function createCollection(collectionName : string) : Promise<any> {
 
         if(snapshot.empty) {
             await addDoc(collectionRef, {
-                title : 'USER DB ACTIVATED' + Math.random() * 10
+                title : 'USER DB ACTIVATED' + Math.random() * 10,
+                links : []
             });
 
             revalidatePath("/app/Links");

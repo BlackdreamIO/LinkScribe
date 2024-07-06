@@ -8,6 +8,12 @@ export const dynamic = 'force-dynamic';
 interface SectionContextData {
     highlightContexts: boolean;
     setHighlightContexts: Dispatch<SetStateAction<boolean>>;
+
+    collapseContexts: boolean;
+    setCollapseContexts: Dispatch<SetStateAction<boolean>>;
+
+    openCreatorDialog: boolean;
+    setOpenCreatorDialog: Dispatch<SetStateAction<boolean>>;
 }
 
 export interface SectionContextType extends SectionContextData {
@@ -24,11 +30,17 @@ export const useSectionContext = () => useContext(SectionContext);
 
 export const SectionContextProvider = ({children} : SectionContextProviderProps) => {
 
+    const [openCreatorDialog, setOpenCreatorDialog] = useState<boolean>(false);
+    const [collapseContexts, setCollapseContexts] = useState<boolean>(false);
     const [highlightContexts, setHighlightContexts] = useState<boolean>(false);
    
     const contextValue: SectionContextType = {
         highlightContexts,
         setHighlightContexts,
+        collapseContexts,
+        setCollapseContexts,
+        openCreatorDialog,
+        setOpenCreatorDialog
     };
 
     return (

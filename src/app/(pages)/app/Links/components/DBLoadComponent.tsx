@@ -25,7 +25,7 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
     const [createComplete, setCreateComplete] = useState(false);
     const [hideElement, setHideElement] = useState(false);
 
-    const [windowSize, setWindowSize] = useState({ x : window.innerWidth, y : window.innerHeight });
+    const [windowSize, setWindowSize] = useState({ x : 0, y : 0 });
 
     const { CreateCollection, status } = useDBController()!;
     const { isSignedIn, isLoaded } = useUser();
