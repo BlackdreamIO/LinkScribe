@@ -2,9 +2,8 @@
 
 import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
-import useLocalStorage from '@/hook/useLocalStorage';
 import { useSectionController } from './SectionControllerProviders';
-import { createLink } from '@/app/actions/linkAPI';
+import { createLink, updateLink } from '@/app/actions/linkAPI';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
 import { SectionScheme } from '@/scheme/Section';
@@ -13,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 interface LinkContextData {
     CreateLink : ({ sectionID, linkData } : { sectionID : string, linkData : LinkScheme }) => Promise<void>;
-    UpdateLink : () => Promise<void>;
+    UpdateLink : ({ sectionID, linkData } : { sectionID : string, currentLink : LinkScheme, linkData : LinkScheme }) => Promise<void>;
     DeleteLink : () => Promise<void>;
 }
 
@@ -75,8 +74,50 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
     }
 
-    const UpdateLink = async () => {
-        
+    const UpdateLink = async ({ sectionID, currentLink, linkData } : { sectionID : string, currentLink : LinkScheme, linkData : LinkScheme }) => {
+        try 
+        {
+            if(isSignedIn && isLoaded && user.primaryEmailAddress)
+            {
+                const targetSection = contextSections.find((section) => section.id === sectionID);
+
+                if (targetSection) {
+                    // Find the index of the link to update
+                    const linkIndex = targetSection.links.findIndex((link) => link.id === currentLink.id);
+                
+                    if (linkIndex !== -1) {
+                        // Update the link at the found index
+                        const updatedLinks = [...targetSection.links];
+                        updatedLinks[linkIndex] = {
+                            ...updatedLinks[linkIndex],
+                            title: linkData.title,
+                            url: linkData.url,
+                            visitCount: linkData.visitCount,
+                            created_at: linkData.created_at
+                        };
+                
+                        // Update the contextSections state
+                        setContextSections((prevSections) =>
+                            prevSections.map((section) =>
+                                section.id === sectionID ? { ...section, links: updatedLinks } : section
+                            )
+                        );
+                    }
+                }
+                
+                if(currentLink.title == linkData.title && currentLink.url == linkData.url) {
+                    return;
+                }
+                else {
+                    const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData));
+                    console.log(response);
+                }
+            }
+        }
+        catch (error : any) {
+            RestoreContextSections();
+            throw new Error(error);
+        }
     }
 
     const DeleteLink = async () => {

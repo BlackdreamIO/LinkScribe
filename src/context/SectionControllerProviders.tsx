@@ -2,10 +2,13 @@
 
 import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
-import { SectionScheme } from '@/scheme/Section';
 import { createSection, deleteSection, getSections, updateSection } from '@/app/actions/sectionAPI';
+import { SectionScheme } from '@/scheme/Section';
 import useLocalStorage from '@/hook/useLocalStorage';
 import { ConvertEmailString } from '@/global/convertEmailString';
+
+import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from '@/components/ui/toast';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +49,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     const [enableFilterContextSections, setEnableFilterContextSections] = useState<boolean>(false);
 
     const { isSignedIn, isLoaded, user } = useUser();
+    const { toast } = useToast();
 
     const CreateSection = async ({ newSection } : { newSection: SectionScheme }) => {
         if(isSignedIn && isLoaded && user.primaryEmailAddress) {
@@ -57,7 +61,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
 
             try
             {
-                const response = await createSection(currentUserEmail, JSON.stringify(newSection));
+                const response = await createSection(currentUserEmail, JSON.stringify(newSection), window.location.origin);
                 setServerOperationInterrupted(false);
                 SaveContextSections();
             }
@@ -81,7 +85,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             else
             {
                 console.log(`REQUEST HAS BEEN MADE ${new Date().toTimeString()}`);
-                const sections = await getSections(currentUserEmail);
+                const sections = await getSections(currentUserEmail, window.location.origin);
                 if(sections) 
                 {
                     setContextSections(sections);
@@ -105,7 +109,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         try
         {
             if(currentSection == updatedSection) return;
-            const response = await updateSection(currentUserEmail, currentSection.id, JSON.stringify(updatedSection));
+            const response = await updateSection(currentUserEmail, currentSection.id, JSON.stringify(updatedSection), window.location.origin);
             SaveContextSections();
         }
         catch (error : any) {
@@ -119,12 +123,28 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
             try
             {
-                setContextSections(prevSections => {
-                    const updatedSections = prevSections.filter(section => section.id !== id);
-                    return updatedSections;
-                });
-                await deleteSection(currentUserEmail, id);
-                SaveContextSections();
+                const totalContextsLength = contextSections.length;
+                const decreamnentAmount = 1;
+
+                if(totalContextsLength - decreamnentAmount > 1)
+                {
+                    setContextSections(prevSections => {
+                        const updatedSections = prevSections.filter(section => section.id !== id);
+                        return updatedSections;
+                    })
+                    
+                    await deleteSection(currentUserEmail, id, window.location.origin);
+                    SaveContextSections();
+                }
+
+                else {
+                    toast({
+                        title: "Verification Code Has Been Send ",
+                        description: "VEIRFICATION",
+                        action : <ToastAction altText="Ok">Ok</ToastAction>,
+                        className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
+                    });
+                }
             }
             catch (error : any) {
                 RestoreContextSections();

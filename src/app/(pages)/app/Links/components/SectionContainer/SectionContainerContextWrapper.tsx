@@ -9,6 +9,7 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import { Separator } from "@/components/ui/separator";
 import { Labelkey } from "@/components/ui/key";
 import { ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "@/components/ui/context-menu";
+import { useSectionController } from "@/context/SectionControllerProviders";
 
 type SectionContainerContextWrapperProps = {
     children : React.ReactNode;
@@ -22,6 +23,7 @@ const dropdownMenuItemStyle = `text-sm py-2 font-normal rounded-lg px-2 transiti
 export const SectionContainerContextWrapper = (props : SectionContainerContextWrapperProps) => {
 
     const { children } = props;
+    
     const { 
         highlightContexts,
         setHighlightContexts,
@@ -30,6 +32,11 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         collapseContexts,
         setCollapseContexts 
     } = useSectionContext()!;
+    const {
+        contextSections,
+        setContextSections,
+        DeleteSections
+    } = useSectionController()!;
 
     const contextMenuRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +99,11 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         },
     })
 
+    const handleDelete = async () => {
+        const updatedSections = contextSections.filter((section) => section !== contextSections.at(0));
+        console.log(updatedSections); 
+    }
+
     return (
         <ContextMenu>
             <ContextMenuTrigger ref={contextMenuRef} className="w-full">
@@ -124,7 +136,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                     {!highlightContexts ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="CTRL + A"/></>}
                 </ContextMenuItem>
                 <Separator/>
-                <ContextMenuItem disabled={!highlightContexts} className={dropdownMenuItemStyle}>
+                <ContextMenuItem onClick={() => handleDelete()} disabled={!highlightContexts} className={dropdownMenuItemStyle}>
                     Delete <Labelkey label="CTRL + DEL"/>
                 </ContextMenuItem>
             </ContextMenuContent>

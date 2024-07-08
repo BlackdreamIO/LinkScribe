@@ -1,16 +1,16 @@
 "use client"
 
+import dynamic from 'next/dynamic';
 import { useSectionController } from '@/context/SectionControllerProviders';
 import CheckDbExist from '@/global/dbExist';
 
-import BarLoader from "react-spinners/BarLoader";
-
 import { Box} from '@chakra-ui/react';
+import { ConditionalRender } from '@/components/ui/conditionalRender';
 
-import LinksNavbar from './components/Navbar/LinksNavbar';
-import { DBLoadComponent } from './components/DBLoadComponent';
-import { SectionContainer } from './components/SectionContainer/SectionContainer';
-import { SectionCreator } from './components/Section/SectionCreator';
+const LinksNavbar = dynamic(() => import('./components/Navbar/LinksNavbar'));
+const SectionContainer = dynamic(() => import('./components/SectionContainer/SectionContainer').then((mod) => mod.SectionContainer));
+const SectionCreator = dynamic(() => import('./components/Section/SectionCreator').then((mod) => mod.SectionCreator));
+const DBLoadComponent = dynamic(() => import('./components/DBLoadComponent').then((mod) => mod.DBLoadComponent));
 
 export default function LinkPage() 
 {
@@ -24,13 +24,11 @@ export default function LinkPage()
         <LinksNavbar />
         <DBLoadComponent onCreate={async () => await GetSections(true)} />
 
-        {
-            dbExist && contextSections.length > 0 && (
-                <SectionContainer/>
-            )
-        }
-        <SectionCreator />
+        <ConditionalRender render={dbExist}>
+            <SectionContainer/>
+        </ConditionalRender>
 
+        <SectionCreator />
       </Box>
     );
 }

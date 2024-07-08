@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import dynamic from 'next/dynamic';
 
 import { useSectionController } from "@/context/SectionControllerProviders";
 import { useSectionContext } from "@/context/SectionContextProvider";
@@ -9,13 +9,21 @@ import { useLinkController } from "@/context/LinkControllerProviders";
 
 import { SectionScheme } from "@/scheme/Section";
 
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 
 import { ConditionalRender } from "@/components/ui/conditionalRender";
-import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
-import { LinkComponent } from "../Link/Link";
 import { SectionHeader } from "./SectionHeader";
+
+const LinkComponent = dynamic(() => import('../Link/Link').then((mod) => mod.LinkComponent), {
+    ssr: false,
+    loading: () => <p>Loading link...</p>,
+})
+  
+const ErrorManager = dynamic(() => import('../../../components/ErrorHandler/ErrorManager'), {
+    ssr: false,
+    loading: () => <p>Loading error manager...</p>,
+})
 
 export const Section = ({ currrentSection } : {currrentSection : SectionScheme}) => {
 
@@ -62,13 +70,13 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
                 })}
             />
 
-            <motion.div className="w-full p-2 overflow-hidden transition-all duration-200 flex flex-col items-center justify-center space-y-4 select-none">
-                <ConditionalRender render={!minimize}>
+            <ConditionalRender render={!minimize}>
+                <Box className="w-full p-2 overflow-hidden transition-all duration-200 flex flex-col items-center justify-center space-y-4 select-none">
                     <ErrorManager>
                         {
                             (links ?? []).length > 0 ? (
                                 links ?? []).map((link, i) => (
-                                    <LinkComponent link={link} key={i}/>
+                                    <LinkComponent link={link} sectionID={id} key={i}/>
                                 )
                             )
                             : (
@@ -76,8 +84,8 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
                             )
                         }
                     </ErrorManager>
-                </ConditionalRender>
-            </motion.div>
+                </Box>
+            </ConditionalRender>
         </Box>
     )
 }

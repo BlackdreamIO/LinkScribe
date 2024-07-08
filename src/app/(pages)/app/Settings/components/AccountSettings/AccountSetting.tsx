@@ -1,15 +1,18 @@
+
+import dynamic from 'next/dynamic';
+
 import { Box, Flex, Text } from "@chakra-ui/react";
 
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
-import { AccountProfileSection } from "./AccountProfile";
-import { AccountUpdates } from "./AccountUpdates";
-import { AccountEmailVerificationManager } from "./AccountEmailVerificationManager";
-import { ConnectedProviderAccount } from "./ConnectedProviderAccount";
-import { AccountConnectedDevice } from "./AccountConnectedDevice";
 import { SecurityReleated } from "./SecuretySite";
-import { AccountAdvance } from "./AccountAdvance";
 
+const AccountEmailVerificationManager = dynamic(() => import('./AccountEmailVerificationManager').then((mod) => mod.AccountEmailVerificationManager));
+const ConnectedProviderAccount = dynamic(() => import('./ConnectedProviderAccount').then((mod) => mod.ConnectedProviderAccount));
+const AccountConnectedDevice = dynamic(() => import('./AccountConnectedDevice').then((mod) => mod.AccountConnectedDevice));
+const AccountProfileSection = dynamic(() => import('./AccountProfile').then((mod) => mod.AccountProfileSection));
+const AccountUpdates = dynamic(() => import('./AccountUpdates').then((mod) => mod.AccountUpdates));
+const AccountAdvance = dynamic(() => import('./AccountAdvance').then((mod) => mod.AccountAdvance));
 
 export const AccountSetting = () => {
 

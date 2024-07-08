@@ -5,7 +5,7 @@ import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/database/firebase";
 import { SectionScheme } from "@/scheme/Section";
 
-export async function deleteSection(userEmail : string, documentId : string) : Promise<SectionScheme | any>
+export async function deleteSection(userEmail : string, documentId : string, revalidateUrl="/app/Links") : Promise<SectionScheme | any>
 {
     try 
     {
@@ -13,12 +13,12 @@ export async function deleteSection(userEmail : string, documentId : string) : P
 
         const response = await deleteDoc(docRef);
     
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl);
 
         return response;
     } 
     catch (error : any) {
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl);
         throw new Error(error?.message || 'An unknown error occurred');
     }
 }

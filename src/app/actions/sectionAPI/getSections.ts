@@ -5,12 +5,12 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/database/firebase";
 import { SectionScheme } from "@/scheme/Section";
 
-export async function getSections(userEmail : string) : Promise<SectionScheme[]>
+export async function getSections(userEmail : string, revalidateUrl="/app/Links") : Promise<SectionScheme[]>
 {
     try 
     {
         const documentsCollectionRef = collection(db, userEmail);
-        const documentsSnapshot = await getDocs(documentsCollectionRef);
+        const documentsSnapshot = await getDocsFromServer(documentsCollectionRef);
 
         const documents = documentsSnapshot.docs.map((doc) => {
             const data = doc.data();
@@ -23,12 +23,12 @@ export async function getSections(userEmail : string) : Promise<SectionScheme[]>
             };
         });
     
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl);
         
         return documents;
     } 
     catch (error : any) {
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl);
         throw new Error(error?.message || 'An unknown error occurred');
     }
 }

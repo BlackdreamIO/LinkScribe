@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/database/firebase";
 import { SectionScheme } from "@/scheme/Section";
 
-export async function createSection(userEmail : string, data : string) : Promise<SectionScheme | any>
+export async function createSection(userEmail : string, data : string, revalidateUrl="/app/Links") : Promise<SectionScheme | any>
 {
     try 
     {
@@ -22,7 +22,7 @@ export async function createSection(userEmail : string, data : string) : Promise
             created_at : parsedUpdatedDocument.created_at
         });
     
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl);
 
         return '';
     } 

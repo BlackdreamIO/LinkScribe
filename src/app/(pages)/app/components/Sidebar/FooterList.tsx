@@ -20,13 +20,13 @@ export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
     const handleSignIn = () => {
         openSignIn({
-            forceRedirectUrl : `${window.location.origin}/app/Links`
+            //forceRedirectUrl : `${window.location.origin}/app/Links`
         });
     }
 
     const handleSignOut = () => {
         signOut({
-            redirectUrl : `${window.location.origin}/app/Links`
+            //redirectUrl : `${window.location.origin}/app/Links`
         });
     }
 

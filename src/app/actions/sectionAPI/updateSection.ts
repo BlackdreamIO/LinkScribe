@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/database/firebase";
 import { SectionScheme } from "@/scheme/Section";
 
-export async function updateSection(userEmail : string, documentId : string, updatedDocument : string) : Promise<SectionScheme | any>
+export async function updateSection(userEmail : string, documentId : string, updatedDocument : string, revalidateUrl="/app/Links") : Promise<SectionScheme | any>
 {
     try 
     {
@@ -14,12 +14,12 @@ export async function updateSection(userEmail : string, documentId : string, upd
 
         const response = await updateDoc(docRef, parsedUpdatedDocument);
     
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl);
 
         return response;
     } 
     catch (error : any) {
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl);
         throw new Error(error?.message || 'An unknown error occurred');
     }
 }
