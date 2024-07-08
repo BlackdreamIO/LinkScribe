@@ -1,6 +1,6 @@
 "use server"
 
-import { Timestamp, addDoc, collection, } from "firebase/firestore";
+import { doc, setDoc, collection, } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 import { db } from "@/database/firebase";
 import { SectionScheme } from "@/scheme/Section";
@@ -12,7 +12,9 @@ export async function createSection(userEmail : string, data : string) : Promise
         const parsedUpdatedDocument : SectionScheme = JSON.parse(data);
         const collectionRef = collection(db, userEmail);
 
-        const response = await addDoc(collectionRef,  {
+        const docRef = doc(collectionRef, parsedUpdatedDocument.id);
+
+        const response = await setDoc(docRef,  {
             id : parsedUpdatedDocument.id,
             title : parsedUpdatedDocument.title,
             links : parsedUpdatedDocument.links,

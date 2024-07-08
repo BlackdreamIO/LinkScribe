@@ -4,14 +4,14 @@ import { useState } from "react";
 
 import { Box, Divider, HStack, Stack, Text } from "@chakra-ui/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-//import {ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, } from "@/components/ui/context-menu";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@radix-ui/react-context-menu";
 
-import { EllipsisVertical, LayoutPanelTop, Pen, SquareChevronDown, SquareChevronUp, PlusIcon } from "lucide-react";
+import { EllipsisVertical, LayoutPanelTop, SquareChevronDown, SquareChevronUp, PlusIcon } from "lucide-react";
   
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SectionHeaderLinkDrawer } from "./SectionHeaderLinkDrawer";
+import { LinkScheme } from "@/scheme/Link";
   
 
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
@@ -27,21 +27,17 @@ type SectionHeaderProps = {
     onContextMenu : (open : boolean) => void;
     onMinimize : () => void;
     onRename : (newName : string) => void;
+    onCreateLink : (link : LinkScheme) => void;
     onDelete : () => void;
 }
 
 export const SectionHeader = (props : SectionHeaderProps) => {
 
-    const { linkCount, isMinimzied, onMinimize, onRename, onDelete, onContextMenu, sectionTitle } = props;
+    const { linkCount, isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, sectionTitle } = props;
     const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState(false);
 
-    const [currentSectionTitle, setCurrentSectionTitle] = useState("");
+    const [currentSectionTitle, setCurrentSectionTitle] = useState(sectionTitle);
     const [titleEditMode, setTitleEditMode] = useState(false);
-    const [linkUrl, setLinkUrl] = useState("");
-
-    const handleCreateLink = () => {
-
-    }
 
     const handleMinimzie = () => {
         onMinimize();
@@ -54,19 +50,29 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                     <HStack justifyContent={"space-between"} className="w-full px-4 group">
                         <Box className="w-full flex flex-row flex-grow items-center justify-between">
                             <Input
-                                defaultValue={sectionTitle}
+                                value={currentSectionTitle}
                                 className={`text-xl p-2 w-full dark:border-transparent border-2 border-transparent !ring-0 !outline-none focus-visible:!border-theme-borderNavigation disabled:opacity-100 disabled:cursor-default
                                     ${titleEditMode ? "dark:bg-neutral-800 bg-neutral-200 selection:!bg-sky-700" : "!bg-transparent selection:!bg-transparent"} truncate`}
                                 disabled={!titleEditMode}
                                 onBlur={() => {
                                     setTitleEditMode(false);
-                                    onRename(currentSectionTitle);
+                                    if(currentSectionTitle.length > 3) {
+                                        onRename(currentSectionTitle);
+                                    }
+                                    else {
+                                        setCurrentSectionTitle(sectionTitle);
+                                    }
                                 }}
                                 onChange={(e) => setCurrentSectionTitle(e.target.value)}
                                 onKeyDown={(e) => {
                                     if(e.key == "Enter") {
                                         setTitleEditMode(false);
-                                        onRename(currentSectionTitle);
+                                        if(currentSectionTitle.length > 3) {
+                                            onRename(currentSectionTitle);
+                                        }
+                                        else {
+                                            setCurrentSectionTitle(sectionTitle);
+                                        }
                                     }
                                 }}
                             />
@@ -108,6 +114,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                             <SectionHeaderLinkDrawer
                                 openLinkCreateDrawer={openLinkCreateDrawer}
                                 onOpenChange={setOpenLinkCreateDrawer}
+                                onCreate={onCreateLink}
                                 onClose={() => setOpenLinkCreateDrawer(false)}
                             />
 

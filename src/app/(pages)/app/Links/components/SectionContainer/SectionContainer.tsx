@@ -32,7 +32,6 @@ export const SectionContainer = () => {
                     }
                 </VStack>
             </Box>
-        <SectionCreator />
         </SectionContainerContextWrapper>
     )
 }

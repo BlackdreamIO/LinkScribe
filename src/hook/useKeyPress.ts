@@ -25,6 +25,7 @@ export function useKeyPress({ mode = "Single key", key, caseSensitive = false, c
                  activeElement.tagName === "TEXTAREA" || 
                  activeElement.tagName === "SELECT" || 
                  activeElement.tagName === "DIV" || 
+                 activeElement.tagName === "BUTTON" || 
                  activeElement.isContentEditable);
 
             if (isInputFocused && preventElementFocus) {

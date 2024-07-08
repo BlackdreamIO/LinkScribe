@@ -1,6 +1,7 @@
 "use client"
 
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 type LinkContextMenuWrapperProps = {
     onContextMenu : (open : boolean) => void;
@@ -22,7 +23,11 @@ export const LinkContextMenuWrapper = (props : LinkContextMenuWrapperProps) => {
 
     return (
         <ContextMenu onOpenChange={onContextMenu}>
-            <ContextMenuTrigger className="w-full"> {children} </ContextMenuTrigger>
+            <ContextMenuTrigger className="w-full">
+                <ErrorManager>
+                    {children}
+                </ErrorManager>
+            </ContextMenuTrigger>
             <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth dark:shadow-black border dark:border-neutral-700">
                 <ContextMenuItem onClick={() => onTitleRename()} className={dropdownMenuItemStyle}>Rename Title</ContextMenuItem>
                 <ContextMenuItem onClick={() => onUrlUpdate()} className={dropdownMenuItemStyle}>Update Url</ContextMenuItem>

@@ -3,13 +3,19 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+import { useSectionController } from "@/context/SectionControllerProviders";
+import { useSectionContext } from "@/context/SectionContextProvider";
+import { useLinkController } from "@/context/LinkControllerProviders";
+
+import { SectionScheme } from "@/scheme/Section";
+
 import { Box, HStack, Text } from "@chakra-ui/react";
 
-import { SectionHeader } from "./SectionHeader";
+import { ConditionalRender } from "@/components/ui/conditionalRender";
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
+
 import { LinkComponent } from "../Link/Link";
-import { useSectionContext } from "@/context/SectionContextProvider";
-import { SectionScheme } from "@/scheme/Section";
-import { useSectionController } from "@/context/SectionControllerProviders";
+import { SectionHeader } from "./SectionHeader";
 
 export const Section = ({ currrentSection } : {currrentSection : SectionScheme}) => {
 
@@ -18,8 +24,9 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
     const [minimize, setMinimize] = useState(true);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
-    const { highlightContexts, collapseContexts } = useSectionContext()!;
     const { UpdateSection, DeleteSections } = useSectionController()!;
+    const { highlightContexts, collapseContexts } = useSectionContext()!;
+    const { CreateLink } = useLinkController()!;
 
     useEffect(() => {
         setMinimize(collapseContexts);
@@ -29,8 +36,7 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
         <Box className={`w-full dark:bg-theme-bgFourth border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
             ${contextMenuOpen && !highlightContexts ? "border-indigo-300" : highlightContexts ? "border-white" : "dark:border-neutral-900"}
             ${highlightContexts ? "pointer-events-none" : "pointer-events-auto"}`}
-        >
-            
+        >   
             <SectionHeader
                 sectionTitle={title}
                 linkCount={links?.length || 0}
@@ -50,23 +56,28 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
                         }
                     })}}
                 onDelete={() => DeleteSections(id)}
+                onCreateLink={(link) => CreateLink({
+                    sectionID : id,
+                    linkData :link
+                })}
             />
-            {
-                !minimize && (
-                    <motion.div className="w-full p-2 overflow-hidden transition-all duration-200 flex flex-col items-center justify-center space-y-4 select-none">
+
+            <motion.div className="w-full p-2 overflow-hidden transition-all duration-200 flex flex-col items-center justify-center space-y-4 select-none">
+                <ConditionalRender render={!minimize}>
+                    <ErrorManager>
                         {
                             (links ?? []).length > 0 ? (
                                 links ?? []).map((link, i) => (
-                                    <LinkComponent key={i}/>
+                                    <LinkComponent link={link} key={i}/>
                                 )
                             )
                             : (
                                 <Text className="text-lg text-center mb-4">EMPTY</Text>
                             )
                         }
-                    </motion.div>
-                )
-            }
+                    </ErrorManager>
+                </ConditionalRender>
+            </motion.div>
         </Box>
     )
 }

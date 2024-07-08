@@ -20,7 +20,7 @@ export const SectionCreator = () => {
         setOpenCreatorDialog(false);
         await CreateSection({
             newSection : {
-                id : crypto.randomUUID(),
+                id : crypto.randomUUID().slice(0, 8), // gen 8 character long random string
                 title : sectionTitle,
                 links : [],
                 totalLinksCount : 0,

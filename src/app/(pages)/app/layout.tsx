@@ -12,6 +12,7 @@ import { Flex } from "@chakra-ui/react";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { SectionContextProvider } from "@/context/SectionContextProvider";
+import { LinkControllerProvider } from "@/context/LinkControllerProviders";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,13 +28,15 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
                 <DBContextProvider>
                     <SectionControllerProvider> { /* CRUD OPERATIONS */ }
                         <SectionContextProvider> { /* UI SIDE */ }
-                            <Flex flexDir="row" className="no-scrollbar">
-                                <Sidebar />
-                                <div className="w-full p-0 overflow-hidden !select-none">
-                                    {children}
-                                </div>
-                            </Flex>
-                            <Toaster />
+                            <LinkControllerProvider> { /* CRUD OPERATIONS */ }
+                                <Flex flexDir="row" className="no-scrollbar">
+                                    <Sidebar />
+                                    <div className="w-full p-0 overflow-hidden !select-none">
+                                        {children}
+                                    </div>
+                                </Flex>
+                                <Toaster />
+                            </LinkControllerProvider>
                         </SectionContextProvider>
                     </SectionControllerProvider>
                 </DBContextProvider>

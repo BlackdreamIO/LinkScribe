@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/menubar";
 import { useSectionContext } from "@/context/SectionContextProvider";
 import { useSectionController } from "@/context/SectionControllerProviders";
+import { ConvertSectionToTxt } from "@/global/convertSectionsToTxt";
+import { ConvertSectionToJSON } from "@/global/convertSectionToJSON";
 
 
 const MenubarTriggerStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dark:hover:text-theme-textSecondary 
@@ -36,7 +38,7 @@ export default function LinksNavbarSettings()
     
     const [_, setTheme] = useTheme();
     const [fullscreen, setFullscreen] = useFullscreenToggle();
-    const { GetSections } = useSectionController()!;
+    const { GetSections, contextSections } = useSectionController()!;
     const { setOpenCreatorDialog } = useSectionContext()!;
 
     const handleMenubarOpen = (value : string) => setMenubarOpen(value != '');
@@ -44,12 +46,18 @@ export default function LinksNavbarSettings()
     const handleNormalReload = () => {
         window.location.reload();
     }
+
     const handleForceReload = async () => {
         await GetSections(true);
     }
+
     const handleTheme = (theme : "dark" | "light") => {
         setTheme(theme);
     }
+
+    const handleExportAsJson = () => ConvertSectionToJSON(contextSections); // export json file
+
+    const handleExportAsTxt = () => ConvertSectionToTxt(contextSections); // export txt file
 
     return (
         <Box>
@@ -60,12 +68,14 @@ export default function LinksNavbarSettings()
                         <MenubarItem className={MenuItemStyle} onClick={() => setOpenCreatorDialog(true)}>
                             New Section
                         </MenubarItem>
-                        <MenubarItem className={MenuItemStyle} disabled>New Incognito Window</MenubarItem>
+                        <MenubarItem className={MenuItemStyle} onClick={() => setOpenCreatorDialog(true)}>
+                            Save
+                        </MenubarItem>
                         <MenubarSub>
-                            <MenubarSubTrigger className={MenubarTriggerStyle}>Export</MenubarSubTrigger>
+                            <MenubarSubTrigger className={MenubarTriggerStyle}>Export As</MenubarSubTrigger>
                             <MenubarSubContent>
-                                <MenubarItem className={MenuItemStyle}>Json</MenubarItem>
-                                <MenubarItem className={MenuItemStyle}>Txt</MenubarItem>
+                                <MenubarItem onClick={handleExportAsJson} className={MenuItemStyle}>Json</MenubarItem>
+                                <MenubarItem onClick={handleExportAsTxt} className={MenuItemStyle}>Txt</MenubarItem>
                             </MenubarSubContent>
                         </MenubarSub>
                         <MenubarItem className={MenuItemStyle}> Setting </MenubarItem>
@@ -99,7 +109,7 @@ export default function LinksNavbarSettings()
                     </MenubarContent>
                 </MenubarMenu>
             </Menubar>
-            <div className={`${menubarOpen ? 'opacity-60' : 'opacity-0  pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150 !backdrop-blur-sm`}></div>
+            <div className={`${menubarOpen ? 'opacity-60' : 'opacity-0  pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150`}></div>
             {/* <Setting onOpenChange={() => setOpenSettingDialog(false)} openSetting={openSettingDialog} /> */}
         </Box>
     )

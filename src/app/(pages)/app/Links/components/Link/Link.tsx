@@ -1,34 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Box, HStack, Text } from "@chakra-ui/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link as LinkIcon, Eye, EllipsisVertical } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useWindowResize } from "@/hook/useWindowResize";
+import { LinkScheme } from "@/scheme/Link";
+import Image from "next/image";
+import Link from "next/link";
+
+import { Link as LinkIcon, Eye, EllipsisVertical, BadgeCheck } from "lucide-react";
+import { Box, HStack, Text } from "@chakra-ui/react";
+
+import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { Input } from "@/components/ui/input";
 import { LinkContextMenuWrapper } from "./LinkContextMenuWrapper";
-import Image from "next/image";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { URLStatus } from "@/global/checkUrlValidity";
+
 
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
     data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary`;
 
-export const LinkComponent = () => {
+export const LinkComponent = ( { link } : { link : LinkScheme }) => {
+
+    const { title, url, visitCount, created_at, id } = link;
 
     const [faviconUrl, setFaviconUrl] = useState('');
     const [showContextMenuOutline, setShowContextMenuOutline] = useState(false);
 
-    const [linkTitle, setLinkTitle] = useState("Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non molestias quas, quos accusamus optio commodi debitis ducimus recusandae vitae.");
+    const [linkTitle, setLinkTitle] = useState(title);
     const [titleEditMode, setTitleEditMode] = useState(false);
 
-    const [linkUrl, setLinkUrl] = useState(" https://github.com/BlackdreamIO/Fullstack-Todo-App/blob/master/src/app/TodoPage/Layout/RightNavigation/TodoSections/CreateTodoSection.jsx");
+    const [linkUrl, setLinkUrl] = useState(url);
     const [urlEditMode, setUrlEditMode] = useState(false);
 
+    const [urlStatus, setUrlStatus] = useState<URLStatus>();
     const [showMobileOptions, setShowMobileOptions] = useState(false);
-    const [createdAt, setCreatedAt] = useState<Date>(new Date());
-    
+
     const HandleRenameTitle = (str : string) => {
         setLinkTitle(str);
     }
@@ -65,10 +73,6 @@ export const LinkComponent = () => {
         )
     }
 
-    const RenderConditionalChildren = ({ render, children }: { render: boolean, children: React.ReactNode }) => {
-        return <>{render ? children : null}</>;
-    }
-
     const getFaviconUrl = (link: string) => {
         try {
             const domain = new URL(link);
@@ -79,24 +83,49 @@ export const LinkComponent = () => {
         }
     };
 
+    const GetURLStatus = async () => {
+        const url = linkUrl;
+        const status = await fetch(`${window.location.origin}/api/checkUrl?url=${url}`, {
+            method : "POST",
+        });
+        
+        const statusJSON : URLStatus = await status.json();
+
+        switch (statusJSON) {
+            case URLStatus.Valid:
+                setUrlStatus(URLStatus.Valid);
+                break;
+            case URLStatus.Invalid:
+                setUrlStatus(URLStatus.Invalid);
+                break
+
+            default:
+                break;
+        }
+    }
+
     useEffect(() => {
         const favicon = getFaviconUrl(linkUrl);
         setFaviconUrl(favicon);
+        GetURLStatus();
     }, [linkUrl]);
+    
 
     return (
         <LinkContextMenuWrapper onContextMenu={setShowContextMenuOutline} onTitleRename={() => setTitleEditMode(true)} onUrlUpdate={() => setUrlEditMode(true)} onDelete={() => {}}>
-            <Box className={`w-full dark:bg-[rgb(5,5,5,1)] flex flex-col items-center justify-center py-2 px-4 space-y-4 rounded-xl border-2 ${showContextMenuOutline ? "dark:border-indigo-300" : "dark:border-neutral-900"}`}>
+            <Box className={`w-full dark:bg-theme-bgSecondary flex flex-col items-center justify-center py-2 px-4 space-y-4 rounded-xl ${showContextMenuOutline ? "border-2 dark:border-indigo-300" : "border-[1px] dark:border-neutral-500"}`}>
                 <HStack className="w-full" justifyContent={"space-between"}>
                     <Box className="flex flex-grow flex-row items-center justify-start">
-                        <Image
-                            src={faviconUrl}
-                            alt="https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg"
-                            width={24}
-                            height={24}
-                            unoptimized
-                            quality={100}
-                        />
+                        <ConditionalRender render={faviconUrl.length > 0}>
+                            <Image
+                                src={faviconUrl}
+                                alt="https://img.freepik.com/premium-vector/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.jpg"
+                                width={24}
+                                height={24}
+                                unoptimized
+                                quality={100}
+                            />
+                        </ConditionalRender>
                         <Input
                             value={linkTitle}
                             className={`flex flex-grow text-lg max-lg:text-base max-sm:text-xs p-2 dark:border-transparent border-2 border-transparent 
@@ -111,23 +140,29 @@ export const LinkComponent = () => {
                             }}
                         />
                     </Box>
-                    <RenderConditionalChildren render={!showMobileOptions}>
+                    <ConditionalRender render={!showMobileOptions}>
                         <Box className="w-60 max-md:w-64 flex flex-row items-center justify-end space-x-4 max-sm:hidden">
                             <Text className="text-neutral-500 max-xl:text-sm flex flex-row items-center justify-center">
-                                <Eye className="mr-2" /> 20
+                                <Eye className="mr-2" /> {visitCount}
                             </Text>
                             <Text className="dark:text-neutral-500 max-xl:text-sm">
                                 {/* {new Date().toLocaleDateString()} */}
-                                {createdAt.toDateString()}
+                                {new Date(created_at).toLocaleDateString()}
+                            </Text>
+                            <Text className="max-xl:text-sm flex flex-row items-center justify-center">
+                                <BadgeCheck className={`${
+                                    urlStatus == URLStatus.Valid ? "text-green-500" : 
+                                    URLStatus.Invalid ? "text-red-500" : 
+                                    URLStatus.NetworkIssue ? "text-amber-400" : 
+                                    URLStatus.Unknown ? "text-orange-400" : "text-orange-400"}`
+                                } 
+                                />
                             </Text>
                         </Box>
-                    </RenderConditionalChildren>
+                    </ConditionalRender>
                 </HStack>
                 <HStack className="w-full" justifyContent={"space-between"}>
                     <Box className="w-full overflow-hidden flex flex-row items-center justify-start">
-                        <RenderConditionalChildren render={!urlEditMode}>
-                            <LinkIcon className="text-theme-textLink mr-2" />
-                        </RenderConditionalChildren>
                         {
                             urlEditMode && (                        
                                 <Input
@@ -152,16 +187,16 @@ export const LinkComponent = () => {
                                 />
                             )
                         }
-                        <RenderConditionalChildren render={!urlEditMode}>
+                        <ConditionalRender render={!urlEditMode}>
                             <Link
                                 target="_blank"
                                 href="#"
                                 className="text-base max-lg:text-sm max-sm:text-xs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
                                     {linkUrl}
                             </Link>
-                        </RenderConditionalChildren>
+                        </ConditionalRender>
                     </Box>
-                    <RenderConditionalChildren render={!showMobileOptions}>
+                    <ConditionalRender render={!showMobileOptions}>
                         <DropdownMenu>
                             <DropdownMenuTrigger className={buttonStyle}>
                                 <EllipsisVertical className="rotate-90" />
@@ -175,9 +210,9 @@ export const LinkComponent = () => {
                                 <DropdownContents />
                             </DropdownMenuContent>
                         </DropdownMenu>
-                    </RenderConditionalChildren>
+                    </ConditionalRender>
                 </HStack>
-                <RenderConditionalChildren render={showMobileOptions}>
+                <ConditionalRender render={showMobileOptions}>
                     <HStack className="w-full" justifyContent={"space-between"}>
                         <Box className="flex flex-row items-center justify-end space-x-4">
                           <Text className="text-neutral-500 max-lg:text-sm flex flex-row items-center justify-center">
@@ -201,7 +236,7 @@ export const LinkComponent = () => {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </HStack>
-                </RenderConditionalChildren>
+                </ConditionalRender>
             </Box>
         </LinkContextMenuWrapper>
     )

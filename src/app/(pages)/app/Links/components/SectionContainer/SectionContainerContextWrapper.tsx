@@ -15,8 +15,8 @@ type SectionContainerContextWrapperProps = {
 }
 
 const dropdownMenuItemStyle = `text-sm py-2 font-normal rounded-lg px-2 transition-none 
-    dark:bg-transparent dark:hover:bg-neutral-900 dark:text-neutral-300
-    data-[highlighted]:dark:bg-neutral-900 data-[disabled]:dark:bg-neutral-900 data-[disabled]:dark:text-neutral-500 outline-none
+    dark:bg-transparent dark:hover:bg-neutral-300/10 dark:text-neutral-300
+    data-[highlighted]:dark:bg-neutral-300/10 data-[disabled]:dark:bg-neutral-900 data-[disabled]:dark:text-neutral-500 outline-none
     w-full flex flex-row items-center justify-between`;
 
 export const SectionContainerContextWrapper = (props : SectionContainerContextWrapperProps) => {

@@ -7,9 +7,10 @@ import BarLoader from "react-spinners/BarLoader";
 
 import { Box} from '@chakra-ui/react';
 
-import LinksNavbar from './components/LinksNavbar';
+import LinksNavbar from './components/Navbar/LinksNavbar';
 import { DBLoadComponent } from './components/DBLoadComponent';
 import { SectionContainer } from './components/SectionContainer/SectionContainer';
+import { SectionCreator } from './components/Section/SectionCreator';
 
 export default function LinkPage() 
 {
@@ -18,7 +19,7 @@ export default function LinkPage()
     const dbExist = CheckDbExist();
     
     return (
-      <Box onContextMenu={(e) => e.preventDefault()} className="w-full h-screen overflow-scroll no-scrollbar dark:bg-[rgb(5,5,5)] bg-neutral-100">
+      <Box onContextMenu={(e) => e.preventDefault()} className="w-full h-screen overflow-scroll no-scrollbar dark:bg-black bg-neutral-100">
         
         <LinksNavbar />
         <DBLoadComponent onCreate={async () => await GetSections(true)} />
@@ -28,6 +29,7 @@ export default function LinkPage()
                 <SectionContainer/>
             )
         }
+        <SectionCreator />
 
       </Box>
     );
