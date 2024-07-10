@@ -11,6 +11,8 @@ import { Account } from "./Account";
 import { ListItems } from "./ListItems";
 import { FooterList } from "./FooterList";
 import { useWindowResize } from "@/hook/useWindowResize";
+import { KeyboardNavigationProvider } from "@/context/KeyboardNavigationContext";
+import { useKeyPress } from "@/hook/useKeyPress";
 
 const varients = {
     show : {
@@ -37,8 +39,18 @@ export const Sidebar = () => {
             }
         }
     })
-    
 
+    useKeyPress({
+        caseSensitive : false,
+        preventElementFocus : true,
+        mode : "Multi Key",
+        key : ['Control', "Shift", "l"],
+        preventDefault : true,
+        callback() {
+            setComputerMinimize(!computerMinimize);
+        },
+    })
+    
     return (
         <Box onContextMenu={(e) => e.preventDefault()} className={`relative dark:bg-theme-bgSecondary duration-150 max-lg:absolute z-20 transition-all group
             ${mobileMinimize ? 'w-[0vw]' : computerMinimize ? 'w-20' : 'w-[18vw]'} select-none`}
@@ -47,11 +59,13 @@ export const Sidebar = () => {
                 <Box className={`dark:bg-theme-bgSecondary min-h-screen max-h-auto flex flex-col justify-between max-lg:absolute max-lg:left-1`}>
                     <VStack className="w-full py-4 px-4 space-y-8">
                         <Account minimizeMode={computerMinimize} />
-                        <ListItems
-                            minimizeMode={computerMinimize}
-                        />
+                        <KeyboardNavigationProvider>
+                            <ListItems minimizeMode={computerMinimize} />
+                        </KeyboardNavigationProvider>
                     </VStack>
-                    <FooterList minimizeMode={computerMinimize} />
+                    <KeyboardNavigationProvider>
+                        <FooterList minimizeMode={computerMinimize} />
+                    </KeyboardNavigationProvider>
                 </Box>
             </Box>
             <Button 

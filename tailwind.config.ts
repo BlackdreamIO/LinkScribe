@@ -34,6 +34,7 @@ const config = {
 
                 borderSecondary : "#C8BCF6",
                 borderNavigation : "#38bdf8",
+                borderKeyboardParentNavigation : "#d3fc03",
             },
             border: "hsl(var(--border))",
             input: "hsl(var(--input))",

@@ -9,6 +9,7 @@ import { LogOut, Moon, SunMoon, UserPlus } from "lucide-react";
 import { Box } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useKeyboardNavigationContext } from "@/context/KeyboardNavigationContext";
 
 export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
@@ -17,6 +18,8 @@ export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
     const { signOut, openSignIn } = useClerk();
     const { isSignedIn, isLoaded } = useUser();
+
+    const { handleKeyDown } = useKeyboardNavigationContext()!;
 
     const handleSignIn = () => {
         openSignIn({
@@ -36,25 +39,10 @@ export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
         ${minimizeMode ? "justify-center" : "justify-start"}`;
     
     return (
-        <Box className="w-full flex flex-col items-start justify-center gap-2 px-4 py-4">
-            {
-                isSignedIn ? 
-                    <>
-                        <Button variant={'ghost'} className={buttonStyle} onClick={handleSignOut}>
-                            <LogOut className="text-theme-textSecondary"/>
-                            {!minimizeMode && "Log Out"}
-                        </Button>
-                    </>
-                :
-                <>
-                    <Button disabled={!isLoaded} variant={'ghost'} className={buttonStyle} onClick={handleSignIn}>
-                        <UserPlus className="text-theme-textSecondary"/>
-                        {!minimizeMode && "Sign In"}
-                    </Button>
-                </>
-            }
+        <Box tabIndex={0} role="tablist" onKeyDown={handleKeyDown} className="w-full flex flex-col items-start justify-center gap-2 px-4 py-4">
             <DropdownMenu>
-                <DropdownMenuTrigger 
+                <DropdownMenuTrigger
+                    role="tab"
                     className={`${buttonStyle} 
                         dark:text-neutral-500 text-sm dark:hover:text-white dark:hover:bg-theme-bgThird/20 
                         hover:bg-neutral-100 px-4 !ring-0 !outline-none !border-none rounded-lg transition-all duration-150
@@ -77,6 +65,22 @@ export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+            {
+                isSignedIn ? 
+                    <>
+                        <Button role="tab" variant={'ghost'} className={buttonStyle} onClick={handleSignOut}>
+                            <LogOut className="text-theme-textSecondary"/>
+                            {!minimizeMode && "Log Out"}
+                        </Button>
+                    </>
+                :
+                <>
+                    <Button role="tab" disabled={!isLoaded} variant={'ghost'} className={buttonStyle} onClick={handleSignIn}>
+                        <UserPlus className="text-theme-textSecondary"/>
+                        {!minimizeMode && "Sign In"}
+                    </Button>
+                </>
+            }
         </Box>
     )
 }

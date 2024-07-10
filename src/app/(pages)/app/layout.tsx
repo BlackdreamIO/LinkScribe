@@ -11,8 +11,10 @@ import { Flex } from "@chakra-ui/react";
 
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
+
 import { SectionContextProvider } from "@/context/SectionContextProvider";
 import { LinkControllerProvider } from "@/context/LinkControllerProviders";
+//import { KeyboardNavigationContextProvider } from "@/context/KeyboardNavigationContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
 export default function LinksLayout({ children,}: Readonly<{children: React.ReactNode;}>) {
 
     return (
-            <section className="dark" id="app">
+            <section>
                 <DBContextProvider>
                     <SectionControllerProvider> { /* CRUD OPERATIONS */ }
                         <SectionContextProvider> { /* UI SIDE */ }

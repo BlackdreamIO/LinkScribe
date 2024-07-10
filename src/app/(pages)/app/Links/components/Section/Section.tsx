@@ -42,7 +42,7 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
 
     return (
         <Box className={`w-full dark:bg-theme-bgFourth border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
-            ${contextMenuOpen && !highlightContexts ? "border-indigo-300" : highlightContexts ? "border-white" : "dark:border-neutral-900"}
+            ${contextMenuOpen && !highlightContexts ? "border-indigo-300" : highlightContexts ? "border-white " : "dark:border-neutral-900 "}
             ${highlightContexts ? "pointer-events-none" : "pointer-events-auto"}`}
         >   
             <SectionHeader

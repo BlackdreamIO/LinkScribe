@@ -1,9 +1,15 @@
 'use client'
 
 import { useState } from "react";
+import { useSectionContext } from "@/context/SectionContextProvider";
+import { useSectionController } from "@/context/SectionControllerProviders";
+
 import useFullscreenToggle from "@/hook/useFulscreenToggle";
 import useTheme from "@/hook/useTheme";
- 
+
+import { ConvertSectionToTxt } from "@/global/convertSectionsToTxt";
+import { ConvertSectionToJSON } from "@/global/convertSectionToJSON";
+
 import { Box } from "@chakra-ui/react";
 
 import {
@@ -16,18 +22,14 @@ import {
     MenubarSubTrigger,
     MenubarTrigger,
 } from "@/components/ui/menubar";
-import { useSectionContext } from "@/context/SectionContextProvider";
-import { useSectionController } from "@/context/SectionControllerProviders";
-import { ConvertSectionToTxt } from "@/global/convertSectionsToTxt";
-import { ConvertSectionToJSON } from "@/global/convertSectionToJSON";
 
 
 const MenubarTriggerStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dark:hover:text-theme-textSecondary 
-data-[highlighted]:bg-theme-bgSecondary data-[highlighted]:text-theme-textSecondary 
+data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:text-theme-textSecondary 
 text-sm max-sm:text-xs max-xl:text-sm rounded-lg py-2`;
 
 const MenuItemStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dark:hover:text-theme-textSecondary 
-data-[highlighted]:bg-theme-bgSecondary data-[highlighted]:text-theme-textSecondary 
+data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary
 text-sm max-sm:text-xs max-xl:text-sm rounded-lg py-2`;
 
 const MenubarContentStyle = `dark:bg-theme-bgSecondary dark:border-neutral-700 mt-3 min-w-80 max-sm:min-w-0 p-2 space-y-3`;
@@ -61,9 +63,9 @@ export default function LinksNavbarSettings()
 
     return (
         <Box>
-            <Menubar onValueChange={handleMenubarOpen} className="border-none !bg-transparent">
+            <Menubar tabIndex={0} role="tablist" onValueChange={handleMenubarOpen} className="border-none !bg-transparent">
                 <MenubarMenu>
-                    <MenubarTrigger className={MenubarTriggerStyle}>File</MenubarTrigger>
+                    <MenubarTrigger role="tab" className={MenubarTriggerStyle}>File</MenubarTrigger>
                     <MenubarContent className={MenubarContentStyle}>
                         <MenubarItem className={MenuItemStyle} onClick={() => setOpenCreatorDialog(true)}>
                             New Section
@@ -72,7 +74,7 @@ export default function LinksNavbarSettings()
                             Save
                         </MenubarItem>
                         <MenubarSub>
-                            <MenubarSubTrigger className={MenubarTriggerStyle}>Export As</MenubarSubTrigger>
+                            <MenubarSubTrigger role="tab" className={MenubarTriggerStyle}>Export As</MenubarSubTrigger>
                             <MenubarSubContent>
                                 <MenubarItem onClick={handleExportAsJson} className={MenuItemStyle}>Json</MenubarItem>
                                 <MenubarItem onClick={handleExportAsTxt} className={MenuItemStyle}>Txt</MenubarItem>
@@ -85,7 +87,7 @@ export default function LinksNavbarSettings()
                     </MenubarContent>
                 </MenubarMenu>
                 <MenubarMenu>
-                    <MenubarTrigger className={MenubarTriggerStyle}>View</MenubarTrigger>
+                    <MenubarTrigger role="tab" className={MenubarTriggerStyle}>View</MenubarTrigger>
                     <MenubarContent className={MenubarContentStyle}>
                         <MenubarItem className={MenuItemStyle}> Zoom In + </MenubarItem>
                         <MenubarItem className={MenuItemStyle}> Zoom Out - </MenubarItem>
@@ -96,7 +98,7 @@ export default function LinksNavbarSettings()
                     </MenubarContent>
                 </MenubarMenu>
                 <MenubarMenu>
-                    <MenubarTrigger className={MenubarTriggerStyle}>Preference</MenubarTrigger>
+                    <MenubarTrigger role="tab" className={MenubarTriggerStyle}>Preference</MenubarTrigger>
                     <MenubarContent className={MenubarContentStyle}>
                         <MenubarSub>
                             <MenubarSubTrigger className={MenubarTriggerStyle}>Theme</MenubarSubTrigger>

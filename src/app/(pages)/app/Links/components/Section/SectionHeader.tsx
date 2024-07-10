@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Box, Divider, HStack, Stack, Text } from "@chakra-ui/react";
 //import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -27,6 +27,7 @@ import {
 
     SectionHeaderLinkDrawer
 } from './DynamicImport';
+import { useKeyboardNavigationContext } from "@/context/KeyboardNavigationContext";
 
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
@@ -52,6 +53,8 @@ export const SectionHeader = (props : SectionHeaderProps) => {
 
     const [currentSectionTitle, setCurrentSectionTitle] = useState(sectionTitle);
     const [titleEditMode, setTitleEditMode] = useState(false);
+
+    //const { handleKeyDown } = useKeyboardNavigationContext()!;
 
     const handleMinimzie = () => {
         onMinimize();
@@ -91,21 +94,21 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                 }}
                             />
                         </Box>
-                        <Stack direction={"row"} className="space-x-2">
-                            <Text className="dark:text-neutral-500">{linkCount}</Text>
-                            <Button onClick={() => setOpenLinkCreateDrawer(true)} className={buttonStyle}>
+                        <Stack direction={"row"} role="tablist" onKeyDown={() => {}} tabIndex={1} className="space-x-2">
+                            <Text role="tab" className="dark:text-neutral-500">{linkCount}</Text>
+                            <Button role="tab" onClick={() => setOpenLinkCreateDrawer(true)} className={buttonStyle}>
                                 <PlusIcon />
                             </Button>
-                            <Button onClick={() => handleMinimzie()} className={`${buttonStyle} ${isMinimzied ? "dark:text-white text-black" : ""}`}>
+                            <Button role="tab" onClick={() => handleMinimzie()} className={`${buttonStyle} ${isMinimzied ? "dark:text-white text-black" : ""}`}>
                                 {
                                     isMinimzied ? <SquareChevronUp /> : <SquareChevronDown />
                                 }
                             </Button>
-                            <Button className={buttonStyle}>
+                            <Button role="tab" className={buttonStyle}>
                                 <LayoutPanelTop />
                             </Button>
                             <DropdownMenu>
-                                <DropdownMenuTrigger className={buttonStyle}>
+                                <DropdownMenuTrigger role="tab" className={buttonStyle}>
                                     <EllipsisVertical />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent 

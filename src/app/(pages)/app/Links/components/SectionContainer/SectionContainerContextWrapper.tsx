@@ -120,6 +120,9 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                     Sort By <Labelkey label=""/>
                 </ContextMenuItem>
                 <Separator/>
+                <ContextMenuItem onClick={() => setHighlightContexts(!highlightContexts)} className={dropdownMenuItemStyle}>
+                    {!highlightContexts ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="ESC"/></>}
+                </ContextMenuItem>
                 <ContextMenuItem onClick={() => setCollapseContexts(!collapseContexts)} className={dropdownMenuItemStyle}>
                     {collapseContexts ? "Expand All" : "Collapse All"} <Labelkey label="CTRL + M"/>
                 </ContextMenuItem>
@@ -132,9 +135,6 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                         <ContextMenuItem className={dropdownMenuItemStyle}>List</ContextMenuItem>
                     </ContextMenuSubContent>
                 </ContextMenuSub>
-                <ContextMenuItem onClick={() => setHighlightContexts(!highlightContexts)} className={dropdownMenuItemStyle}>
-                    {!highlightContexts ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="CTRL + A"/></>}
-                </ContextMenuItem>
                 <Separator/>
                 <ContextMenuItem onClick={() => handleDelete()} disabled={!highlightContexts} className={dropdownMenuItemStyle}>
                     Delete <Labelkey label="CTRL + DEL"/>

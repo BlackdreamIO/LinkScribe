@@ -1,16 +1,12 @@
-"use client"
-
 import dynamic from 'next/dynamic';
-import { useSectionController } from '@/context/SectionControllerProviders';
 import { SectionContainerContextWrapper } from './SectionContainerContextWrapper';
 
 import { Box, VStack } from '@chakra-ui/react';
+import { SectionScheme } from '@/scheme/Section';
 
 const Section = dynamic(() => import('../Section/Section').then((mod) => mod.Section), { ssr : true });
 
-export const SectionContainer = () => {
-
-    const { contextSections } = useSectionController()!;
+export const SectionContainer = ({ contextSections } : { contextSections : SectionScheme[] }) => {
 
     return (
         <SectionContainerContextWrapper>

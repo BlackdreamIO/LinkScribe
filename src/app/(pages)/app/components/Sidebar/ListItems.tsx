@@ -1,13 +1,18 @@
 "use client";
 
+import { useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Box, Text, VStack } from "@chakra-ui/react"
 import { LayoutGrid, Rows3, Search, Settings } from 'lucide-react';
+import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 
 
 export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
+
+    const parentRef = useRef<HTMLDivElement>(null);
+    useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "vertical" });
 
     const router = useRouter();
     const pathName = usePathname();
@@ -19,6 +24,8 @@ export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
     const Item = ({ icon, label, onClick } : { icon : any, label : string, onClick : (e? : any) => void; }) => {
         return (
             <Button 
+                role="tab"
+                tabIndex={0}
                 variant={"ghost"} 
                 className={`w-full flex flex-row items-center gap-4 px-4 h-14 rounded-lg !ring-0 focus-visible:!outline-theme-borderNavigation cursor-default
                     ${ minimizeMode ? "h-10" : "h-14"}
@@ -41,7 +48,7 @@ export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
     return (
         <Box className="w-full">
-            <VStack className="space-y-2">
+            <VStack ref={parentRef} className="space-y-2 !outline-none border-2 !border-transparent focus:!border-theme-borderKeyboardParentNavigation rounded-xl" role="tablist" tabIndex={0}>
                 <Item 
                     icon={<Search />}
                     label="Search"

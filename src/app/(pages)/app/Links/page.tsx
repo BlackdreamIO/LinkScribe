@@ -25,7 +25,7 @@ export default function LinkPage()
         <DBLoadComponent onCreate={async () => await GetSections(true)} />
 
         <ConditionalRender render={dbExist}>
-            <SectionContainer/>
+            <SectionContainer contextSections={contextSections} />
         </ConditionalRender>
 
         <SectionCreator />
