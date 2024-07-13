@@ -7,13 +7,14 @@ import "@/styles/globals.css";
 import { DBContextProvider } from "@/context/DBContextProvider";
 import { SectionControllerProvider } from "@/context/SectionControllerProviders";
 
-import { Flex } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
 
 import { SectionContextProvider } from "@/context/SectionContextProvider";
 import { LinkControllerProvider } from "@/context/LinkControllerProviders";
+import { SettingContextProvider } from "@/context/SettingContextProvider";
 //import { KeyboardNavigationContextProvider } from "@/context/KeyboardNavigationContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,22 +27,22 @@ export const metadata: Metadata = {
 export default function LinksLayout({ children,}: Readonly<{children: React.ReactNode;}>) {
 
     return (
-            <section>
-                <DBContextProvider>
-                    <SectionControllerProvider> { /* CRUD OPERATIONS */ }
-                        <SectionContextProvider> { /* UI SIDE */ }
-                            <LinkControllerProvider> { /* CRUD OPERATIONS */ }
+        <section>
+            <DBContextProvider>
+                <SectionControllerProvider> { /* CRUD OPERATIONS */ }
+                    <SectionContextProvider> { /* UI SIDE */ }
+                        <LinkControllerProvider> { /* CRUD OPERATIONS */ }
+                            <SettingContextProvider> { /* App Settings */ }
                                 <Flex flexDir="row" className="no-scrollbar">
                                     <Sidebar />
-                                    <div className="w-full p-0 overflow-hidden !select-none">
-                                        {children}
-                                    </div>
+                                    <Box className="w-full p-0 overflow-hidden !select-none" children={children} />
                                 </Flex>
                                 <Toaster />
-                            </LinkControllerProvider>
-                        </SectionContextProvider>
-                    </SectionControllerProvider>
-                </DBContextProvider>
-            </section>
-    );
+                            </SettingContextProvider>
+                        </LinkControllerProvider>
+                    </SectionContextProvider>
+                </SectionControllerProvider>
+            </DBContextProvider>
+        </section>
+    )
 }

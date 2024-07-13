@@ -1,6 +1,9 @@
 'use client'
 
 import { createCollection } from '@/app/actions/database/createCollection';
+import { userDBExist } from '@/app/actions/database/userDBExist';
+import { ConvertEmailString } from '@/global/convertEmailString';
+import CheckDbExist from '@/global/dbExist';
 import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 
@@ -20,6 +23,9 @@ export interface DBContextType{
     status : DBTaskStatus;
     setStatus: Dispatch<SetStateAction<DBTaskStatus>>;
 
+    databaseExist : boolean;
+    setDatabaseExist: Dispatch<SetStateAction<boolean>>;
+
     CreateCollection: () => Promise<void>;
     GetCollections: (revalidateFetch? : boolean) => Promise<any[]>;
     DeleteCollection: (id: string) => Promise<any>;
@@ -36,6 +42,8 @@ export const useDBController = () => useContext(DBController);
 export const DBContextProvider = ({children} : DBContextProviderProps) => {
 
     const [status, setStatus] = useState<DBTaskStatus>(DBTaskStatus.NoTask);
+
+    const [databaseExist, setDatabaseExist] = useState(true);
 
     const { isSignedIn, isLoaded, user } = useUser();
 
@@ -70,12 +78,39 @@ export const DBContextProvider = ({children} : DBContextProviderProps) => {
         return [];
     }
 
+    const DBExist = async () => {
+        if(user && isSignedIn && user.primaryEmailAddress?.emailAddress) {
+            const existence = await userDBExist(ConvertEmailString(user.primaryEmailAddress.emailAddress));
+
+            setTimeout(() => {
+                setDatabaseExist(existence);
+            }, 200);
+        }
+        else {
+            setDatabaseExist(false);
+        }
+    }
+
+    useEffect(() => {
+        if(user && isSignedIn && isLoaded) {
+            DBExist();
+        }
+    }, [user, isLoaded, isSignedIn])
+    
+    useEffect(() => {
+        console.log(databaseExist, " ya it kinda");
+        
+    }, [databaseExist])
+    
+
     const contextValue: DBContextType = {
         status,
         setStatus,
         CreateCollection,
         GetCollections,
-        DeleteCollection
+        DeleteCollection,
+        databaseExist,
+        setDatabaseExist
     };
 
     return (

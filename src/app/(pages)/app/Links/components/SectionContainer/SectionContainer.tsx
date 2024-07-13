@@ -22,6 +22,7 @@ export const SectionContainer = ({ contextSections } : { contextSections : Secti
                     }
                 </VStack>
             </Box>
+
         </SectionContainerContextWrapper>
     )
 }

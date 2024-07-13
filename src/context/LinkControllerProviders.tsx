@@ -3,17 +3,16 @@
 import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { useSectionController } from './SectionControllerProviders';
-import { createLink, updateLink } from '@/app/actions/linkAPI';
+import { createLink, deleteLink, updateLink } from '@/app/actions/linkAPI';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
-import { SectionScheme } from '@/scheme/Section';
 
 export const dynamic = 'force-dynamic';
 
 interface LinkContextData {
     CreateLink : ({ sectionID, linkData } : { sectionID : string, linkData : LinkScheme }) => Promise<void>;
     UpdateLink : ({ sectionID, linkData } : { sectionID : string, currentLink : LinkScheme, linkData : LinkScheme }) => Promise<void>;
-    DeleteLink : () => Promise<void>;
+    DeleteLink : ({ sectionID, linkId } : { sectionID : string, linkId : string }) => Promise<void>;
 }
 
 export interface LinkContextType extends LinkContextData {
@@ -109,7 +108,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     return;
                 }
                 else {
-                    const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData));
+                    const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData), window.location.origin);
                     console.log(response);
                 }
             }
@@ -120,8 +119,35 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
     }
 
-    const DeleteLink = async () => {
-        
+    const DeleteLink = async ({ sectionID, linkId } : { sectionID : string, linkId : string }) => {
+        try {
+            if(isSignedIn && isLoaded && user.primaryEmailAddress) {
+                const targetSection = contextSections.find((section) => section.id === sectionID);
+
+                if(targetSection) {
+                    const linkIndex = targetSection.links.findIndex((link) => link.id === linkId);
+
+                    if(linkIndex != -1) {
+                        const updatedLinks = targetSection.links.filter((currentLink) => currentLink.id !== linkId);
+                        targetSection.links = updatedLinks;
+                        
+                        setContextSections((prevSections) =>
+                            prevSections.map((section) =>
+                                section.id === sectionID ? { ...section, links: updatedLinks } : section
+                            )
+                        );
+                    }
+                }
+
+
+                const currentEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
+                await deleteLink(currentEmail, sectionID, linkId, window.location.origin);
+            }
+        }
+        catch (error : any) {
+            RestoreContextSections();
+            throw new Error(error);
+        }
     }
 
     const contextValue: LinkContextType = {

@@ -1,11 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { Box, Divider, HStack, Stack, Text } from "@chakra-ui/react";
-//import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-//import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@radix-ui/react-context-menu";
-
 import { EllipsisVertical, LayoutPanelTop, SquareChevronDown, SquareChevronUp, PlusIcon } from "lucide-react";
   
 import { Input } from "@/components/ui/input";
@@ -13,13 +10,6 @@ import { Button } from "@/components/ui/button";
 import { LinkScheme } from "@/scheme/Link";
   
 import { 
-    DropdownMenu,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-    DropdownMenuSeparator,
-    DropdownMenuLabel,
-    DropdownMenuContent,
-
     ContextMenu,
     ContextMenuTrigger,
     ContextMenuContent,
@@ -27,9 +17,10 @@ import {
 
     SectionHeaderLinkDrawer
 } from './DynamicImport';
-import { useKeyboardNavigationContext } from "@/context/KeyboardNavigationContext";
+import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
+import { SectionHeaderOptions } from "./SectionHeaderOptions";
+import { useSettingContext } from "@/context/SettingContextProvider";
 
-const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
     data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary !outline-none`;
@@ -38,6 +29,7 @@ type SectionHeaderProps = {
     sectionTitle : string;
     linkCount : number;
     isMinimzied : boolean;
+    showLinkCount : boolean;
 
     onContextMenu : (open : boolean) => void;
     onMinimize : () => void;
@@ -48,13 +40,14 @@ type SectionHeaderProps = {
 
 export const SectionHeader = (props : SectionHeaderProps) => {
 
-    const { linkCount, isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, sectionTitle } = props;
+    const { linkCount, isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, sectionTitle, showLinkCount } = props;
     const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState(false);
 
     const [currentSectionTitle, setCurrentSectionTitle] = useState(sectionTitle);
     const [titleEditMode, setTitleEditMode] = useState(false);
 
-    //const { handleKeyDown } = useKeyboardNavigationContext()!;
+    const parentRef = useRef<HTMLDivElement>(null);
+    useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "both" });
 
     const handleMinimzie = () => {
         onMinimize();
@@ -94,48 +87,16 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                 }}
                             />
                         </Box>
-                        <Stack direction={"row"} role="tablist" onKeyDown={() => {}} tabIndex={1} className="space-x-2">
-                            <Text role="tab" className="dark:text-neutral-500">{linkCount}</Text>
-                            <Button role="tab" onClick={() => setOpenLinkCreateDrawer(true)} className={buttonStyle}>
-                                <PlusIcon />
-                            </Button>
-                            <Button role="tab" onClick={() => handleMinimzie()} className={`${buttonStyle} ${isMinimzied ? "dark:text-white text-black" : ""}`}>
-                                {
-                                    isMinimzied ? <SquareChevronUp /> : <SquareChevronDown />
-                                }
-                            </Button>
-                            <Button role="tab" className={buttonStyle}>
-                                <LayoutPanelTop />
-                            </Button>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger role="tab" className={buttonStyle}>
-                                    <EllipsisVertical />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent 
-                                    side="bottom" 
-                                    sideOffset={15} 
-                                    align="start" 
-                                    className="w-60 border-neutral-600 dark:bg-theme-bgFourth mr-5 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black"
-                                >
-                                    <DropdownMenuLabel className="text-lg">Setting</DropdownMenuLabel>
-                                    <DropdownMenuSeparator/>
-                                    <DropdownMenuItem onClick={() => setTitleEditMode(true)} className={dropdownMenuItemStyle}>Rename Section</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>Add New Link</DropdownMenuItem>
-                                    <DropdownMenuItem className={dropdownMenuItemStyle}>Collapse/Expand Section</DropdownMenuItem>
-                                    <DropdownMenuSeparator/>
-                                    <DropdownMenuItem className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>Delete All Links</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => onDelete()} className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>Delete Section</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
 
-                            <SectionHeaderLinkDrawer
-                                openLinkCreateDrawer={openLinkCreateDrawer}
-                                onOpenChange={setOpenLinkCreateDrawer}
-                                onCreate={onCreateLink}
-                                onClose={() => setOpenLinkCreateDrawer(false)}
-                            />
-
-                        </Stack>
+                        <SectionHeaderOptions
+                            linkCount={linkCount}
+                            minimized={isMinimzied}
+                            showLinkCount={showLinkCount}
+                            handleMinimzie={handleMinimzie}
+                            onTitleEditMode={setTitleEditMode}
+                            onDelete={onDelete}
+                            onOpenLinkDrawer={setOpenLinkCreateDrawer}
+                        />
                     </HStack>
                     {
                         !isMinimzied && (
@@ -143,6 +104,14 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                         )
                     }
                 </Box>
+
+                <SectionHeaderLinkDrawer
+                    openLinkCreateDrawer={openLinkCreateDrawer}
+                    onOpenChange={setOpenLinkCreateDrawer}
+                    onCreate={onCreateLink}
+                    onClose={() => setOpenLinkCreateDrawer(false)}
+                />
+                
             </ContextMenuTrigger>
             <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth dark:shadow-black border dark:border-neutral-700">
                 <ContextMenuItem onClick={() => setTitleEditMode(true)} className={dropdownMenuItemStyle}>Rename Section</ContextMenuItem>

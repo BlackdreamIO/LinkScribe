@@ -2,6 +2,8 @@
 
 import { useRef } from "react";
 import { useSectionContext } from "@/context/SectionContextProvider";
+import { useSectionController } from "@/context/SectionControllerProviders";
+import { useSettingContext } from "@/context/SettingContextProvider";
 import { useKeyPress } from "@/hook/useKeyPress";
 import { useOutsideClick } from "@chakra-ui/react";
 
@@ -9,7 +11,6 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import { Separator } from "@/components/ui/separator";
 import { Labelkey } from "@/components/ui/key";
 import { ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "@/components/ui/context-menu";
-import { useSectionController } from "@/context/SectionControllerProviders";
 
 type SectionContainerContextWrapperProps = {
     children : React.ReactNode;
@@ -34,9 +35,10 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
     } = useSectionContext()!;
     const {
         contextSections,
-        setContextSections,
         DeleteSections
     } = useSectionController()!;
+
+    const { keyboardShortcutStatus } = useSettingContext()!;
 
     const contextMenuRef = useRef<HTMLDivElement>(null);
 
@@ -44,18 +46,21 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
     useKeyPress({
         mode :"Multi Key",
         key : ["Control","a"],
+        enable : keyboardShortcutStatus == "Full Controll",
         callback : () => setHighlightContexts(!highlightContexts)
     })
     // Mac
     useKeyPress({
         mode :"Multi Key",
         key : ["Meta","a"],
+        enable : keyboardShortcutStatus == "Full Controll",
         callback : () => setHighlightContexts(!highlightContexts)
     })
 
     useKeyPress({
         mode :"Single key",
         key : "Escape",
+        enable : keyboardShortcutStatus != "Disabled",
         callback() {
             if(highlightContexts) {
                 setHighlightContexts(false);
@@ -69,6 +74,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         key : ["Control", "Shift", "c"],
         preventDefault : false,
         preventElementFocus : false,
+        enable : keyboardShortcutStatus == "Full Controll",
         callback: () => setOpenCreatorDialog(!openCreatorDialog)
     })
 
@@ -77,6 +83,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         mode :"Multi Key",
         key : ["Meta", "Shift"],
         preventDefault : true,
+        enable : keyboardShortcutStatus == "Full Controll",
         callback() {
             setOpenCreatorDialog(true);
         },
@@ -87,6 +94,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         key : ["Control", "m"],
         preventDefault : true,
         preventElementFocus : false,
+        enable : keyboardShortcutStatus == "Full Controll",
         callback: () => setCollapseContexts(!collapseContexts)
     })
 
@@ -109,7 +117,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
             <ContextMenuTrigger ref={contextMenuRef} className="w-full">
                 {children}
             </ContextMenuTrigger>
-            <ContextMenuContent sticky="partial" className="w-80 space-y-2 rounded-md p-2 shadow-lg dark:bg-theme-bgFourth/30 !backdrop-blur-3xl !backdrop-filter dark:shadow-black border dark:border-neutral-700">
+            <ContextMenuContent sticky="partial" className="w-80 space-y-2 rounded-md p-2  dark:bg-theme-bgFourth/30 !backdrop-blur-3xl !backdrop-filter dark:shadow-black border dark:border-neutral-700">
                 <ContextMenuItem onClick={() => setOpenCreatorDialog(true)} className={dropdownMenuItemStyle}>
                     New Section <Labelkey label="CTRL + SHIFT + C"/>
                 </ContextMenuItem>

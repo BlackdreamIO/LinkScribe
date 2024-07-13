@@ -48,7 +48,7 @@ export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
     return (
         <Box className="w-full">
-            <VStack ref={parentRef} className="space-y-2 !outline-none border-2 !border-transparent focus:!border-theme-borderKeyboardParentNavigation rounded-xl" role="tablist" tabIndex={0}>
+            <VStack ref={parentRef} className="space-y-2 !outline-none border-2 !border-transparent focus-visible:!border-theme-borderKeyboardParentNavigation rounded-xl" role="tablist" tabIndex={0}>
                 <Item 
                     icon={<Search />}
                     label="Search"

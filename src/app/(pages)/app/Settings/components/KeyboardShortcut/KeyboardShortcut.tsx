@@ -10,10 +10,10 @@ export const KeyboardShortcutSetting = () => {
 
     const Shortcut = ({ label, keyName } : { label : string, keyName : string }) => {
         return (
-            <Box className="w-full flex flex-row items-center justify-between dark:bg-neutral-900 px-4 py-2 border-[1px] dark:border-neutral-700 cursor-not-allowed">
+            <Box className="w-full flex flex-row items-center justify-between px-4 py-2 cursor-not-allowed">
                 <Text>{label}</Text>
                 <Text 
-                    className="dark:text-neutral-900 dark:font-bold px-2 py-1 border-2 border-transparent dark:border-theme-borderNavigation dark:bg-neutral-300">
+                    className="dark:text-neutral-200 dark:font-bold px-2 py-1 border-2 border-transparent dark:border-theme-borderNavigation dark:bg-neutral-900 rounded-xl">
                         {keyName}
                 </Text>
             </Box>

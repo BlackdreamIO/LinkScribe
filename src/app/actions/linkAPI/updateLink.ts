@@ -4,7 +4,7 @@ import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/database/firebase';
 import { LinkScheme } from '@/scheme/Link';
 
-export async function updateLink(userEmail: string, documentId: string, linkData: string): Promise<void> {
+export async function updateLink(userEmail: string, documentId: string, linkData: string, revalidateUrl="/app/Links"): Promise<void> {
     try {
 
         const parsedLinkData = JSON.parse(linkData);
@@ -37,7 +37,7 @@ export async function updateLink(userEmail: string, documentId: string, linkData
                     links: updatedLinks
                 });
 
-                revalidatePath('/app/Links/');
+                revalidatePath(revalidateUrl || '/app/Links/');
                 return;
             }
         }
@@ -47,7 +47,7 @@ export async function updateLink(userEmail: string, documentId: string, linkData
         }
     }
     catch (error: any) {
-        revalidatePath('/app/Links/');
+        revalidatePath(revalidateUrl || '/app/Links/');
         throw new Error(error?.message || 'An unknown error occurred');
     }
 }

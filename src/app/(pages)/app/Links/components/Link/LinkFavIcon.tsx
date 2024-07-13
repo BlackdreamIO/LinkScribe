@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 
@@ -19,11 +18,11 @@ export const LinkFavIcon = ({ faviconUrl } : { faviconUrl : string }) => {
         <ConditionalRender render={faviconUrl.length > 0}>
             <Image
                 src={getFaviconUrl(faviconUrl)}
-                alt=""
+                alt="."
                 width={24}
                 height={24}
-                unoptimized
                 quality={100}
+                loading="lazy"
             />
         </ConditionalRender>
     )

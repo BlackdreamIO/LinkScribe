@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useWindowResize } from "@/hook/useWindowResize";
 import { LinkScheme } from "@/scheme/Link";
-import Image from "next/image";
 import Link from "next/link";
 
 import { Link as LinkIcon, Eye, EllipsisVertical } from "lucide-react";
@@ -36,11 +35,12 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
     const [urlEditMode, setUrlEditMode] = useState(false);
 
     const [showMobileOptions, setShowMobileOptions] = useState(false);
+    const [keepOpenModal, setKeepOpenModal] = useState(false);
 
-    const { UpdateLink } = useLinkController()!;
+    const { UpdateLink, DeleteLink } = useLinkController()!;
 
     const HandleRenameTitle = () => {
-        if(linkTitle.length < 6) return;
+        if(linkTitle.length < 3) return;
         
         setTitleEditMode(false);
         UpdateLink({
@@ -55,8 +55,29 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
             }
         })
     }
-    const HandleRenameUrl = (str : string) => {
-        setLinkUrl(str);
+
+    const HandleRenameUrl = () => {
+        if(linkTitle.length < 6) return;
+
+        setUrlEditMode(false);
+        UpdateLink({
+            currentLink : link,
+            sectionID : sectionID,
+            linkData : {
+                id : link.id,
+                title : link.title,
+                url : linkUrl,
+                visitCount : link.visitCount,
+                created_at : link.created_at
+            }
+        })
+    }
+
+    const handleDeleteLink = async () => {
+        DeleteLink({
+            sectionID : sectionID,
+            linkId : id
+        })
     }
 
     useWindowResize({
@@ -81,15 +102,15 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                     Update Url
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
-                Delete
+                <DropdownMenuItem onClick={() => handleDeleteLink()} className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
+                    Delete
                 </DropdownMenuItem>
             </>
         )
     }
 
     return (
-        <LinkContextMenuWrapper onContextMenu={setShowContextMenuOutline} onTitleRename={() => setTitleEditMode(true)} onUrlUpdate={() => setUrlEditMode(true)} onDelete={() => {}}>
+        <LinkContextMenuWrapper onContextMenu={setShowContextMenuOutline} onTitleRename={() => setTitleEditMode(true)} onUrlUpdate={() => setUrlEditMode(true)} onDelete={() => handleDeleteLink()}>
             <Box className={`w-full dark:bg-theme-bgFourth flex flex-col items-center justify-center py-2 px-4 space-y-4 rounded-xl
                 shadow-md shadow-black
                 ${showContextMenuOutline ? "border-2 dark:border-indigo-300" : "border-[1px] dark:border-neutral-700"}`
@@ -128,6 +149,8 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                         </Box>
                     </ConditionalRender>
                 </HStack>
+                
+
                 <HStack className="w-full" justifyContent={"space-between"}>
                     <Box className="w-full overflow-hidden flex flex-row items-center justify-start">
                         {
@@ -138,18 +161,10 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                                         !ring-0 !outline-none focus-visible:!border-theme-borderNavigation disabled:opacity-100 disabled:cursor-default
                                         ${urlEditMode ? "dark:bg-neutral-800 bg-neutral-200" : "!bg-transparent "} `}
                                     disabled={!urlEditMode}
-                                    onChange={(e) => {
-                                        if(e.target.value.length > 5) {
-                                            HandleRenameUrl(e.target.value);
-                                        }
-                                        else {
-                                            alert("Url Should Be Atleast 5 Character Long")
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                    onBlur={() => setUrlEditMode(false)}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    onBlur={() => HandleRenameUrl()}
                                     onKeyDown={(e) => {
-                                        if(e.key == "Enter"){ setUrlEditMode(false)};
+                                        if(e.key == "Enter"){ HandleRenameUrl()};
                                     }}
                                 />
                             )
@@ -164,7 +179,7 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                         </ConditionalRender>
                     </Box>
                     <ConditionalRender render={!showMobileOptions}>
-                        <DropdownMenu>
+                        <DropdownMenu open={keepOpenModal} onOpenChange={setKeepOpenModal}>
                             <DropdownMenuTrigger className={buttonStyle}>
                                 <EllipsisVertical className="rotate-90" />
                             </DropdownMenuTrigger>
@@ -172,6 +187,7 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                                 side="bottom"
                                 sideOffset={15}
                                 align="start"
+                                onInteractOutside={() => setKeepOpenModal(false)}
                                 className="w-60 border-neutral-600 dark:bg-theme-bgFourth mr-5 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black"
                             >
                                 <DropdownContents />
@@ -179,6 +195,7 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                         </DropdownMenu>
                     </ConditionalRender>
                 </HStack>
+
                 <ConditionalRender render={showMobileOptions}>
                     <HStack className="w-full" justifyContent={"space-between"}>
                         <Box className="flex flex-row items-center justify-end space-x-4">

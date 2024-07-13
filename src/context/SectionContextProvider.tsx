@@ -30,10 +30,20 @@ export const useSectionContext = () => useContext(SectionContext);
 
 export const SectionContextProvider = ({children} : SectionContextProviderProps) => {
 
+    const [_, __, getDataByKey, ___] = useLocalStorage("null", []);
+
     const [openCreatorDialog, setOpenCreatorDialog] = useState<boolean>(false);
     const [collapseContexts, setCollapseContexts] = useState<boolean>(false);
     const [highlightContexts, setHighlightContexts] = useState<boolean>(false);
    
+
+    useEffect(() => {
+
+        const showLinkCount = getDataByKey("showLinkCount");
+
+    }, [])
+    
+
     const contextValue: SectionContextType = {
         highlightContexts,
         setHighlightContexts,

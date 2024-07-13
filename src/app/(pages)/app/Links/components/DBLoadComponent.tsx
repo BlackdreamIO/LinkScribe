@@ -1,15 +1,15 @@
 "use client"
 
 import { CSSProperties, useEffect, useState } from "react";
-import ReactConfetti from 'react-confetti';
+import { DBTaskStatus, useDBController } from "@/context/DBContextProvider";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+
 import BarLoader from "react-spinners/BarLoader";
+import ReactConfetti from 'react-confetti';
 
 import { Box, Text } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button";
-import { DBTaskStatus, useDBController } from "@/context/DBContextProvider";
-import { useUser } from "@clerk/nextjs";
-import CheckDbExist from "@/global/dbExist";
-import { useRouter } from "next/navigation";
 
 const override: CSSProperties = {
     display: "block",
@@ -28,6 +28,7 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
     const [windowSize, setWindowSize] = useState({ x : 0, y : 0 });
 
     const { CreateCollection, status } = useDBController()!;
+    const { databaseExist } = useDBController()!;
     const { isSignedIn, isLoaded } = useUser();
     const router = useRouter();
 
@@ -92,10 +93,8 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
         });
     }, [windowSize]);
 
-    const dbExist = CheckDbExist();
-
     if(isSignedIn && isLoaded) {
-        if(!dbExist) 
+        if(!databaseExist) 
         {
             return (
                 <Box className={`w-full h-[90%] p-8 ${hideElement ? "hidden" : "flex"} flex-col items-center justify-center space-y-8`}>

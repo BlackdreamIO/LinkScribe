@@ -18,7 +18,6 @@ export default function CheckDbExist()
             const currentUserEmail = user.primaryEmailAddress.emailAddress.replaceAll("@", "").replaceAll(".", "");
             const dbExist = await userDBExist(currentUserEmail);
             setDbExist(dbExist)
-            console.log(dbExist);
             
             if(!dbExist)
             {

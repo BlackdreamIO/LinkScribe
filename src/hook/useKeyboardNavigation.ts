@@ -5,11 +5,15 @@ interface UseKeyboardNavigationProps {
   direction?: "horizontal" | "vertical" | "both";
   mouseInterruptFocus? : boolean;
   parentRef: React.RefObject<HTMLElement>;
+  enable? : boolean;
 }
 
-export const useKeyboardNavigation = ({ role, parentRef, direction = "both", mouseInterruptFocus = true }: UseKeyboardNavigationProps) => {
+export const useKeyboardNavigation = ({ role, parentRef, direction = "both", enable = true }: UseKeyboardNavigationProps) => {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
+            
+            if(!enable) return;
+
             const parentElement = parentRef.current;
             if (!parentElement) return;
 

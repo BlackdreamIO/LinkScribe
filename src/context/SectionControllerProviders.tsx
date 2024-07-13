@@ -78,7 +78,6 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         if(isSignedIn && isLoaded && user.primaryEmailAddress)
         {
             const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
-            console.log(currentUserEmail, " : ", getLocalStorageSectionByKey(currentUserEmail) && getLocalStorageSectionByKey(currentUserEmail)?.length);
 
             if(getLocalStorageSectionByKey(currentUserEmail) && !revalidateFetch) return getLocalStorageSectionByKey(currentUserEmail);
 
@@ -126,7 +125,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                 const totalContextsLength = contextSections.length;
                 const decreamnentAmount = 1;
 
-                if(totalContextsLength - decreamnentAmount > 1)
+                if(totalContextsLength - decreamnentAmount > 0)
                 {
                     setContextSections(prevSections => {
                         const updatedSections = prevSections.filter(section => section.id !== id);
@@ -139,7 +138,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
 
                 else {
                     toast({
-                        title: "Verification Code Has Been Send ",
+                        title: "You Must Have Atleast 1 Document In Order To Maintain Storage Invalidation",
                         description: "VEIRFICATION",
                         action : <ToastAction altText="Ok">Ok</ToastAction>,
                         className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"

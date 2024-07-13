@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 import { PanelRightOpen, StepBack } from "lucide-react";
@@ -13,6 +13,7 @@ import { FooterList } from "./FooterList";
 import { useWindowResize } from "@/hook/useWindowResize";
 import { KeyboardNavigationProvider } from "@/context/KeyboardNavigationContext";
 import { useKeyPress } from "@/hook/useKeyPress";
+import { useSettingContext } from "@/context/SettingContextProvider";
 
 const varients = {
     show : {
@@ -27,6 +28,8 @@ export const Sidebar = () => {
 
     const [computerMinimize, setComputerMinimize] = useState(false);
     const [mobileMinimize, seMobiletMinimize] = useState(false);
+
+    const { keyboardShortcutStatus, sidebarDefaultOpen } = useSettingContext()!;
 
     useWindowResize({
         thresholdWidth : 1024, //px
@@ -44,12 +47,20 @@ export const Sidebar = () => {
         caseSensitive : false,
         preventElementFocus : true,
         mode : "Multi Key",
+        enable : keyboardShortcutStatus == "Full Controll",
         key : ['Control', "Shift", "l"],
         preventDefault : true,
         callback() {
             setComputerMinimize(!computerMinimize);
         },
     })
+
+    useEffect(() => {
+        if(!mobileMinimize) {
+            setComputerMinimize(sidebarDefaultOpen);
+        }
+    }, [])
+    
     
     return (
         <Box onContextMenu={(e) => e.preventDefault()} className={`relative dark:bg-theme-bgSecondary duration-150 max-lg:absolute z-20 transition-all group

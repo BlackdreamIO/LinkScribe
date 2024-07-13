@@ -4,18 +4,23 @@ type UseKeyPressProps = {
     mode?: "Single key" | "Multi Key";
     key: string | string[];
     caseSensitive?: boolean;
+    enable? : boolean;
     callback: () => void;
     preventDefault?: boolean;
     preventElementFocus? : boolean;
 };
 
-export function useKeyPress({ mode = "Single key", key, caseSensitive = false, callback, preventDefault = true, preventElementFocus = true }: UseKeyPressProps) {
+export function useKeyPress({ mode = "Single key", key, caseSensitive = false, callback, preventDefault = true, preventElementFocus = true, enable = true }: UseKeyPressProps) {
     useEffect(() => {        
+
+        if(!enable) return;
 
         let keysPressed = new Set<string>();
 
         const handleKeyDown = (e: KeyboardEvent) => {
             //preventDefault ? e.preventDefault() : null;
+
+            if(!enable) return;
 
             const keyPressed = caseSensitive ? e.key : e.key.toLowerCase();
 
@@ -55,6 +60,7 @@ export function useKeyPress({ mode = "Single key", key, caseSensitive = false, c
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {
+            if(!enable) return;
             const keyReleased = caseSensitive ? e.key : e.key.toLowerCase();
             keysPressed.delete(keyReleased);
         };
