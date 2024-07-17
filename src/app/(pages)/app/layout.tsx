@@ -35,7 +35,9 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
                             <SettingContextProvider> { /* App Settings */ }
                                 <Flex flexDir="row" className="no-scrollbar">
                                     <Sidebar />
-                                    <Box className="w-full p-0 overflow-hidden !select-none" children={children} />
+                                    <Box className="w-full p-0 overflow-hidden !select-none">
+                                        {children}
+                                    </Box>
                                 </Flex>
                                 <Toaster />
                             </SettingContextProvider>

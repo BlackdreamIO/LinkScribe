@@ -35,7 +35,6 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
     const [urlEditMode, setUrlEditMode] = useState(false);
 
     const [showMobileOptions, setShowMobileOptions] = useState(false);
-    const [keepOpenModal, setKeepOpenModal] = useState(false);
 
     const { UpdateLink, DeleteLink } = useLinkController()!;
 
@@ -179,7 +178,7 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                         </ConditionalRender>
                     </Box>
                     <ConditionalRender render={!showMobileOptions}>
-                        <DropdownMenu open={keepOpenModal} onOpenChange={setKeepOpenModal}>
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger className={buttonStyle}>
                                 <EllipsisVertical className="rotate-90" />
                             </DropdownMenuTrigger>
@@ -187,7 +186,6 @@ export const LinkComponent = ( { link, sectionID } : { link : LinkScheme, sectio
                                 side="bottom"
                                 sideOffset={15}
                                 align="start"
-                                onInteractOutside={() => setKeepOpenModal(false)}
                                 className="w-60 border-neutral-600 dark:bg-theme-bgFourth mr-5 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black"
                             >
                                 <DropdownContents />

@@ -54,7 +54,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
     }
 
     return (
-        <ContextMenu onOpenChange={onContextMenu}>
+        <ContextMenu onOpenChange={onContextMenu} modal={false}>
             <ContextMenuTrigger>
                 <Box className="w-full flex flex-col items-start justify-center space-y-6 py-4">
                     <HStack justifyContent={"space-between"} className="w-full px-4 group">

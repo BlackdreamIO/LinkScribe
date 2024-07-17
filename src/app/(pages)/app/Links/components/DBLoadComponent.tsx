@@ -3,9 +3,7 @@
 import { CSSProperties, useEffect, useState } from "react";
 import { DBTaskStatus, useDBController } from "@/context/DBContextProvider";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 
-import BarLoader from "react-spinners/BarLoader";
 import ReactConfetti from 'react-confetti';
 
 import { Box, Text } from "@chakra-ui/react";
@@ -30,7 +28,6 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
     const { CreateCollection, status } = useDBController()!;
     const { databaseExist } = useDBController()!;
     const { isSignedIn, isLoaded } = useUser();
-    const router = useRouter();
 
     useEffect(() => {
         if (isCreating) {
@@ -65,7 +62,7 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
         
             updateStatus();
         }
-    }, [isCreating]);
+    }, [isCreating, CreateCollection]);
 
     useEffect(() => {
         if(status == DBTaskStatus.CreatedCollection) {
@@ -82,7 +79,7 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
         {
             setStatusText("Operation Failed..");
         }
-    }, [status, isCreating])
+    }, [status, isCreating, onCreate])
 
     useEffect(()=>{
         window.addEventListener('resize', () => {

@@ -22,6 +22,11 @@ export function useKeyPress({ mode = "Single key", key, caseSensitive = false, c
 
             if(!enable) return;
 
+            if (typeof e.key !== 'string') {
+                console.error(`Unexpected key value: ${e.key}`);
+                return;
+            }
+
             const keyPressed = caseSensitive ? e.key : e.key.toLowerCase();
 
             const activeElement = document.activeElement as HTMLElement;
@@ -61,6 +66,10 @@ export function useKeyPress({ mode = "Single key", key, caseSensitive = false, c
 
         const handleKeyUp = (e: KeyboardEvent) => {
             if(!enable) return;
+            if (typeof e.key !== 'string') {
+                console.error(`Unexpected key value: ${e.key}`);
+                return;
+            }
             const keyReleased = caseSensitive ? e.key : e.key.toLowerCase();
             keysPressed.delete(keyReleased);
         };

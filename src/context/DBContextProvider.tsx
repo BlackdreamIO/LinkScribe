@@ -95,13 +95,10 @@ export const DBContextProvider = ({children} : DBContextProviderProps) => {
         if(user && isSignedIn && isLoaded) {
             DBExist();
         }
+        else {
+            setDatabaseExist(false);
+        }
     }, [user, isLoaded, isSignedIn])
-    
-    useEffect(() => {
-        console.log(databaseExist, " ya it kinda");
-        
-    }, [databaseExist])
-    
 
     const contextValue: DBContextType = {
         status,

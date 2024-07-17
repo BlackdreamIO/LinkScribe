@@ -56,10 +56,10 @@ export const Sidebar = () => {
     })
 
     useEffect(() => {
-        if(!mobileMinimize) {
+        if (!mobileMinimize) {
             setComputerMinimize(sidebarDefaultOpen);
         }
-    }, [])
+    }, [mobileMinimize, sidebarDefaultOpen]);    
     
     
     return (

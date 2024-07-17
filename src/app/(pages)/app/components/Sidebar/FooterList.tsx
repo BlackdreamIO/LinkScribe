@@ -27,7 +27,7 @@ export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
     const handleSignIn = () => {
         openSignIn({
-            //forceRedirectUrl : `${window.location.origin}/app/Links`
+            forceRedirectUrl : `${window.location.origin}/app/Links`
         });
     }
 
@@ -86,7 +86,7 @@ export const FooterList = ({ minimizeMode } : { minimizeMode : boolean }) => {
                     </>
                 :
                 <>
-                    <Button role="tab" disabled={!isLoaded} variant={'ghost'} className={buttonStyle} onClick={handleSignIn}>
+                    <Button role="tab" disabled={!isLoaded} variant={'ghost'} className={`${buttonStyle}  ${minimizeMode ? "p-0" : "px-4"}`} onClick={handleSignIn}>
                         <UserPlus className="text-theme-textSecondary"/>
                         {!minimizeMode && "Sign In"}
                     </Button>

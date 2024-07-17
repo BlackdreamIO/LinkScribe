@@ -113,7 +113,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
     }
 
     return (
-        <ContextMenu>
+        <ContextMenu modal={false}>
             <ContextMenuTrigger ref={contextMenuRef} className="w-full">
                 {children}
             </ContextMenuTrigger>

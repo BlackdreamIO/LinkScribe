@@ -14,7 +14,7 @@ export async function createSection(userEmail : string, data : string, revalidat
 
         const docRef = doc(collectionRef, parsedUpdatedDocument.id);
 
-        const response = await setDoc(docRef,  {
+        await setDoc(docRef,  {
             id : parsedUpdatedDocument.id,
             title : parsedUpdatedDocument.title,
             links : parsedUpdatedDocument.links,

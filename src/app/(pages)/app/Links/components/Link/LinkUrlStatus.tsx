@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { URLStatus } from "@/global/checkUrlValidity";
 
 import { Text } from "@chakra-ui/react";
@@ -11,7 +11,7 @@ export const LinkUrlStatus = ( { linkUrl } : { linkUrl : string }) => {
 
     const [urlStatus, setUrlStatus] = useState<URLStatus>();
 
-    const GetURLStatus = async () => {
+    const GetURLStatus = useCallback(async () => {
         const url = linkUrl;
         const status = await fetch(`${window.location.origin}/api/checkUrl?url=${url}`, {
             method : "POST",
@@ -35,11 +35,11 @@ export const LinkUrlStatus = ( { linkUrl } : { linkUrl : string }) => {
             default:
                 break;
         }
-    }
+    }, [linkUrl])
 
     useEffect(() => {
         GetURLStatus();
-    }, [linkUrl])
+    }, [linkUrl, GetURLStatus])
     
     return (
         <TooltipProvider>
