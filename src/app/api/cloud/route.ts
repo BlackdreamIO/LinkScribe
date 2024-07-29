@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import fs from "fs";
 import { drive, auth } from "@googleapis/drive";
 import path from 'path';
-
+/*
 async function uploadFile(authClient: any) {
   return new Promise((resolve, reject) => {
     const driveInstance = drive({ version: 'v3', auth: authClient });
@@ -70,12 +70,13 @@ async function authorize()
 
     return jwtClient;
 }
-
+*/
 export async function POST(req: Request, res: NextApiResponse) {
 
+  /*
     const authClient = await authorize();
     await uploadFile(authClient);
-    
+*/    
 
     return NextResponse.json("FILE 259")
 }
