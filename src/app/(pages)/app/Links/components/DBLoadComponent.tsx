@@ -25,9 +25,8 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
 
     const [windowSize, setWindowSize] = useState({ x : 0, y : 0 });
 
-    const { CreateCollection, status } = useDBController()!;
-    const { databaseExist } = useDBController()!;
     const { isSignedIn, isLoaded } = useUser();
+    const { CreateCollection, status, databaseExist } = useDBController()!;
 
     useEffect(() => {
         if (isCreating) {

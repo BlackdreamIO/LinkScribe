@@ -3,7 +3,6 @@
 import { createCollection } from '@/app/actions/database/createCollection';
 import { userDBExist } from '@/app/actions/database/userDBExist';
 import { ConvertEmailString } from '@/global/convertEmailString';
-import CheckDbExist from '@/global/dbExist';
 import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 
@@ -16,7 +15,7 @@ export enum DBTaskStatus {
     DeletingCollection = "deleting-collection",
     FailedCreateCollection = "failed-create-collection",
     FailedDeleteCollection = "failed-delete-collection",
-  }
+}
 
 export interface DBContextType{
 

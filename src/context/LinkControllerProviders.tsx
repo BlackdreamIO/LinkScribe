@@ -1,7 +1,7 @@
 'use client'
 
+import { createContext, useContext, ReactNode } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { useSectionController } from './SectionControllerProviders';
 import { createLink, deleteLink, updateLink } from '@/app/actions/linkAPI';
 import { ConvertEmailString } from '@/global/convertEmailString';
@@ -15,9 +15,7 @@ interface LinkContextData {
     DeleteLink : ({ sectionID, linkId } : { sectionID : string, linkId : string }) => Promise<void>;
 }
 
-export interface LinkContextType extends LinkContextData {
-    
-}
+export interface LinkContextType extends LinkContextData {};
 
 type LinkProviderProps = {
     children : ReactNode;
@@ -49,7 +47,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                                 title: linkData.title,
                                 url: linkData.url,
                                 visitCount: linkData.visitCount,
-                                created_at: new Date()
+                                created_at: new Date().toString(),
                             }
                         ]
                     };

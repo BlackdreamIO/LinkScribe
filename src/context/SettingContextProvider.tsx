@@ -1,13 +1,10 @@
 'use client'
 
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
+import { AutoSyncTimeType, DefaultExportType, KeyboardShortcutStatusType, LinkLayoutType } from '@/types/SettingTypes';
 import useLocalStorage from '@/hook/useLocalStorage';
 
 export const dynamic = 'force-dynamic';
-
-export type KeyboardShortcutStatusType = "Full Controll" | "Minimume" | "Disabled";
-export type DefaultExportType = "Png" | "Json" | "Txt";
-export type AutoSyncTimeType = "5 Min" | "10 Min" | "15 Min" | "30 Min" | "1 Hour" | "1 Day" | "Manual";
 
 interface ISettingGeneral {
     homeView: string;
@@ -24,6 +21,9 @@ interface ISettingGeneral {
 
     sectionsDefaultOpen: boolean;
     setSectionsDefaultOpen: Dispatch<SetStateAction<boolean>>;
+
+    linkLayoutDefaultSize: number;
+    setLinkLayoutDefaultSize: Dispatch<SetStateAction<number>>;
 
     keyboardShortcutStatus: KeyboardShortcutStatusType;
     setKeyboardShortcutStatus: Dispatch<SetStateAction<KeyboardShortcutStatusType>>;
@@ -49,18 +49,19 @@ interface ISettingAudio {
     setKeyboardNavigationSound: Dispatch<SetStateAction<boolean>>;
 }
 
-export interface SettingContextType extends ISettingGeneral, ISettingAudio {
 
-};
+export interface SettingContextType extends ISettingGeneral, ISettingAudio {};
 
 interface ISettings {
     homeView : string;
     autoSyncTime : AutoSyncTimeType;
     sidebarDefaultOpen : boolean;
     sectionsDefaultOpen : boolean;
+    
     keyboardShortcutStatus : KeyboardShortcutStatusType;
     defaultExportType : DefaultExportType;
     showLinkCount : boolean;
+    linkLayoutDefaultSize : number;
 
     applicationStartUpSound: boolean;
     sectionCreateSound: boolean;
@@ -81,6 +82,7 @@ const initialSettings : ISettings = {
     sectionsDefaultOpen : true,
     sidebarDefaultOpen : true,
     showLinkCount : true,
+    linkLayoutDefaultSize : 3,
 
     applicationStartUpSound: true,
     sectionCreateSound: true,
@@ -102,6 +104,7 @@ export const SettingContextProvider = ({children} : SettingContextProviderProps)
     const [showLinkCount, setShowLinkCount] = useState<boolean>(false);
     const [sidebarDefaultOpen, setSidebarDefaultOpen] = useState<boolean>(false);
     const [sectionsDefaultOpen, setSectionsDefaultOpen] = useState<boolean>(false);
+    const [linkLayoutDefaultSize, setLinkLayoutDefaultSize] = useState<number>(3);
     const [autoSyncTime, setAutoSyncTime] = useState<AutoSyncTimeType>("1 Day");
     const [keyboardShortcutStatus, setKeyboardShortcutStatus] = useState<KeyboardShortcutStatusType>("Full Controll");
     const [defaultExportType, setDefaultExportType] = useState<DefaultExportType>("Txt");
@@ -129,6 +132,7 @@ export const SettingContextProvider = ({children} : SettingContextProviderProps)
                     setSectionsDefaultOpen(x.sectionsDefaultOpen);
                     setKeyboardShortcutStatus(x.keyboardShortcutStatus);
                     setDefaultExportType(x.defaultExportType);
+                    setLinkLayoutDefaultSize(x.linkLayoutDefaultSize);
 
                     // Audio
                     setApplicationStartUpSound(x.applicationStartUpSound);
@@ -150,7 +154,8 @@ export const SettingContextProvider = ({children} : SettingContextProviderProps)
                 sidebarDefaultOpen : sidebarDefaultOpen,
                 sectionsDefaultOpen : sectionsDefaultOpen,
                 keyboardShortcutStatus : keyboardShortcutStatus,
-                defaultExportType : defaultExportType
+                defaultExportType : defaultExportType,
+                linkLayoutDefaultSize : linkLayoutDefaultSize,
             }
 
             const audioSettings = {
@@ -173,6 +178,7 @@ export const SettingContextProvider = ({children} : SettingContextProviderProps)
         showLinkCount,
         sidebarDefaultOpen,
         sectionsDefaultOpen,
+        linkLayoutDefaultSize,
         keyboardShortcutStatus,
         defaultExportType,
 
@@ -180,6 +186,7 @@ export const SettingContextProvider = ({children} : SettingContextProviderProps)
         keyboardNavigationSound,
         sectionCreateSound,
         sectionDeleteSound,
+        setLinkLayoutDefaultSize,
         systemsNotificationSound
     ])
     
@@ -200,6 +207,8 @@ export const SettingContextProvider = ({children} : SettingContextProviderProps)
         setKeyboardShortcutStatus,
         defaultExportType,
         setDefaultExportType,
+        linkLayoutDefaultSize,
+        setLinkLayoutDefaultSize,
 
         applicationStartUpSound,
         sectionCreateSound,

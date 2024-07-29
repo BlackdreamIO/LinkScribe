@@ -1,8 +1,8 @@
 "use client"
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import ErrorBoundary from "./ErrorBoundry";
-import { Box, Flex, Text } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button";
 
 import {

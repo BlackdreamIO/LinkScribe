@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 
 import { PanelRightOpen, StepBack } from "lucide-react";
 import { Box, VStack } from "@chakra-ui/react";
@@ -11,18 +10,8 @@ import { Account } from "./Account";
 import { ListItems } from "./ListItems";
 import { FooterList } from "./FooterList";
 import { useWindowResize } from "@/hook/useWindowResize";
-import { KeyboardNavigationProvider } from "@/context/KeyboardNavigationContext";
 import { useKeyPress } from "@/hook/useKeyPress";
 import { useSettingContext } from "@/context/SettingContextProvider";
-
-const varients = {
-    show : {
-        left : 0
-    },
-    minimize : {
-        left : '-24rem'
-    }
-}
 
 export const Sidebar = () => {
 
@@ -66,17 +55,13 @@ export const Sidebar = () => {
         <Box onContextMenu={(e) => e.preventDefault()} className={`relative dark:bg-theme-bgSecondary duration-150 max-lg:absolute z-20 transition-all group
             ${mobileMinimize ? 'w-[0vw]' : computerMinimize ? 'w-20' : 'w-[18vw]'} select-none`}
         >
-            <Box as={motion.div} variants={varients} animate={mobileMinimize ? "minimize" : "show"} className="relative">
+            <Box className={`relative ${mobileMinimize ? "left-[-25rem]" : "left-0"}`}>
                 <Box className={`dark:bg-theme-bgSecondary min-h-screen max-h-auto flex flex-col justify-between max-lg:absolute max-lg:left-1`}>
                     <VStack className="w-full py-4 px-4 space-y-8">
                         <Account minimizeMode={computerMinimize} />
-                        <KeyboardNavigationProvider>
                             <ListItems minimizeMode={computerMinimize} />
-                        </KeyboardNavigationProvider>
                     </VStack>
-                    <KeyboardNavigationProvider>
-                        <FooterList minimizeMode={computerMinimize} />
-                    </KeyboardNavigationProvider>
+                    <FooterList minimizeMode={computerMinimize} />
                 </Box>
             </Box>
             <Button 

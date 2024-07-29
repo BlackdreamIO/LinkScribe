@@ -69,6 +69,12 @@
 body::-webkit-scrollbar {
   display: none
 }
+.appBG {
+  background-image: url("../../../../../../WLF/5b6ad6e989e00c610e5e97366ee636cb.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
 
 @layer base {
     * {

@@ -2,12 +2,10 @@
 
 import { useRef, useState } from "react";
 
-import { Box, Divider, HStack, Stack, Text } from "@chakra-ui/react";
-import { EllipsisVertical, LayoutPanelTop, SquareChevronDown, SquareChevronUp, PlusIcon } from "lucide-react";
+import { Box, Divider, HStack } from "@chakra-ui/react";
   
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { LinkScheme } from "@/scheme/Link";
+import { LinkLayout, LinkScheme } from "@/scheme/Link";
   
 import { 
     ContextMenu,
@@ -19,10 +17,11 @@ import {
 } from './DynamicImport';
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 import { SectionHeaderOptions } from "./SectionHeaderOptions";
-import { useSettingContext } from "@/context/SettingContextProvider";
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
+    hover:bg-neutral-200 data-[highlighted]:bg-neutral-200
     data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary !outline-none`;
 
 type SectionHeaderProps = {
@@ -30,17 +29,18 @@ type SectionHeaderProps = {
     linkCount : number;
     isMinimzied : boolean;
     showLinkCount : boolean;
-
+    id : string;
     onContextMenu : (open : boolean) => void;
     onMinimize : () => void;
     onRename : (newName : string) => void;
     onCreateLink : (link : LinkScheme) => void;
     onDelete : () => void;
+    onLinkLayoutChange : (layout : LinkLayout) => void;
 }
 
 export const SectionHeader = (props : SectionHeaderProps) => {
 
-    const { linkCount, isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, sectionTitle, showLinkCount } = props;
+    const { linkCount, isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, sectionTitle, showLinkCount, onLinkLayoutChange, id } = props;
     const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState(false);
 
     const [currentSectionTitle, setCurrentSectionTitle] = useState(sectionTitle);
@@ -56,12 +56,12 @@ export const SectionHeader = (props : SectionHeaderProps) => {
     return (
         <ContextMenu onOpenChange={onContextMenu} modal={false}>
             <ContextMenuTrigger>
-                <Box className="w-full flex flex-col items-start justify-center space-y-6 py-4">
+                <Box className="w-full flex flex-col items-start justify-center space-y-6 py-4 max-sm:py-2">
                     <HStack justifyContent={"space-between"} className="w-full px-4 group">
                         <Box className="w-full flex flex-row flex-grow items-center justify-between">
                             <Input
                                 value={currentSectionTitle}
-                                className={`text-xl p-2 w-full dark:border-transparent border-2 border-transparent !ring-0 !outline-none focus-visible:!border-theme-borderNavigation disabled:opacity-100 disabled:cursor-default
+                                className={`text-xl max-sm:text-sm p-2 w-full dark:border-transparent border-2 border-transparent !ring-0 !outline-none focus-visible:!border-theme-borderNavigation disabled:opacity-100 disabled:cursor-default
                                     ${titleEditMode ? "dark:bg-neutral-800 bg-neutral-200 selection:!bg-sky-700" : "!bg-transparent selection:!bg-transparent"} truncate`}
                                 disabled={!titleEditMode}
                                 onBlur={() => {
@@ -88,15 +88,19 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                             />
                         </Box>
 
-                        <SectionHeaderOptions
-                            linkCount={linkCount}
-                            minimized={isMinimzied}
-                            showLinkCount={showLinkCount}
-                            handleMinimzie={handleMinimzie}
-                            onTitleEditMode={setTitleEditMode}
-                            onDelete={onDelete}
-                            onOpenLinkDrawer={setOpenLinkCreateDrawer}
-                        />
+                        <ErrorManager>
+                            <SectionHeaderOptions
+                                id={id}
+                                linkCount={linkCount}
+                                minimized={isMinimzied}
+                                showLinkCount={showLinkCount}
+                                handleMinimzie={handleMinimzie}
+                                onTitleEditMode={setTitleEditMode}
+                                onDelete={onDelete}
+                                onOpenLinkDrawer={setOpenLinkCreateDrawer}
+                                onLayoutChange={onLinkLayoutChange}
+                            />
+                        </ErrorManager>
                     </HStack>
                     {
                         !isMinimzied && (
@@ -113,7 +117,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                 />
                 
             </ContextMenuTrigger>
-            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth dark:shadow-black border dark:border-neutral-700">
+            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth bg-neutral-50 dark:shadow-black border dark:border-neutral-700">
                 <ContextMenuItem onClick={() => setTitleEditMode(true)} className={dropdownMenuItemStyle}>Rename Section</ContextMenuItem>
                 <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>Add Link</ContextMenuItem>
                 <ContextMenuItem className={dropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>

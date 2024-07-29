@@ -28,7 +28,7 @@ export const SectionHeaderLinkDrawer = ({ openLinkCreateDrawer, onOpenChange, on
                 title : linkTitle,
                 url : linkUrl,
                 visitCount : 0,
-                created_at : new Date()
+                created_at : new Date().toString()
             });
             onClose();
         }

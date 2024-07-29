@@ -5,32 +5,35 @@ import dynamic from 'next/dynamic';
 import { useSectionController } from '@/context/SectionControllerProviders';
 
 import { Box, Text} from '@chakra-ui/react';
-import { ConditionalRender } from '@/components/ui/conditionalRender';
-import { useDBController } from '@/context/DBContextProvider';
+//import { ConditionalRender } from '@/components/ui/conditionalRender';
+//import { useDBController } from '@/context/DBContextProvider';
 import { useUser } from '@clerk/nextjs';
 
 import EmptyStreetSvg from "../../../../../public/svgs/brainstroming.svg";
+import { Button } from '@/components/ui/button';
 
-const LinksNavbar = dynamic(() => import('./components/Navbar/LinksNavbar'));
+//const LinksNavbar = dynamic(() => import('./components/Navbar/LinksNavbar'));
 const SectionContainer = dynamic(() => import('./components/SectionContainer/SectionContainer').then((mod) => mod.SectionContainer));
-const SectionCreator = dynamic(() => import('./components/Section/SectionCreator').then((mod) => mod.SectionCreator));
-const DBLoadComponent = dynamic(() => import('./components/DBLoadComponent').then((mod) => mod.DBLoadComponent));
-
+//const SectionCreator = dynamic(() => import('./components/Section/SectionCreator').then((mod) => mod.SectionCreator));
+//const DBLoadComponent = dynamic(() => import('./components/DBLoadComponent').then((mod) => mod.DBLoadComponent));
 
 export default function LinkPage() 
 {
-    const { contextSections, GetSections } = useSectionController()!;
-    const { databaseExist } = useDBController()!;
 
-    const { isSignedIn, isLoaded } = useUser();
-    
-    return (
-      <Box onContextMenu={(e) => e.preventDefault()} className="w-full h-screen overflow-scroll no-scrollbar dark:bg-black bg-neutral-100">
+    //const { contextSections, GetSections } = useSectionController()!;
+    //const { databaseExist } = useDBController()!;
+
+    //const { isSignedIn, isLoaded } = useUser();
         
-        <LinksNavbar />
-        {
+    return (
+      <Box  className="w-full h-screen overflow-scroll no-scrollbar dark:bg-black bg-neutral-100">
+        
+        {/* <LinksNavbar /> */}
+        
+        {/* {
             isSignedIn ? (
-                <DBLoadComponent onCreate={async () => await GetSections(true)} />
+                // <DBLoadComponent onCreate={async () => await GetSections(true)} />
+                <p>loading</p>
             )
             :
             isLoaded ? (
@@ -59,13 +62,15 @@ export default function LinkPage()
                     />
                 </Text>
             )
-        }
+        } */}
 
-        <ConditionalRender render={databaseExist}>
-            <SectionContainer contextSections={contextSections} />
-        </ConditionalRender>
+        <SectionContainer/>
 
-        <SectionCreator />
+        {/* <ConditionalRender render={databaseExist}>
+            
+        </ConditionalRender> */}
+
+        {/* <SectionCreator /> */}
       </Box>
     );
 }

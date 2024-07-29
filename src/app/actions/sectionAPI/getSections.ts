@@ -14,12 +14,15 @@ export async function getSections(userEmail : string, revalidateUrl="/app/Links"
 
         const documents = documentsSnapshot.docs.map((doc) => {
             const data = doc.data();
-            return {
+            return <SectionScheme>{
                 id: doc.id,
                 title: data.title,
-                totalLinksCount: data?.links?.length || [],
+                totalLinksCount: data?.links?.length || 0,
                 links: data.links,
                 created_at: data.created_at,
+                _deleted : false,
+                linksLayout : data.linksLayout || "Grid Detailed",
+                timestamp : new Date().toISOString()
             };
         });
     

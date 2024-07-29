@@ -24,7 +24,10 @@ export const SectionCreator = () => {
                 title : sectionTitle,
                 links : [],
                 totalLinksCount : 0,
-                created_at : new Date()
+                created_at : new Date().toString(),
+                _deleted : false,
+                linksLayout : "Grid Detailed",
+                timestamp : new Date().toString()
             }
         });
     }

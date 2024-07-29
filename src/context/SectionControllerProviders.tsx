@@ -9,6 +9,10 @@ import { ConvertEmailString } from '@/global/convertEmailString';
 
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from '@/components/ui/toast';
+import PouchDB from 'pouchdb';
+import PouchDBLocalStorageAdapter from 'pouchdb-adapter-localstorage';
+
+PouchDB.plugin(PouchDBLocalStorageAdapter);
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +61,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
 
             setServerOperationInterrupted(true);
-            setContextSections(prev => [...prev, newSection]);
+            //setContextSections(prev => [...prev, newSection]);
 
             try
             {
@@ -69,16 +73,87 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             {
                 setServerOperationInterrupted(false);
                 RestoreContextSections();
+                toast({
+                    title: "Failed Create Section Please Try Again 😁",
+                    description: "INTERNAL SERVER ERROR 500",
+                    action : <ToastAction altText="Ok">Ok</ToastAction>,
+                    className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
+                });
                 throw new Error(error);
             }
+        }
+        else {
+            toast({
+                title: "Failed Create Section Please Try Again 😁",
+                description: "INTERNAL SERVER ERROR 500",
+                action : <ToastAction altText="Ok">Ok</ToastAction>,
+                className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
+            });
         }
     }
 
     const GetSections = async (revalidateFetch? : boolean) => {
+
+        function prepareDocsForInsert(sections : SectionScheme[]) {
+            return sections.map(section => {
+              // Map your custom `id` to `_id`
+              const { id, ...rest } = section;
+              return { _id: id, ...rest };
+            });
+        }
+
         if(isSignedIn && isLoaded && user.primaryEmailAddress)
         {
             const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
+            const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const secret = process.env.NEXT_PUBLIC_SUPABASE_ANON;
+            
+            const uri = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users?apikey=${process.env.NEXT_PUBLIC_SUPABASE_ANON}&select=*,sections(*,links(*)),settings(*)&email=eq.${currentUserEmail}`;
 
+            const response = await fetch(uri, {
+                next : {
+                    revalidate : 0
+                },
+                method : "GET",
+            });
+            const data = await response.json();
+            console.log(data);
+            
+
+            if(true) {
+                
+                //const x = await getSections(currentUserEmail, window.location.origin);
+                
+                const db = new PouchDB('my_database_x');
+
+        
+
+        //const xd = await db.allDocs({ include_docs : true });
+        //console.log(xd.rows.flatMap((x) => x.doc));
+        
+        //if(xd) return [];
+
+        //const response = await fetch(`${url}/rest/v1/users?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZ251enhiaGNxb2F3bHp0b3JwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTg0MjIzMDAsImV4cCI6MjAxMzk5ODMwMH0.mU1IbZVdFsvDTGwPD25mrci7guzxWy582ASOAmONBi8&select=*,sections(*,links(*)),settings(*)&email=eq.mdh560354gmailcom`);
+        //const data = await response.json();
+
+        //const sections = await getSections(currentUserEmail, window.location.origin);
+
+        //const docsForInsert = prepareDocsForInsert(data);
+//
+        //db.bulkDocs(docsForInsert).then((response : any) => {
+        //    console.log('Document created successfully:', response);
+        //}).catch((err : any) => {
+        //      console.error('Error creating document:', err);
+        //});
+                     
+            }
+
+            if(data) {
+                setContextSections(data[0].sections ?? []);
+            }
+            return [];
+
+            /*
             if(getLocalStorageSectionByKey(currentUserEmail) && !revalidateFetch) return getLocalStorageSectionByKey(currentUserEmail);
 
             else
@@ -91,11 +166,20 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                     setLocalStorageSectionByKey(currentUserEmail, sections);
                     return sections;
                 }
+
                 return [];
-            }   
+            }
+            */
         }
         else
         {
+            //toast({
+            //    title: "Failed To Fetch Sections",
+            //    description: "INTERNAL SERVER ERROR 500",
+            //    action : <ToastAction altText="Ok">Ok</ToastAction>,
+            //    className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
+            //});
+
             return [];
         }
     }
@@ -113,6 +197,12 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         }
         catch (error : any) {
             RestoreContextSections();
+            toast({
+                title: "Failed To Update Please Be Paitent Your Data Synced",
+                description: "INTERNAL SERVER ERROR 500",
+                action : <ToastAction altText="Ok">Ok</ToastAction>,
+                className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
+            });
             throw new Error(error);
         }
     }
@@ -139,7 +229,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                 else {
                     toast({
                         title: "You Must Have Atleast 1 Document In Order To Maintain Storage Invalidation",
-                        description: "VEIRFICATION",
+                        description: "SYSTEM",
                         action : <ToastAction altText="Ok">Ok</ToastAction>,
                         className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
                     });
@@ -147,6 +237,12 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             }
             catch (error : any) {
                 RestoreContextSections();
+                toast({
+                    title: "Failed To Delete Section Please Try Again",
+                    description: "SYSTEM",
+                    action : <ToastAction altText="Try Again">Try Again</ToastAction>,
+                    className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
+                });
                 throw new Error(error);
             }
         }
@@ -165,9 +261,9 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         const getSections = async () => {
             await GetSections(true);
         }
-        if(isSignedIn && isLoaded && user.primaryEmailAddress)
+        if(true)
         {
-            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
+            const currentUserEmail = ConvertEmailString(user?.primaryEmailAddress?.emailAddress || 'mdh560354gmailcom');
             if(getLocalStorageSectionByKey(currentUserEmail).length < 1)
             {
                 console.log("INITIAIED FROM BACKEND");

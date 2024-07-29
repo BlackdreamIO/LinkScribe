@@ -6,11 +6,12 @@ import { useSectionController } from "@/context/SectionControllerProviders";
 import { useSettingContext } from "@/context/SettingContextProvider";
 import { useKeyPress } from "@/hook/useKeyPress";
 import { useOutsideClick } from "@chakra-ui/react";
+import { useWindowResize } from "@/hook/useWindowResize";
 
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@radix-ui/react-context-menu";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "@radix-ui/react-context-menu";
 import { Separator } from "@/components/ui/separator";
 import { Labelkey } from "@/components/ui/key";
-import { ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "@/components/ui/context-menu";
+//import { ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "@/components/ui/context-menu";
 
 type SectionContainerContextWrapperProps = {
     children : React.ReactNode;
@@ -18,7 +19,8 @@ type SectionContainerContextWrapperProps = {
 
 const dropdownMenuItemStyle = `text-sm py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-neutral-300/10 dark:text-neutral-300
-    data-[highlighted]:dark:bg-neutral-300/10 data-[disabled]:dark:bg-neutral-900 data-[disabled]:dark:text-neutral-500 outline-none
+    hover:bg-neutral-300/40 data-[highlighted]:bg-neutral-300/40 data-[disabled]:bg-neutral-300/80
+    data-[highlighted]:dark:bg-neutral-300/10 data-[disabled]:dark:bg-transparent data-[disabled]:dark:text-neutral-500 outline-none
     w-full flex flex-row items-center justify-between`;
 
 export const SectionContainerContextWrapper = (props : SectionContainerContextWrapperProps) => {
@@ -95,7 +97,11 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         preventDefault : true,
         preventElementFocus : false,
         enable : keyboardShortcutStatus == "Full Controll",
-        callback: () => setCollapseContexts(!collapseContexts)
+        callback: () => {
+            if(highlightContexts) {
+                setCollapseContexts(!collapseContexts);
+            }
+        }
     })
 
     useOutsideClick({
@@ -104,6 +110,16 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
             if(highlightContexts) {
                 setHighlightContexts(false);
             }
+        },
+    })
+
+    useWindowResize({
+        thresholdWidth : 640,
+        onTriggerEnter() {
+            
+        },
+        onTriggerOut() {
+            
         },
     })
 
@@ -117,7 +133,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
             <ContextMenuTrigger ref={contextMenuRef} className="w-full">
                 {children}
             </ContextMenuTrigger>
-            <ContextMenuContent sticky="partial" className="w-80 space-y-2 rounded-md p-2  dark:bg-theme-bgFourth/30 !backdrop-blur-3xl !backdrop-filter dark:shadow-black border dark:border-neutral-700">
+            <ContextMenuContent sticky="partial" className="w-80 space-y-2 rounded-md p-2 dark:bg-theme-bgFourth/30 !backdrop-blur-xl !backdrop-filter dark:shadow-black border dark:border-neutral-700">
                 <ContextMenuItem onClick={() => setOpenCreatorDialog(true)} className={dropdownMenuItemStyle}>
                     New Section <Labelkey label="CTRL + SHIFT + C"/>
                 </ContextMenuItem>
@@ -131,14 +147,14 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                 <ContextMenuItem onClick={() => setHighlightContexts(!highlightContexts)} className={dropdownMenuItemStyle}>
                     {!highlightContexts ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="ESC"/></>}
                 </ContextMenuItem>
-                <ContextMenuItem onClick={() => setCollapseContexts(!collapseContexts)} className={dropdownMenuItemStyle}>
+                <ContextMenuItem disabled={!highlightContexts} onClick={() => setCollapseContexts(!collapseContexts)} className={dropdownMenuItemStyle}>
                     {collapseContexts ? "Expand All" : "Collapse All"} <Labelkey label="CTRL + M"/>
                 </ContextMenuItem>
                 <ContextMenuSub>
                     <ContextMenuSubTrigger className={dropdownMenuItemStyle}>
                         Layout
                     </ContextMenuSubTrigger>
-                    <ContextMenuSubContent className="w-40 space-y-2 rounded-md p-2 shadow-lg dark:bg-theme-bgFourth ml-5 dark:shadow-black border dark:border-neutral-400">
+                    <ContextMenuSubContent className="w-40 space-y-2 rounded-md p-2 shadow-lg dark:bg-theme-bgFourth/80 bg-neutral-100 !backdrop-blur-3xl !backdrop-filter ml-5 dark:shadow-black border dark:border-neutral-400">
                         <ContextMenuItem className={dropdownMenuItemStyle}>Grid</ContextMenuItem>
                         <ContextMenuItem className={dropdownMenuItemStyle}>List</ContextMenuItem>
                     </ContextMenuSubContent>

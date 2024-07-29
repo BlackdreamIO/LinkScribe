@@ -28,7 +28,7 @@ export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
                 tabIndex={0}
                 variant={"ghost"} 
                 className={`w-full flex flex-row items-center gap-4 px-4 h-14 rounded-lg !ring-0 focus-visible:!outline-theme-borderNavigation cursor-default
-                    ${ minimizeMode ? "h-10" : "h-14"}
+                    ${ minimizeMode ? "h-10" : "h-14"} pointer-events-auto
                     ${ minimizeMode ? "justify-center" : "justify-start"}
                     ${pathName.includes(label) ? "dark:bg-theme-bgThird/20 bg-neutral-100 dark:border-neutral-800 border border-neutral-300" : "dark:hover:bg-theme-bgThird/40"}`}
                 
@@ -48,7 +48,7 @@ export const ListItems = ({ minimizeMode } : { minimizeMode : boolean }) => {
 
     return (
         <Box className="w-full">
-            <VStack ref={parentRef} className="space-y-2 !outline-none border-2 !border-transparent focus-visible:!border-theme-borderKeyboardParentNavigation rounded-xl" role="tablist" tabIndex={0}>
+            <VStack ref={parentRef} className="space-y-2 !outline-none border-2 pointer-events-none !border-transparent focus-visible:!border-theme-borderKeyboardParentNavigation rounded-xl" role="tablist" tabIndex={0}>
                 <Item 
                     icon={<Search />}
                     label="Search"
