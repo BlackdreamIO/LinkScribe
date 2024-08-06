@@ -1,11 +1,11 @@
 'use client'
 
 import { useRef, useState } from "react";
-
-import { Box, Divider, HStack } from "@chakra-ui/react";
-  
-import { Input } from "@/components/ui/input";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
+import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
+
+import { Box, Divider, HStack } from "@chakra-ui/react";  
+import { Input } from "@/components/ui/input";
   
 import { 
     ContextMenu,
@@ -15,7 +15,6 @@ import {
 
     SectionHeaderLinkDrawer
 } from './DynamicImport';
-import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 import { SectionHeaderOptions } from "./SectionHeaderOptions";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
@@ -117,7 +116,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                 />
                 
             </ContextMenuTrigger>
-            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth bg-neutral-50 dark:shadow-black border dark:border-neutral-700">
+            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth bg-neutral-50 dark:shadow-black border dark:border-neutral-700 z-20">
                 <ContextMenuItem onClick={() => setTitleEditMode(true)} className={dropdownMenuItemStyle}>Rename Section</ContextMenuItem>
                 <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>Add Link</ContextMenuItem>
                 <ContextMenuItem className={dropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>

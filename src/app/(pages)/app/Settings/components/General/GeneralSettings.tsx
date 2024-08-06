@@ -147,7 +147,7 @@ export const GeneralSettings = () => {
                 />
                 <LabelDropdown
                     label="Default Grid Size"
-                    defaultValue={linkLayoutDefaultSize.toLocaleString()}
+                    defaultValue={linkLayoutDefaultSize?.toLocaleString() || "3"}
                     onChange={(value) => setLinkLayoutDefaultSize(parseInt(value))}
                     options={GRID_SIZES}
                 />

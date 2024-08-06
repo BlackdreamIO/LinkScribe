@@ -1,7 +1,7 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { createSection, deleteSection, getSections, updateSection } from '@/app/actions/sectionAPI';
 import { SectionScheme } from '@/scheme/Section';
 import useLocalStorage from '@/hook/useLocalStorage';
@@ -9,12 +9,15 @@ import { ConvertEmailString } from '@/global/convertEmailString';
 
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from '@/components/ui/toast';
-import PouchDB from 'pouchdb';
-import PouchDBLocalStorageAdapter from 'pouchdb-adapter-localstorage';
 
-PouchDB.plugin(PouchDBLocalStorageAdapter);
+import { GetSections as ClientSideGetSections } from '@/database/functions/supabase/sections/getAllSections';
+import { DeleteSection as ClientSideDeleteSection } from '@/database/functions/supabase/sections/deleteSection';
+import { CreateSection as ClientSideCreateSection } from '@/database/functions/supabase/sections/createSections';
 
-export const dynamic = 'force-dynamic';
+import { SynchronizeToDexieDB, SynchronizeToSupabase } from '@/database/functions/dexie/Synchronizer';
+import { DexieGetSections } from '@/database/functions/dexie/DexieSections';
+
+//PouchDB.plugin(PouchDBLocalStorageAdapter);
 
 interface SectionContextData {
     contextSections: SectionScheme[];
@@ -46,41 +49,64 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     const [contextSections, setContextSections] = useState<SectionScheme[]>([]);
     const [originalContextSections, setOriginalContextSections] = useState<SectionScheme[]>([]);
 
-    const [_, __, getLocalStorageSectionByKey, setLocalStorageSectionByKey] = useLocalStorage<SectionScheme[]>('sectionsCache', []);
-    const [serverOperationInterrupted, setServerOperationInterrupted] = useLocalStorage<boolean>('operationInterrupted', false);
+    const [serverOperationInterrupted, setServerOperationInterrupted] = useLocalStorage<boolean>('operationInterrupted', false); // track server operation interruption
 
     {/* the filteredContextSections data will come from the component that does the filtering */}
     const [enableFilterContextSections, setEnableFilterContextSections] = useState<boolean>(false);
 
     const { isSignedIn, isLoaded, user } = useUser();
+    const { getToken } = useAuth();
     const { toast } = useToast();
 
+    const ToastMessage = (message : string, descirption? : string, type : "Status" | "Error" | "Warning" = "Status") => {
+        let className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary";
+        switch (type) {
+            case "Status":
+                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary";
+                break;
+            case "Error":
+                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-red-500"
+                break;
+            case "Error":
+                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-yellow-400"
+                break;
+            default:
+                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary";    
+                break;
+        }
+        toast({
+            title: message,
+            description: descirption,
+            action : <ToastAction altText="Ok">Ok</ToastAction>,
+            className : className
+        })
+    }
+
     const CreateSection = async ({ newSection } : { newSection: SectionScheme }) => {
-        if(isSignedIn && isLoaded && user.primaryEmailAddress) {
-            
+        if(isSignedIn && isLoaded && user.primaryEmailAddress)
+        {
+            const token = await getToken({ template : "linkscribe-supabase" });
             const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
 
-            setServerOperationInterrupted(true);
-            //setContextSections(prev => [...prev, newSection]);
+            if(!token) {
+                alert("Failed Authorize Token Please Try Again");
+                return;
+            }
 
-            try
-            {
-                const response = await createSection(currentUserEmail, JSON.stringify(newSection), window.location.origin);
-                setServerOperationInterrupted(false);
-                SaveContextSections();
-            }
-            catch (error : any)
-            {
-                setServerOperationInterrupted(false);
-                RestoreContextSections();
-                toast({
-                    title: "Failed Create Section Please Try Again 😁",
-                    description: "INTERNAL SERVER ERROR 500",
-                    action : <ToastAction altText="Ok">Ok</ToastAction>,
-                    className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
-                });
-                throw new Error(error);
-            }
+            setServerOperationInterrupted(true);
+            setContextSections(prev => [...prev, newSection]);
+            
+            
+            //await ClientSideCreateSection({
+            //    token : token,
+            //    email : currentUserEmail,
+            //    sectionData : newSection,
+            //    onSuccess() {
+            //        setServerOperationInterrupted(false);
+            //        SaveContextSections();
+            //    },
+            //    onError : () => RestoreContextSections()
+            //});
         }
         else {
             toast({
@@ -89,99 +115,57 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                 action : <ToastAction altText="Ok">Ok</ToastAction>,
                 className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
             });
+
+            ToastMessage("No Sections Found", "STORAGE SYSTEM", "Warning");
         }
     }
 
     const GetSections = async (revalidateFetch? : boolean) => {
 
-        function prepareDocsForInsert(sections : SectionScheme[]) {
-            return sections.map(section => {
-              // Map your custom `id` to `_id`
-              const { id, ...rest } = section;
-              return { _id: id, ...rest };
-            });
-        }
+        const cachedData = await DexieGetSections();
+        setOriginalContextSections(cachedData);
 
         if(isSignedIn && isLoaded && user.primaryEmailAddress)
         {
+            const token = await getToken({ template : "linkscribe-supabase" });
+
             const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
-            const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-            const secret = process.env.NEXT_PUBLIC_SUPABASE_ANON;
-            
-            const uri = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users?apikey=${process.env.NEXT_PUBLIC_SUPABASE_ANON}&select=*,sections(*,links(*)),settings(*)&email=eq.${currentUserEmail}`;
 
-            const response = await fetch(uri, {
-                next : {
-                    revalidate : 0
-                },
-                method : "GET",
-            });
-            const data = await response.json();
-            console.log(data);
-            
-
-            if(true) {
-                
-                //const x = await getSections(currentUserEmail, window.location.origin);
-                
-                const db = new PouchDB('my_database_x');
-
-        
-
-        //const xd = await db.allDocs({ include_docs : true });
-        //console.log(xd.rows.flatMap((x) => x.doc));
-        
-        //if(xd) return [];
-
-        //const response = await fetch(`${url}/rest/v1/users?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZ251enhiaGNxb2F3bHp0b3JwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTg0MjIzMDAsImV4cCI6MjAxMzk5ODMwMH0.mU1IbZVdFsvDTGwPD25mrci7guzxWy582ASOAmONBi8&select=*,sections(*,links(*)),settings(*)&email=eq.mdh560354gmailcom`);
-        //const data = await response.json();
-
-        //const sections = await getSections(currentUserEmail, window.location.origin);
-
-        //const docsForInsert = prepareDocsForInsert(data);
-//
-        //db.bulkDocs(docsForInsert).then((response : any) => {
-        //    console.log('Document created successfully:', response);
-        //}).catch((err : any) => {
-        //      console.error('Error creating document:', err);
-        //});
-                     
-            }
-
-            if(data) {
-                setContextSections(data[0].sections ?? []);
-            }
-            return [];
-
-            /*
-            if(getLocalStorageSectionByKey(currentUserEmail) && !revalidateFetch) return getLocalStorageSectionByKey(currentUserEmail);
-
-            else
-            {
-                console.log(`REQUEST HAS BEEN MADE ${new Date().toTimeString()}`);
-                const sections = await getSections(currentUserEmail, window.location.origin);
-                if(sections) 
-                {
-                    setContextSections(sections);
-                    setLocalStorageSectionByKey(currentUserEmail, sections);
-                    return sections;
-                }
-
+            if(!token) {
+                alert("Failed Authorize Token Please Try Again");
                 return [];
             }
-            */
-        }
-        else
-        {
-            //toast({
-            //    title: "Failed To Fetch Sections",
-            //    description: "INTERNAL SERVER ERROR 500",
-            //    action : <ToastAction altText="Ok">Ok</ToastAction>,
-            //    className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
-            //});
 
-            return [];
+            if(!revalidateFetch && cachedData)
+            {
+                //setContextSections(cachedData);
+                RestoreContextSections();
+                console.log("INITALIZED FROM CLIENT SIDE STORAGE");
+                //console.log(cachedData);
+            }
+            else
+            {
+                console.log("INITIALIZING FROM DATABASE...");
+                
+                await ClientSideGetSections({
+                    token : token,
+                    email : currentUserEmail,
+                    onSuccess : async (sections) => {
+                        console.log("INITALIZED FROM DATABASE");
+                        setContextSections(sections);
+                    },
+                    onEmpty() {  },
+                    onError(error) {
+                        ToastMessage("Failed Operation During Fetching Sections From Database", "SYSTEM", "Error");
+                        console.error("Error While Fetching Sections : ", error);
+                    },
+                });
+                
+            }
+            
+            return contextSections;
         }
+        return [];
     }
 
     const UpdateSection = async ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => {
@@ -192,7 +176,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         try
         {
             if(currentSection == updatedSection) return;
-            const response = await updateSection(currentUserEmail, currentSection.id, JSON.stringify(updatedSection), window.location.origin);
+            //const response = await updateSection(currentUserEmail, currentSection.id, JSON.stringify(updatedSection), window.location.origin);
             SaveContextSections();
         }
         catch (error : any) {
@@ -208,43 +192,41 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     }
     
     const DeleteSections = async (id:string) => {
-        if(isSignedIn && isLoaded && user.primaryEmailAddress) {
-            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
-            try
-            {
-                const totalContextsLength = contextSections.length;
-                const decreamnentAmount = 1;
+        if(isSignedIn && isLoaded && user.primaryEmailAddress)
+        {
+            const token = await getToken({ template : "linkscribe-supabase" });
 
-                if(totalContextsLength - decreamnentAmount > 0)
-                {
-                    setContextSections(prevSections => {
-                        const updatedSections = prevSections.filter(section => section.id !== id);
-                        return updatedSections;
-                    })
-                    
-                    await deleteSection(currentUserEmail, id, window.location.origin);
+            if(!token) {
+                alert("Failed Authorize Token Please Try Again");
+                return;
+            }
+
+            const totalContextsLength = contextSections.length;
+            const decreamnentAmount = 1;
+
+            if(totalContextsLength - decreamnentAmount < 1) {
+                ToastMessage("You Must Have Atleast 1 Document In Order To Maintain Storage Invalidation", "STORAGE", "Warning");
+                return;
+            }
+            setContextSections(prevSections => {
+                const updatedSections = prevSections.filter(section => section.id !== id);
+                return updatedSections;
+            })
+            
+            /*
+            await ClientSideDeleteSection({
+                token : token,
+                section_id : id,
+                onSuccess() {
+                    ToastMessage("Successfully Deleted ${id}", "STORAGE", "Status");
                     SaveContextSections();
-                }
-
-                else {
-                    toast({
-                        title: "You Must Have Atleast 1 Document In Order To Maintain Storage Invalidation",
-                        description: "SYSTEM",
-                        action : <ToastAction altText="Ok">Ok</ToastAction>,
-                        className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
-                    });
-                }
-            }
-            catch (error : any) {
-                RestoreContextSections();
-                toast({
-                    title: "Failed To Delete Section Please Try Again",
-                    description: "SYSTEM",
-                    action : <ToastAction altText="Try Again">Try Again</ToastAction>,
-                    className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
-                });
-                throw new Error(error);
-            }
+                },
+                onError(error) {
+                    ToastMessage("Failed To Delete Section Retry Few Seconds Letter.", "STORAGE", "Error");
+                    RestoreContextSections();
+                },
+            })
+            */
         }
     }
 
@@ -258,37 +240,32 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     }
 
     useEffect(() => {
-        const getSections = async () => {
-            await GetSections(true);
-        }
-        if(true)
-        {
-            const currentUserEmail = ConvertEmailString(user?.primaryEmailAddress?.emailAddress || 'mdh560354gmailcom');
-            if(getLocalStorageSectionByKey(currentUserEmail).length < 1)
-            {
-                console.log("INITIAIED FROM BACKEND");
-                getSections()
-                return;
-            }
-            else {
-                GetSections();
-                console.log("INITIAIED FROM LOCAL STORAGE : ");
-            }
-            setContextSections(getLocalStorageSectionByKey(currentUserEmail));
-            setOriginalContextSections(getLocalStorageSectionByKey(currentUserEmail));
-        }
+        GetSections();       
     }, [isSignedIn, isLoaded, user]);
     
 
+
     useEffect(() => {
-        if(user?.primaryEmailAddress) 
-        {
-            const currentUserEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
-            setLocalStorageSectionByKey(currentUserEmail, contextSections);
-        }
+        const syncSystem = async () => {
+            if (isSignedIn && isLoaded && user && user.primaryEmailAddress) {
+                const token = await getToken({ template: "linkscribe-supabase" });
+
+                if (!token) return;
+
+                // Synchronize DexieDB
+                await SynchronizeToDexieDB(contextSections);
+
+                // Synchronize Supabase
+                if (user.primaryEmailAddress?.emailAddress) {
+                    await SynchronizeToSupabase(token, ConvertEmailString(user.primaryEmailAddress.emailAddress));
+                }
+            }
+        };
+
+        syncSystem();
     }, [contextSections, isSignedIn, isLoaded, user]);
     
-    
+
     const contextValue: SectionContextType = {
         CreateSection,
         GetSections,

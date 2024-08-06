@@ -1,6 +1,5 @@
 import { LinkLayoutType } from "@/types/SettingTypes";
 import { LinkScheme } from "./Link";
-import { Timestamp } from "firebase/firestore";
 
 export interface SectionScheme {
     id : string;
@@ -8,7 +7,8 @@ export interface SectionScheme {
     totalLinksCount : number;
     links : LinkScheme[];
     linksLayout : LinkLayoutType;
+    selfLayout : string;
+    section_ref : string;
     created_at : string;
-    timestamp : string;
     _deleted : boolean;
 }

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import { SectionScheme } from "@/scheme/Section";
+import { LinkLayout } from "@/scheme/Link";
 import dynamic from 'next/dynamic';
 
 import { useSectionController } from "@/context/SectionControllerProviders";
@@ -8,20 +10,13 @@ import { useSectionContext } from "@/context/SectionContextProvider";
 import { useLinkController } from "@/context/LinkControllerProviders";
 import { useSettingContext } from "@/context/SettingContextProvider";
 
-import { SectionScheme } from "@/scheme/Section";
-
 import { Box } from "@chakra-ui/react";
 
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 
 import { SectionHeader } from "./SectionHeader";
 import { LinksLayout } from "../Link/LinksLayout";
-import { LinkLayout } from "@/scheme/Link";
-  
-const ErrorManager = dynamic(() => import('../../../components/ErrorHandler/ErrorManager'), {
-    ssr: true,
-    loading: () => <h1 className="text-center font-bold">Loading...</h1>,
-})
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 export const Section = ({ currrentSection } : {currrentSection : SectionScheme}) => {
 
@@ -38,12 +33,12 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
     const { showLinkCount, sectionsDefaultOpen } = useSettingContext()!;
 
     useEffect(() => {
-        setMinimize(collapseContexts);
+        //setMinimize(collapseContexts);
     }, [collapseContexts])
 
     useEffect(() => {
         const currentTomout = setTimeout(() => {
-            setMinimize(!sectionsDefaultOpen);
+            //setMinimize(!sectionsDefaultOpen);
         }, 50);
 
         return () => clearTimeout(currentTomout);

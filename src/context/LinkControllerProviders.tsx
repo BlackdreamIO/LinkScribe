@@ -58,15 +58,15 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     );
                 }
                 
-                const response = await createLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData));
+                //const response = await createLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData));
                 SaveContextSections();
-                console.log(response);
+                //console.log(response);
                 
-                return response;
+                //return response;
             }
         }
         catch (error : any) {
-            RestoreContextSections();
+            //RestoreContextSections();
             throw new Error(error);
         }
     }
@@ -106,13 +106,13 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     return;
                 }
                 else {
-                    const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData), window.location.origin);
-                    console.log(response);
+                    //const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData), window.location.origin);
+                    //console.log(response);
                 }
             }
         }
         catch (error : any) {
-            RestoreContextSections();
+            //RestoreContextSections();
             throw new Error(error);
         }
     }
@@ -139,11 +139,11 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
 
                 const currentEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
-                await deleteLink(currentEmail, sectionID, linkId, window.location.origin);
+                //await deleteLink(currentEmail, sectionID, linkId, window.location.origin);
             }
         }
         catch (error : any) {
-            RestoreContextSections();
+            //RestoreContextSections();
             throw new Error(error);
         }
     }
