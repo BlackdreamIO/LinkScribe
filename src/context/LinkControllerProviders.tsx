@@ -6,6 +6,7 @@ import { useSectionController } from './SectionControllerProviders';
 import { createLink, deleteLink, updateLink } from '@/app/actions/linkAPI';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
+import { SynchronizeToDexieDB } from '@/helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                 }
                 
                 //const response = await createLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData));
+                //await SynchronizeToDexieDB({ sections : contextSections });
                 SaveContextSections();
                 //console.log(response);
                 
@@ -66,7 +68,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
             }
         }
         catch (error : any) {
-            //RestoreContextSections();
+            RestoreContextSections();
             throw new Error(error);
         }
     }
@@ -108,11 +110,12 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                 else {
                     //const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData), window.location.origin);
                     //console.log(response);
+                    await SynchronizeToDexieDB({ sections : contextSections });
                 }
             }
         }
         catch (error : any) {
-            //RestoreContextSections();
+            RestoreContextSections();
             throw new Error(error);
         }
     }
@@ -140,10 +143,11 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
                 const currentEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
                 //await deleteLink(currentEmail, sectionID, linkId, window.location.origin);
+                //await SynchronizeToDexieDB({ sections : contextSections });
             }
         }
         catch (error : any) {
-            //RestoreContextSections();
+            RestoreContextSections();
             throw new Error(error);
         }
     }

@@ -1,30 +1,22 @@
-import { DexieDB } from "@/database/dexie";
 import { SectionScheme } from "@/scheme/Section";
 
-import { GetSections } from "../supabase/sections/getAllSections";
-import { DeleteSection } from "../supabase/sections/deleteSection";
-import { CreateSection } from "../supabase/sections/createSections";
-import { UpdateSection } from "../supabase/sections/updateSection";
-import { DexieGetSections } from "./DexieSections";
+import { GetSections } from "@/database/functions/supabase/sections/getAllSections";
+import { DexieGetSections } from "@/database/functions/dexie/DexieSections";
+import { isEqual } from "./isEqual";
+import { CreateSection } from "@/database/functions/supabase/sections/createSections";
 
-//import { isEqual } from "lodash";
-import { DifferenceComparatorAlgorithm } from "@/helpers/DiffAlgorithm";
+interface ISynchronizeToSupabase {
+    token : string;
+    email : string;
+    
+    useCacheSections? : boolean;
+    sections? : SectionScheme[];
 
-//import { isEqual } from "lodash";
-
-// Function to get new sections from Dexie based on new IDs
-function getNewSections(dexieSections: SectionScheme[], newIds: Set<string>): SectionScheme[] {
-    const currentSections = dexieSections.filter(section => newIds.has(section.id));
-    return [...new Set(removeExtraSections(currentSections))];
+    onSyncSuccess? : () => void;
+    onSyncError? : (error : any) => void;
 }
 
-function removeExtraSections(sections: SectionScheme[]): SectionScheme[] {
-    return sections.map(section => ({
-        ...section
-    }));
-}
-
-export async function SynchronizeToSupabase(token: string, email: string)
+export async function SynchronizeToSupabase({ email, token } : ISynchronizeToSupabase)
 {
     try {
         // Fetch sections from Supabase
@@ -64,13 +56,44 @@ export async function SynchronizeToSupabase(token: string, email: string)
             Updated : updatedSections
         });
 
+    
+        await CreateSectionToSupabase(email, token, newSections);
         
-    } catch (error) {
-        console.error("Error during synchronization:", error);
+    }
+    catch (error)
+    {
+        console.error("Error During Synchronization:", error);
     }
 };
 
-// Helper function to deeply compare two objects
-function isEqual(obj1: object, obj2: object): boolean {
-    return JSON.stringify(obj1) === JSON.stringify(obj2);
+let operationDone = 0;
+
+async function CreateSectionToSupabase(email : string, token : string, sections:SectionScheme[])
+{
+    let totalOperationCount = sections.length;
+
+    for (const section of sections) {
+        await CreateSection({
+            token: token,
+            email: email,
+            sectionData : section,
+            onSuccess: (data) => operationDone++,
+            onError: (error) => console.error("Error creating sections in Supabase:", error)
+        })
+    }
+
+    console.log("Synchronization Completed Successfully");
+
+    if(operationDone === totalOperationCount) {
+        
+    }
 }
+
+
+// Function to get new sections from Dexie based on new IDs
+function getNewSections(dexieSections: SectionScheme[], newIds: Set<string>): SectionScheme[] {
+    const currentSections = dexieSections.filter(section => newIds.has(section.id));
+    return [...new Set(removeExtraSections(currentSections))];
+}
+
+const removeExtraSections = (sections: SectionScheme[]): SectionScheme[] => sections.map(section => ({...section}));

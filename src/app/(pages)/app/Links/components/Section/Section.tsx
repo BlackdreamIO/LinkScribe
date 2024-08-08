@@ -18,9 +18,9 @@ import { SectionHeader } from "./SectionHeader";
 import { LinksLayout } from "../Link/LinksLayout";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
-export const Section = ({ currrentSection } : {currrentSection : SectionScheme}) => {
+export const Section = ({ currentSection } : {currentSection : SectionScheme}) => {
 
-    const { id, links, title, totalLinksCount, created_at, _deleted, linksLayout, timestamp } = currrentSection;
+    const { id, links, title, totalLinksCount, created_at, _deleted, linksLayout, section_ref, selfLayout } = currentSection;
 
     const [layout, setLayout] = useState<LinkLayout>({ layout : "Grid Detailed", size : 1 });
 
@@ -33,7 +33,7 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
     const { showLinkCount, sectionsDefaultOpen } = useSettingContext()!;
 
     useEffect(() => {
-        //setMinimize(collapseContexts);
+        setMinimize(collapseContexts);
     }, [collapseContexts])
 
     useEffect(() => {
@@ -62,17 +62,8 @@ export const Section = ({ currrentSection } : {currrentSection : SectionScheme})
                     onMinimize={() => setMinimize(!minimize)}
                     onRename={(newTitle) => {
                         UpdateSection({ 
-                            currentSection : currrentSection,
-                            updatedSection : {
-                                id : id,
-                                links : links,
-                                created_at : created_at,
-                                totalLinksCount : totalLinksCount,
-                                title : newTitle,
-                                _deleted : _deleted,
-                                linksLayout : linksLayout,
-                                timestamp : timestamp
-                            }
+                            currentSection : currentSection,
+                            updatedSection : {...currentSection, title : newTitle}
                         })}}
                     onDelete={() => DeleteSections(id)}
                     onCreateLink={(link) => CreateLink({
