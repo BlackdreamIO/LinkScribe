@@ -3,7 +3,10 @@ import { SectionScheme } from "@/scheme/Section";
 import { GetSections } from "@/database/functions/supabase/sections/getAllSections";
 import { DexieGetSections } from "@/database/functions/dexie/DexieSections";
 import { isEqual } from "./isEqual";
+
 import { CreateSection } from "@/database/functions/supabase/sections/createSections";
+import { DeleteSection } from "@/database/functions/supabase/sections/deleteSection";
+import { UpdateSection } from "@/database/functions/supabase/sections/updateSection";
 
 interface ISynchronizeToSupabase {
     token : string;
@@ -16,7 +19,19 @@ interface ISynchronizeToSupabase {
     onSyncError? : (error : any) => void;
 }
 
-export async function SynchronizeToSupabase({ email, token } : ISynchronizeToSupabase)
+/**
+ * Synchronizes local sections with Supabase.
+ *
+ * This function fetches sections from Supabase, compares them with local sections,
+ * and updates Supabase with new, deleted, or updated sections.
+ *
+ * @param {ISynchronizeToSupabase} options - synchronization options
+ * @param {string} options.email - user email
+ * @param {string} options.token - authentication token
+ * @param {(error: any) => void} [options.onSyncError] - error callback
+ * @return {Promise<void>}
+ */
+export async function SynchronizeToSupabase({ email, token, onSyncError } : ISynchronizeToSupabase)
 {
     try {
         // Fetch sections from Supabase
@@ -50,14 +65,11 @@ export async function SynchronizeToSupabase({ email, token } : ISynchronizeToSup
         const deletedSections = getNewSections(sortedSupabaseSections, deletedIds);
         const updatedSections = getNewSections(updatedSectionss, updatedIds);
 
-        console.log({
-            Added : newSections,
-            Deleted : deletedSections,
-            Updated : updatedSections
-        });
-
+        console.log({ Added : newSections, Deleted : deletedSections, Updated : updatedSections });
     
-        await CreateSectionToSupabase(email, token, newSections);
+        await CreateSectionToSupabase({ email, sections : newSections, token, onSyncError : (e) => onSyncError?.(e) });
+        await DeleteSectionToSupabase({ sections : deletedSections, token, onSyncError : (e) => onSyncError?.(e) });
+        await UpdateSectionToSupabase({ sections : updatedSections, token, email, onSyncError : (e) => onSyncError?.(e) });
         
     }
     catch (error)
@@ -68,9 +80,18 @@ export async function SynchronizeToSupabase({ email, token } : ISynchronizeToSup
 
 let operationDone = 0;
 
-async function CreateSectionToSupabase(email : string, token : string, sections:SectionScheme[])
+interface ICreateSectionToSupabase {
+    email : string;
+    token : string;
+    sections:SectionScheme[];
+    onSyncError : (error : any) => void;
+}
+
+async function CreateSectionToSupabase({ email, token, sections, onSyncError } : ICreateSectionToSupabase)
 {
     let totalOperationCount = sections.length;
+    
+    if(totalOperationCount === 0) return;
 
     for (const section of sections) {
         await CreateSection({
@@ -78,16 +99,79 @@ async function CreateSectionToSupabase(email : string, token : string, sections:
             email: email,
             sectionData : section,
             onSuccess: (data) => operationDone++,
-            onError: (error) => console.error("Error creating sections in Supabase:", error)
+            onError: (error) => onSyncError(`Error creating sections in Supabase: ${error}`)
         })
     }
 
     console.log("Synchronization Completed Successfully");
 
     if(operationDone === totalOperationCount) {
-        
+        console.log("All Synchronization");
+        operationDone = 0;
     }
 }
+
+interface IDeleteSectionToSupabase {
+    token : string;
+    sections:SectionScheme[];
+    onSyncError : (error : any) => void;
+}
+
+async function DeleteSectionToSupabase({ token, sections, onSyncError } : IDeleteSectionToSupabase)
+{
+    let totalOperationCount = sections.length;
+
+    if(totalOperationCount === 0) return;
+
+    for (const section of sections) {
+        await DeleteSection({
+            token: token,
+            section_id : section.id,
+            onSuccess: (data) => operationDone++,
+            onError: (error) => onSyncError(`Error deleting section in Supabase: ${error}`)
+        })
+    }
+
+    console.log("Synchronization Deleted Completed");
+
+    if(operationDone === totalOperationCount) {
+        console.log("All Deletation Synchronization");
+        operationDone = 0;
+    }
+}
+interface IUpdateSectionToSupabase {
+    email : string;
+    token : string;
+    sections:SectionScheme[];
+    onSyncError : (error : any) => void;
+}
+
+async function UpdateSectionToSupabase({ email, token, sections, onSyncError } : IUpdateSectionToSupabase)
+{
+    let totalOperationCount = sections.length;
+
+    if(totalOperationCount === 0) return;
+
+    console.log("Updated : ", sections);
+
+    for (const section of sections) {
+        await UpdateSection({
+            token: token,
+            email : email,
+            sectionData : section,
+            onSuccess: (data) => operationDone++,
+            onError: (error) => onSyncError(`Error updating section in Supabase: ${error}`)
+        })
+    }
+
+    console.log("Synchronization Update Completed");
+
+    if(operationDone === totalOperationCount) {
+        console.log("All Update Synchronization");
+        operationDone = 0;
+    }
+}
+
 
 
 // Function to get new sections from Dexie based on new IDs

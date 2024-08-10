@@ -8,6 +8,15 @@ interface IGetSections {
     onError? : (error : any) => void;
 }
 
+/**
+ * Deletes a section from the database.
+ *
+ * @param {string} token - authentication token
+ * @param {function} onSuccess - callback function to execute on successful deletion
+ * @param {function} onError - callback function to execute on error
+ * @param {string} section_id - ID of the section to delete
+ * @return {any} deleted section data or an empty array on error
+ */
 export async function DeleteSection({ token, onSuccess, onError, section_id} : IGetSections)
 {
     try

@@ -251,8 +251,6 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     useEffect(() => {
         const FetchDexieDBCache = async () => {
             const cachedData = await DexieGetSections();
-            console.log(cachedData);
-            
             setOriginalContextSections(cachedData);
             setContextSections(cachedData);
             setIsCacheLoaded(true);  // Mark cache as loaded

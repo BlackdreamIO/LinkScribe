@@ -36,8 +36,7 @@ export async function SynchronizeToDexieDB({ sections } : ISynchronizeToDexieDB)
                 await DexieDB.sections.add(section);
             }
 
-            console.log(existingSection?.links);
-
+            /*
             for (const link of section.links) {
                 const existingLink = await DexieDB.links.get(link.id);
                 if (existingLink) {
@@ -56,6 +55,7 @@ export async function SynchronizeToDexieDB({ sections } : ISynchronizeToDexieDB)
                 }
                 else { await DexieDB.links.add(link); }
             }
+            */
 
             currentSectionIds.delete(section.id); // Remove processed section ID from the set
         }

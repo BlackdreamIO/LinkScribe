@@ -9,6 +9,17 @@ interface IGetSections {
     onError? : (error : any) => void;
 }
 
+/**
+ * Creates a new section in the "sections" table of the Supabase database.
+ *
+ * @param {Object} options - The options for creating the section.
+ * @param {string} options.token - The token for authentication.
+ * @param {Function} [options.onSuccess] - The callback function to be called on success.
+ * @param {Function} [options.onError] - The callback function to be called on error.
+ * @param {string} options.email - The email associated with the section.
+ * @param {SectionScheme} options.sectionData - The data of the section to be created.
+ * @return {Promise<Object[]|void>} - The created section data on success, or an empty array on error.
+ */
 export async function CreateSection({ token, onSuccess, onError, email, sectionData} : IGetSections)
 {
     try
