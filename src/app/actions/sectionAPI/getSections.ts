@@ -22,7 +22,8 @@ export async function getSections(userEmail : string, revalidateUrl="/app/Links"
                 created_at: data.created_at,
                 _deleted : false,
                 linksLayout : data.linksLayout || "Grid Detailed",
-                timestamp : new Date().toISOString()
+                section_ref : userEmail,
+                selfLayout : data.selfLayout || "Grid",
             };
         });
     

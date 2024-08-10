@@ -8,28 +8,35 @@ import { Box, Text } from "@chakra-ui/react";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
+import { useUser } from "@clerk/nextjs";
+import { RefineEmail } from "@/helpers/NormalizeEmail";
 
 export const SectionCreator = () => {
 
     const [sectionTitle, setSectionTitle] = useState("");
 
     const { CreateSection } = useSectionController()!;
+    const { user } = useUser();
     const { openCreatorDialog, setOpenCreatorDialog } = useSectionContext()!;
 
     const handleCreateSection = async () => {
         setOpenCreatorDialog(false);
-        await CreateSection({
-            newSection : {
-                id : crypto.randomUUID().slice(0, 8), // gen 8 character long random string
-                title : sectionTitle,
-                links : [],
-                totalLinksCount : 0,
-                created_at : new Date().toString(),
-                _deleted : false,
-                linksLayout : "Grid Detailed",
-                timestamp : new Date().toString()
-            }
-        });
+        if(user && user.primaryEmailAddress && sectionTitle) {
+            const uniqID = crypto.randomUUID().slice(0, 8);
+            await CreateSection({
+                newSection : {
+                    id : uniqID, // gen 8 character long random string
+                    title : sectionTitle,
+                    links : [],
+                    totalLinksCount : 0,
+                    created_at : new Date().toString(),
+                    _deleted : false,
+                    linksLayout : "Grid Detailed",
+                    selfLayout : "Grid",
+                    section_ref : RefineEmail(user.primaryEmailAddress.emailAddress),
+                }
+            });
+        }
     }
 
     return (
