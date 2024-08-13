@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 import { useSettingContext } from "@/context/SettingContextProvider";
 
@@ -31,6 +32,7 @@ type SectionHeaderOptionsProsp = {
     onOpenLinkDrawer : (open : boolean) => void;
     onDelete : () => void;
     onLayoutChange : (layout : LinkLayout) => void;
+    onOpenSectionTransferer : () => void;
 }
 
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
@@ -41,14 +43,17 @@ const dropdownMenuItemStyle = `text-md max-sm:text-xxs py-2 font-normal rounded-
 
 export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
 
-    const { minimized, linkCount, onTitleEditMode, onDelete, handleMinimzie, onOpenLinkDrawer, showLinkCount, onLayoutChange } = props;
+    const { minimized, linkCount, onTitleEditMode, onDelete, handleMinimzie, onOpenLinkDrawer, showLinkCount, onLayoutChange, onOpenSectionTransferer } = props;
 
-    const [keepOpenModal, setKeepOpenModal] = useState(false);
     const [currentLayout, setCurrentLayout] = useState<LinkLayoutType>("Grid Detailed");
     const [currentLayoutSize, setCurrentLayoutSize] = useState(1);
+    const [keepOpenModal, setKeepOpenModal] = useState(false);
+    const [ openTransferer, setOpenTransferer ] = useState(false);
 
     const parentRef = useRef<HTMLDivElement>(null);
+    const parentEmailSelectModalRef = useRef<HTMLDivElement>(null);
     useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "horizontal" });
+    useKeyboardNavigation({ role: 'tab', parentRef : parentEmailSelectModalRef, direction : "vertical" });
 
     const { linkLayoutDefaultSize } = useSettingContext()!;
 
@@ -70,7 +75,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                 }
             </Button>
 
-            <DropdownMenu modal>
+            <DropdownMenu modal={false}>
                 <DropdownMenuTrigger role="tab" className={`${buttonStyle} z-0`}>
                     <LayoutPanelTop className={`z-0 max-sm:w-4`} />
                 </DropdownMenuTrigger>
@@ -144,15 +149,11 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenu open={keepOpenModal} onOpenChange={setKeepOpenModal}>
+            <DropdownMenu modal={false}>
                 <DropdownMenuTrigger role="tab" className={`${buttonStyle} z-0`}>
                     <EllipsisVertical className={`z-0 max-sm:w-4`} />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                    side="bottom" 
-                    sideOffset={15}
-                    align="start" 
-                    onInteractOutside={() => setKeepOpenModal(false)}
+                <DropdownMenuContent side="bottom" sideOffset={15} align="start" 
                     className="w-60 z-50 border-neutral-600 dark:bg-theme-bgFourth mr-5 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black"
                 >
                     <DropdownMenuLabel className="text-lg max-sm:text-sm">Setting</DropdownMenuLabel>
@@ -165,6 +166,9 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem className={dropdownMenuItemStyle}>
                         Collapse/Expand Section
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onOpenSectionTransferer()} className={dropdownMenuItemStyle}>
+                        Share
                     </DropdownMenuItem>
                     <DropdownMenuSeparator/>
                     <DropdownMenuItem disabled={linkCount==0} className={`${dropdownMenuItemStyle} data-[highlighted]:!bg-red-500 data-[highlighted]:dark:text-white dark:hover:!bg-red-500 dark:hover:!text-white`}>

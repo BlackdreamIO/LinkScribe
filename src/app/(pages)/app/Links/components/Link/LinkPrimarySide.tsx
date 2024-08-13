@@ -43,7 +43,8 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
                 title : linkTitle,
                 url : link.url,
                 visitCount : link.visitCount,
-                created_at : link.created_at
+                created_at : link.created_at,
+                ref : sectionID
             }
         })
     }
@@ -51,7 +52,7 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
     return (
         <HStack className="w-full" justifyContent={"space-between"}>
             <Box className="flex flex-grow flex-row items-center justify-start">
-                <LinkFavIcon faviconUrl={linkTitle} />
+                <LinkFavIcon faviconUrl={link.url} />
                 <Input
                     value={linkTitle}
                     className={`flex flex-grow text-lg max-lg:text-base max-sm:text-xs p-2 dark:border-transparent border-2 border-transparent 

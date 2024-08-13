@@ -16,7 +16,11 @@ interface SectionContextData {
     setOpenCreatorDialog: Dispatch<SetStateAction<boolean>>;
 }
 
-export interface SectionContextType extends SectionContextData {
+interface SectionContextVoids {
+    openTransferDialog : (id : string) => void;
+}
+
+export interface SectionContextType extends SectionContextData, SectionContextVoids {
     
 }
 
@@ -30,19 +34,13 @@ export const useSectionContext = () => useContext(SectionContext);
 
 export const SectionContextProvider = ({children} : SectionContextProviderProps) => {
 
-    const [_, __, getDataByKey, ___] = useLocalStorage("null", []);
-
     const [openCreatorDialog, setOpenCreatorDialog] = useState<boolean>(false);
     const [collapseContexts, setCollapseContexts] = useState<boolean>(false);
     const [highlightContexts, setHighlightContexts] = useState<boolean>(false);
-   
-
-    useEffect(() => {
-
-        const showLinkCount = getDataByKey("showLinkCount");
-
-    }, [])
     
+    const openTransferDialog = (id : string) => {
+        
+    }
 
     const contextValue: SectionContextType = {
         highlightContexts,
@@ -50,7 +48,9 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
         collapseContexts,
         setCollapseContexts,
         openCreatorDialog,
-        setOpenCreatorDialog
+        setOpenCreatorDialog,
+
+        openTransferDialog
     };
 
     return (

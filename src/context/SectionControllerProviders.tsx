@@ -9,12 +9,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from '@/components/ui/toast';
 
 import { GetSections as ClientSideGetSections } from '@/database/functions/supabase/sections/getAllSections';
-import { DeleteSection as ClientSideDeleteSection } from '@/database/functions/supabase/sections/deleteSection';
 import { CreateSection as ClientSideCreateSection } from '@/database/functions/supabase/sections/createSections';
+import { CreateLink as ClientSideCreateLink } from '@/database/functions/supabase/links/createLink';
 
 import { isEqual, SynchronizeToDexieDB, SynchronizeToSupabase } from '@/helpers';
 import { DexieGetSections } from '@/database/functions/dexie/DexieSections';
 import { RefineEmail } from '@/helpers/NormalizeEmail';
+import { LinkScheme } from '@/scheme/Link';
+import { DexieGetSectionsByEmail } from '@/database/functions/dexie/DexieSectionByEmail';
+import { SyncStatus } from '@/types/Sync';
 
 //PouchDB.plugin(PouchDBLocalStorageAdapter);
 
@@ -24,6 +27,9 @@ interface SectionContextData {
 
     enableFilterContextSections : boolean;
     setEnableFilterContextSections: Dispatch<SetStateAction<boolean>>;
+
+    syncStatus : SyncStatus;
+    setSyncStatus : Dispatch<SetStateAction<SyncStatus>>;
 }
 
 export interface SectionContextType extends SectionContextData {
@@ -31,6 +37,8 @@ export interface SectionContextType extends SectionContextData {
     GetSections: (revalidateFetch? : boolean) => Promise<SectionScheme[]>;
     UpdateSection: ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => Promise<void>;
     DeleteSections: (id: string) => Promise<any>;
+
+    TransferSection: ({ email, sectionToTransfer, importCustomLinks, importLinks, links } : { email : string, importLinks : boolean, sectionToTransfer : SectionScheme, importCustomLinks : boolean, links : LinkScheme[] }) => Promise<void>;
 
     SaveContextSections: () => void;
     RestoreContextSections: () => void;
@@ -51,6 +59,8 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     const [originalContextSections, setOriginalContextSections] = useState<SectionScheme[]>([]);
 
     const [serverOperationInterrupted, setServerOperationInterrupted] = useLocalStorage<boolean>('operationInterrupted', false); // track server operation interruption
+
+    const [syncStatus, setSyncStatus] = useState<SyncStatus>("Synced");
 
     {/* the filteredContextSections data will come from the component that does the filtering */}
     const [enableFilterContextSections, setEnableFilterContextSections] = useState<boolean>(false);
@@ -97,18 +107,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
 
             setServerOperationInterrupted(true);
             setContextSections(prev => [...prev, newSection]);
-            await SynchronizeToDexieDB({ sections : contextSections });
-            
-            //await ClientSideCreateSection({
-            //    token : token,
-            //    email : currentUserEmail,
-            //    sectionData : newSection,
-            //    onSuccess() {
-            //        setServerOperationInterrupted(false);
-            //        SaveContextSections();
-            //    },
-            //    onError : () => RestoreContextSections()
-            //});
+            await SynchronizeToDexieDB({ sections : contextSections, email : currentUserEmail });
         }
         else {
             toast({
@@ -123,14 +122,11 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     }
 
     const GetSections = async (revalidateFetch? : boolean) => {
-
-        //const cachedData = await DexieGetSections();
-        //setOriginalContextSections(cachedData);
         
         if(isSignedIn && isLoaded && user.primaryEmailAddress)
         {
+            const cachedData = await DexieGetSectionsByEmail(user.primaryEmailAddress.emailAddress);
             const token = await getToken({ template : "linkscribe-supabase" });
-
             const currentUserEmail = RefineEmail(user.primaryEmailAddress.emailAddress);
 
             if(!token) {
@@ -138,12 +134,14 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                 return [];
             }
 
-            if(!revalidateFetch)
+            if(!revalidateFetch && cachedData && cachedData.length > 0)
             {
-                //setContextSections(cachedData);
                 console.log("INITALIZED FROM CLIENT SIDE STORAGE");
+                setOriginalContextSections(cachedData);
+                setContextSections(cachedData);
+                setIsCacheLoaded(true);  // Mark cache as loaded
             }
-            else if(revalidateFetch)
+            else
             {
                 console.log("INITIALIZING FROM DATABASE...");
                 
@@ -153,7 +151,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                     onSuccess : async (sections) => {
                         console.log("INITALIZED FROM DATABASE");
                         setContextSections(sections);
-                        await SynchronizeToDexieDB({ sections : sections });
+                        await SynchronizeToDexieDB({ sections : sections, email : currentUserEmail });
                     },
                     onEmpty() {  },
                     onError(error) {
@@ -177,9 +175,8 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         try
         {
             if(currentSection == updatedSection) return;
-            //const response = await updateSection(currentUserEmail, currentSection.id, JSON.stringify(updatedSection), window.location.origin);
             SaveContextSections();
-            await SynchronizeToDexieDB({ sections : contextSections });
+            await SynchronizeToDexieDB({ sections : contextSections, email : currentUserEmail });
         }
         catch (error : any) {
             RestoreContextSections();
@@ -215,22 +212,54 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                 return updatedSections;
             })
 
-            await SynchronizeToDexieDB({ sections : contextSections });
-            
-            /*
-            await ClientSideDeleteSection({
-                token : token,
-                section_id : id,
-                onSuccess() {
-                    ToastMessage("Successfully Deleted ${id}", "STORAGE", "Status");
-                    SaveContextSections();
-                },
-                onError(error) {
-                    ToastMessage("Failed To Delete Section Retry Few Seconds Letter.", "STORAGE", "Error");
-                    RestoreContextSections();
-                },
-            })
-            */
+            await SynchronizeToDexieDB({ sections : contextSections, email : user.primaryEmailAddress.emailAddress });
+        }
+    }
+
+    /**
+     * Transfers a section to a new email address, creating a new section and links if necessary.
+     *
+     * @param {string} email - The email address to transfer the section to.
+     * @param {SectionScheme} sectionToTransfer - The section to transfer.
+     * @param {boolean} importCustomLinks - Whether to import custom links.
+     * @param {LinkScheme[]} links - The links to import if importCustomLinks is true.
+     * @param {boolean} importLinks - Whether to import links from the original section.
+     * @return {Promise<void>} A promise that resolves when the transfer is complete.
+     */
+    const TransferSection = async ({ email, sectionToTransfer, importCustomLinks, links, importLinks } : { email : string, importLinks: boolean, sectionToTransfer : SectionScheme, importCustomLinks : boolean, links : LinkScheme[] }) => {
+        const token = await getToken({ template : "linkscribe-supabase" });
+
+        const sections = await DexieGetSectionsByEmail(RefineEmail(email));
+
+        if(sections && sections.find(section => section.title === sectionToTransfer.title)) {
+            ToastMessage("Section Already Exists", "SYSTEM", "Error");
+            return;
+        }
+        
+        if(!token || !isSignedIn) return;
+
+        const randomUniqeSectionID = crypto.randomUUID().slice(0, 12);
+
+        const newSection : SectionScheme = {
+            ...sectionToTransfer,
+            id: randomUniqeSectionID,
+            section_ref : RefineEmail(email),
+            links : importLinks ? sectionToTransfer.links : []
+        };
+
+        const newLinks : LinkScheme[] = links.map((link) => ({...link, id : crypto.randomUUID().slice(0, 8), ref : randomUniqeSectionID}));
+
+        await ClientSideCreateSection({email : RefineEmail(email), sectionData : newSection, token : token});
+
+        if(importCustomLinks && !importLinks) {
+            for(const link of newLinks) {
+                await ClientSideCreateLink({linkData : link, token : token});
+            }
+        }
+        else if(importLinks && !importCustomLinks) {
+            for(const link of newSection.links) {
+                await ClientSideCreateLink({linkData : link, token : token});
+            }
         }
     }
 
@@ -247,26 +276,15 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         GetSections();       
     }, [isSignedIn, isLoaded, user]);
     
-
-    useEffect(() => {
-        const FetchDexieDBCache = async () => {
-            const cachedData = await DexieGetSections();
-            setOriginalContextSections(cachedData);
-            setContextSections(cachedData);
-            setIsCacheLoaded(true);  // Mark cache as loaded
-        }
-    
-        FetchDexieDBCache();
-    }, [user, isSignedIn, isLoaded]);
-    
     useEffect(() => {
         const currentTimeoutID = setTimeout(() => {
             if (!isCacheLoaded) return; // Prevent synchronization before cache is loaded
-    
+
             // Check if contextSections is different from originalContextSections
             if (isCacheLoaded && !isEqual(contextSections, originalContextSections)) {
                 const SyncToDexieDB = async () => {
-                    await SynchronizeToDexieDB({ sections: contextSections });
+                    if(!user || !user.primaryEmailAddress) return;
+                    await SynchronizeToDexieDB({ sections: contextSections, email : user.primaryEmailAddress?.emailAddress });
                 }
         
                 SyncToDexieDB();
@@ -274,14 +292,14 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         }, 500);
 
         return () => clearTimeout(currentTimeoutID);
-    }, [contextSections, isCacheLoaded, originalContextSections]);
+    }, [contextSections, isCacheLoaded, originalContextSections, user, isSignedIn]);
 
     const Sync = async () => {
+        const token = await getToken({ template: "linkscribe-supabase" }) ?? "";
         if (isSignedIn && isLoaded && user.primaryEmailAddress)
         {
             const currentUserEmail = RefineEmail(user?.primaryEmailAddress?.emailAddress ?? "");
-            const token = await getToken({ template: "linkscribe-supabase" }) ?? "";
-            await SynchronizeToSupabase({ token, email : currentUserEmail});
+            await SynchronizeToSupabase({ token, email : currentUserEmail, onStatusCallback : setSyncStatus });
         }
     }
     
@@ -294,11 +312,14 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         SaveContextSections,
         RestoreContextSections,
         Sync,
+        TransferSection,
 
         contextSections,
         setContextSections,
         enableFilterContextSections,
-        setEnableFilterContextSections
+        setEnableFilterContextSections,
+        syncStatus,
+        setSyncStatus
     };
 
     return (

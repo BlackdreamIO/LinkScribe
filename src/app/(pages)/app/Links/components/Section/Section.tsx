@@ -52,9 +52,7 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
         >  
             <ErrorManager>
                 <SectionHeader
-                    id={id}
-                    sectionTitle={title}
-                    linkCount={links?.length || 0}
+                    section={currentSection}
                     showLinkCount={showLinkCount}
                     isMinimzied={minimize}
                     onLinkLayoutChange={(layt) => setLayout(layt)}

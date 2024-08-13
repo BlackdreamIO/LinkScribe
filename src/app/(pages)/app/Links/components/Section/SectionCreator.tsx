@@ -22,7 +22,7 @@ export const SectionCreator = () => {
     const handleCreateSection = async () => {
         setOpenCreatorDialog(false);
         if(user && user.primaryEmailAddress && sectionTitle) {
-            const uniqID = crypto.randomUUID().slice(0, 8);
+            const uniqID = crypto.randomUUID().slice(0, 12);
             await CreateSection({
                 newSection : {
                     id : uniqID, // gen 8 character long random string

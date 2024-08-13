@@ -8,15 +8,20 @@ import { Box, Divider, HStack } from "@chakra-ui/react";
 import { Input } from "@/components/ui/input";
   
 import { 
+    SectionHeaderLinkDrawer
+} from './DynamicImport';
+
+import {
     ContextMenu,
     ContextMenuTrigger,
     ContextMenuContent,
-    ContextMenuItem,
+    ContextMenuItem
+} from "@radix-ui/react-context-menu";
 
-    SectionHeaderLinkDrawer
-} from './DynamicImport';
 import { SectionHeaderOptions } from "./SectionHeaderOptions";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
+import { SectionTransferer } from "./SectionTransferer";
+import { SectionScheme } from "@/scheme/Section";
 
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
@@ -24,11 +29,9 @@ const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transiti
     data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary !outline-none`;
 
 type SectionHeaderProps = {
-    sectionTitle : string;
-    linkCount : number;
+    section : SectionScheme;
     isMinimzied : boolean;
     showLinkCount : boolean;
-    id : string;
     onContextMenu : (open : boolean) => void;
     onMinimize : () => void;
     onRename : (newName : string) => void;
@@ -39,11 +42,14 @@ type SectionHeaderProps = {
 
 export const SectionHeader = (props : SectionHeaderProps) => {
 
-    const { linkCount, isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, sectionTitle, showLinkCount, onLinkLayoutChange, id } = props;
+    const { isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, showLinkCount, onLinkLayoutChange, section } = props;
     const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState(false);
 
-    const [currentSectionTitle, setCurrentSectionTitle] = useState(sectionTitle);
+    const [currentSectionTitle, setCurrentSectionTitle] = useState(section.title);
     const [titleEditMode, setTitleEditMode] = useState(false);
+
+    const [sectionToTransfer, setSectionToTransfer] = useState<SectionScheme>(section);
+    const [openSectionTransferer, setOpenSectionTransferer] = useState(false);
 
     const parentRef = useRef<HTMLDivElement>(null);
     useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "both" });
@@ -69,7 +75,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                         onRename(currentSectionTitle);
                                     }
                                     else {
-                                        setCurrentSectionTitle(sectionTitle);
+                                        setCurrentSectionTitle(section.title);
                                     }
                                 }}
                                 onChange={(e) => setCurrentSectionTitle(e.target.value)}
@@ -80,7 +86,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                             onRename(currentSectionTitle);
                                         }
                                         else {
-                                            setCurrentSectionTitle(sectionTitle);
+                                            setCurrentSectionTitle(section.title);
                                         }
                                     }
                                 }}
@@ -89,8 +95,8 @@ export const SectionHeader = (props : SectionHeaderProps) => {
 
                         <ErrorManager>
                             <SectionHeaderOptions
-                                id={id}
-                                linkCount={linkCount}
+                                id={section.id}
+                                linkCount={section.links.length}
                                 minimized={isMinimzied}
                                 showLinkCount={showLinkCount}
                                 handleMinimzie={handleMinimzie}
@@ -98,6 +104,10 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                 onDelete={onDelete}
                                 onOpenLinkDrawer={setOpenLinkCreateDrawer}
                                 onLayoutChange={onLinkLayoutChange}
+                                onOpenSectionTransferer={() => {
+                                    setSectionToTransfer(section);
+                                    setOpenSectionTransferer(true);
+                                }}
                             />
                         </ErrorManager>
                     </HStack>
@@ -108,8 +118,15 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                     }
                 </Box>
 
+                <SectionTransferer
+                    open={openSectionTransferer}
+                    onchange={setOpenSectionTransferer}
+                    sectionToTransfer={sectionToTransfer}
+                />
+
                 <SectionHeaderLinkDrawer
                     openLinkCreateDrawer={openLinkCreateDrawer}
+                    sectionID={section.id}
                     onOpenChange={setOpenLinkCreateDrawer}
                     onCreate={onCreateLink}
                     onClose={() => setOpenLinkCreateDrawer(false)}

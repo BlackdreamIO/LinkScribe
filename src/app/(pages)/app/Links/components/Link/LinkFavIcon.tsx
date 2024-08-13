@@ -15,17 +15,16 @@ export const LinkFavIcon = ({ faviconUrl } : { faviconUrl : string }) => {
     };
 
     return (
-        <ConditionalRender render={faviconUrl.length > 0}>
-            {/* <Image
+        <ConditionalRender render={faviconUrl.length > 0 && getFaviconUrl(faviconUrl).length > 0}>
+            <Image
                 src={getFaviconUrl(faviconUrl)}
-                alt="."
+                alt="favicon"
                 width={24}
                 height={24}
                 quality={100}
                 loading="lazy"
                 className="-z-0"
-            /> */}
-            w
+            />
         </ConditionalRender>
     )
 }

@@ -8,29 +8,38 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerT
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LinkScheme } from "@/scheme/Link";
+import { useUser } from "@clerk/nextjs";
+import { RefineEmail } from "@/helpers/NormalizeEmail";
 
 type SectionHeaderLinkDrawerProps = {
-    openLinkCreateDrawer : boolean; 
+    openLinkCreateDrawer : boolean;
+    sectionID : string;
     onOpenChange : (open : boolean) => void;
     onCreate : (link : LinkScheme ) => void;
     onClose : () => void;
 }
 
-export const SectionHeaderLinkDrawer = ({ openLinkCreateDrawer, onOpenChange, onClose, onCreate } : SectionHeaderLinkDrawerProps) => {
+export const SectionHeaderLinkDrawer = ({ openLinkCreateDrawer, onOpenChange, onClose, onCreate, sectionID } : SectionHeaderLinkDrawerProps) => {
 
     const [linkTitle, setLinkTitle] = useState("");
     const [linkUrl, setLinkUrl] = useState("");
 
+    const { user } = useUser();
+
     const handleCreateLink = () => {
-        if(linkTitle.length > 3 && linkUrl.length > 5) {
-            onCreate({
-                id : crypto.randomUUID().slice(0, 4),
-                title : linkTitle,
-                url : linkUrl,
-                visitCount : 0,
-                created_at : new Date().toString()
-            });
-            onClose();
+        if(user && user.primaryEmailAddress) {
+            const uniqID = crypto.randomUUID().slice(0, 8).replaceAll("-", "");
+            if(linkTitle.length > 3 && linkUrl.length > 5) {
+                onCreate({
+                    id : uniqID,
+                    title : linkTitle,
+                    url : linkUrl,
+                    visitCount : 0,
+                    created_at : new Date().toString(),
+                    ref : sectionID
+                });
+                onClose();
+            }
         }
     }
 

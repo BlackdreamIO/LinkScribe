@@ -3,7 +3,6 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useSectionController } from './SectionControllerProviders';
-import { createLink, deleteLink, updateLink } from '@/app/actions/linkAPI';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
 import { SynchronizeToDexieDB } from '@/helpers';
@@ -49,6 +48,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                                 url: linkData.url,
                                 visitCount: linkData.visitCount,
                                 created_at: new Date().toString(),
+                                ref : linkData.ref
                             }
                         ]
                     };
@@ -110,7 +110,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                 else {
                     //const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData), window.location.origin);
                     //console.log(response);
-                    await SynchronizeToDexieDB({ sections : contextSections });
+                    await SynchronizeToDexieDB({ sections : contextSections, email : ConvertEmailString(user.primaryEmailAddress.emailAddress) });
                 }
             }
         }
@@ -143,7 +143,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
                 const currentEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
                 //await deleteLink(currentEmail, sectionID, linkId, window.location.origin);
-                //await SynchronizeToDexieDB({ sections : contextSections });
+                await SynchronizeToDexieDB({ sections : contextSections, email : currentEmail });
             }
         }
         catch (error : any) {

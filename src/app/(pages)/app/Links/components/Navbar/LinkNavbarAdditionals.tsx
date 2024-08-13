@@ -25,7 +25,7 @@ export const LinkNavbarAdditionals = () => {
 
     const { isSignedIn, isLoaded, user } = useUser();
 
-    const { contextSections } = useSectionController()!;
+    const { contextSections, syncStatus, Sync } = useSectionController()!;
     const { databaseExist } = useDBController()!;
     const [_, __, getLocalStorageSectionByKey, ___] = useLocalStorage<SectionScheme[]>('sectionsCache', []);
 
@@ -90,7 +90,7 @@ export const LinkNavbarAdditionals = () => {
                 <TooltipProvider>
                     <Tooltip delayDuration={200}>
                         <TooltipTrigger role="tab" className="!ring-0 border-2 !border-transparent focus:!border-theme-borderNavigation !outline-none">
-                            <RefreshCcwDot />
+                            <RefreshCcwDot className={syncStatus == "Syncing" ? "animate-spin" : ""} />
                         </TooltipTrigger>
                         <TooltipContent className="dark:bg-theme-bgSecondary">
                             <Text className="dark:text-white">

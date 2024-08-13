@@ -1,14 +1,16 @@
 import { DexieDB } from "@/database/dexie";
 import { SectionScheme } from "@/scheme/Section";
 import { isEqual } from "./isEqual";
+import { DexieGetSectionsByEmail } from "@/database/functions/dexie/DexieSectionByEmail";
 
 interface ISynchronizeToDexieDB {
+    email : string;
     sections : SectionScheme[];
 }
 
-export async function SynchronizeToDexieDB({ sections } : ISynchronizeToDexieDB) {
+export async function SynchronizeToDexieDB({ sections, email } : ISynchronizeToDexieDB) {
     // Get all current sections in DexieDB
-    const currentSections = await DexieDB.sections.toArray();
+    const currentSections = await DexieGetSectionsByEmail(email) ?? [];
     const currentSectionIds = new Set(currentSections.map(section => section.id));
 
     try {
