@@ -36,6 +36,7 @@ interface ISynchronizeToSupabase {
  * @param {string} options.email - user email
  * @param {string} options.token - authentication token
  * @param {(error: any) => void} [options.onSyncError] - error callback
+ * @param {(status: SyncStatus) => void} [options.onStatusCallback] - status callback
  * @return {Promise<void>}
  */
 export async function SynchronizeToSupabase({ email, token, onSyncError, onStatusCallback } : ISynchronizeToSupabase)
@@ -66,20 +67,10 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
 
         const updatedLinks : LinkScheme[] = sortedDexieSections.flatMap(section => section.links).filter((link) => {
             const supabaseLinks = sortedSupabaseSections.flatMap(section => section.links).find((s) => s.id === link.id);
-            return supabaseLinks && !isEqual({
-                id : link.id,
-                title : link.title,
-                url : link.url,
-                visitCount : link.visitCount,
-                ref : link.ref
-            },
-            {
-                id : supabaseLinks.id,
-                title : supabaseLinks.title,
-                url : supabaseLinks.url,
-                visitCount : supabaseLinks.visitCount,
-                ref : supabaseLinks.ref
-            });
+            return supabaseLinks && !isEqual(
+                {...link, created_at : new Date(link.created_at).toISOString()},
+                {...supabaseLinks, created_at : new Date(link.created_at).toISOString()}
+            );
         })
 
         // Get new, deleted, and updated sections
@@ -266,7 +257,7 @@ async function UpdateLinkToSupabase({ token, updatedLinks, onSyncError } : IUpda
         await UpdateLink({
             token: token,
             updatedLink : updatedLink,
-            onSuccess: (data) => console.log(data),
+            onSuccess: (data) => operationDone++,
             onError: (error) => onSyncError(`Error updating links in Supabase: ${error}`)
         })
     }

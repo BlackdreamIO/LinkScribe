@@ -26,7 +26,7 @@ export async function GetSections({ email, token, withLinks=true, onSuccess, onE
             return data as unknown as SectionScheme[];
         }
         else {
-            console.error("Error While Fetching Sections : [LN :: 22 >> GET_SECTIONS()] | ", error);
+            console.error("Error While Fetching Sections : [LN :: 29 >> GET_SECTIONS()] | ", error);
             onError?.(error);
             return [];
         }

@@ -26,7 +26,7 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
     const [windowSize, setWindowSize] = useState({ x : 0, y : 0 });
 
     const { isSignedIn, isLoaded } = useUser();
-    const { CreateCollection, status, databaseExist } = useDBController()!;
+    const { CreateUserDatabase, status, databaseExist } = useDBController()!;
 
     useEffect(() => {
         if (isCreating) {
@@ -56,12 +56,12 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
 
                 await sleep(10);
                 setStatusText("");
-                await CreateCollection();
+                await CreateUserDatabase();
             };
         
             updateStatus();
         }
-    }, [isCreating, CreateCollection]);
+    }, [isCreating, CreateUserDatabase]);
 
     useEffect(() => {
         if(status == DBTaskStatus.CreatedCollection) {

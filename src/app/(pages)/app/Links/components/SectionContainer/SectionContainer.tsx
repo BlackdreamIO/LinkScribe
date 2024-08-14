@@ -12,6 +12,8 @@ import ErrorManager from '../../../components/ErrorHandler/ErrorManager';
 import BarLoader from "react-spinners/BarLoader";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { useDBController } from '@/context/DBContextProvider';
+import { DBLoadComponent } from '../DBLoadComponent';
 
 const Section = dynamic(() => import('../Section/Section').then((mod) => mod.Section),
 { ssr : true, loading : () => <Skeleton className='w-full dark:bg-theme-bgFourth animate-none h-16 rounded-xl' /> });
@@ -25,6 +27,7 @@ export const SectionContainer = () => {
 
     const { isSignedIn, isLoaded } = useUser();
     const { contextSections, Sync } = useSectionController()!;
+    const { databaseExist, CreateUserDatabase, status } = useDBController();
 
     const MemoizedContentDisplay = useMemo(() => {
         return contextSections.map((section, i) => (
@@ -52,7 +55,10 @@ export const SectionContainer = () => {
             <Box className='w-full h-[93vh]'>
                 <Button variant={"default"} onClick={() => Sync()} className='w-48 py-2 border border-blue-300 m-2 dark:bg-neutral-950 dark:hover:bg-neutral-800 dark:text-white rounded-lg'>SYNC</Button>
                 <VStack className='p-4 h-full overflow-y-scroll scrollbar-dark' gap={50}>
-                    <RenderSections/>
+                    {
+                        databaseExist && <RenderSections/>
+                    }
+                    <DBLoadComponent onCreate={() => CreateUserDatabase()} />
                 </VStack>
             </Box>
         </SectionContainerContextWrapper>

@@ -8,13 +8,25 @@ interface IUpdateLink {
     onError?: (error: any) => void;
 }
 
+/**
+ * Updates a link in the Supabase database.
+ *
+ * @param {string} token - The authentication token for accessing the Supabase database.
+ * @param {Function} [onSuccess] - The callback function to be called on success.
+ * @param {Function} [onError] - The callback function to be called on error.
+ * @param {LinkScheme} updatedLink - The updated link data to be saved in the database.
+ * @return {Promise<Object[]|void>} - The updated link data on success, or an empty array on error.
+ */
 export async function UpdateLink({ token, onSuccess, onError, updatedLink }: IUpdateLink) {
     try {
-        const { data, error, status, statusText } = await CreateSupabaseServerDBClient(token).from("links")
-            .update(updatedLink)
+
+        const database = CreateSupabaseServerDBClient(token);
+
+        const { data, error, status, statusText } = await database.from("links")
+            .update({...updatedLink, created_at : new Date(updatedLink.created_at).toDateString()})
             .eq("id", updatedLink.id);
 
-        console.log(data);
+        console.log({statusText : statusText, status : status, data : data, error : error});
 
         if (!error && status == 204) {
             onSuccess?.(statusText);
@@ -22,7 +34,7 @@ export async function UpdateLink({ token, onSuccess, onError, updatedLink }: IUp
         }
         else if (error || status != 204) {
             console.error("Error While Updating Link:", error);
-            onError?.(statusText);
+            onError?.(error);
             return [];
         }
     }
