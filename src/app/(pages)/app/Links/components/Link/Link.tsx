@@ -64,9 +64,9 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
                 role="tab"
                 onKeyDown={handleEsacapeOutline}
                 className={`w-full dark:bg-theme-bgFourth flex flex-col items-center justify-center py-2 px-4 rounded-xl
-                shadow-md shadow-black transition-all duration-150 !outline-none !ring-0 pointer-events-auto
+                shadow-sm shadow-black transition-all duration-150 !outline-none !ring-0 pointer-events-auto
                 ${layout.layout == "Grid Detailed" || layout.layout == "List Detailed" ? "space-y-4" : "space-y-0"}
-                ${showContextMenuOutline ? "border-2 dark:border-indigo-300" : "border-[1px] dark:border-neutral-700 focus-visible:!outline-4 focus-visible:!outline-theme-borderNavigation"}`
+                ${showContextMenuOutline ? "border-2 !border-indigo-300" : "border-[1px] dark:border-neutral-700 focus:outline-none focus-visible:!outline-4 focus-visible:!outline-theme-borderNavigation"}`
             }>
 
                 <LinkPrimarySide

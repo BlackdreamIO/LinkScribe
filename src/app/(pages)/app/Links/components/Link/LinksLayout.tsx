@@ -34,7 +34,7 @@ export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layo
         else {
             return <Text className="text-center mb-4 text-lg max-sm:text-xxs">EMPTY</Text>;
         }
-    }, [links, id, layout]);
+    }, [links, id]);
 
     const GenerateLayoutGrid = () => {
         switch (layout.size) {

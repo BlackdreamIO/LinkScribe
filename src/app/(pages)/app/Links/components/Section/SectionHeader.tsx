@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from "react";
-import { LinkLayout, LinkScheme } from "@/scheme/Link";
+import { LinkScheme } from "@/scheme/Link";
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 
 import { Box, Divider, HStack } from "@chakra-ui/react";  
@@ -37,12 +37,12 @@ type SectionHeaderProps = {
     onRename : (newName : string) => void;
     onCreateLink : (link : LinkScheme) => void;
     onDelete : () => void;
-    onLinkLayoutChange : (layout : LinkLayout) => void;
+    onDeleteAllLinks : () => void;
 }
 
 export const SectionHeader = (props : SectionHeaderProps) => {
 
-    const { isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, showLinkCount, onLinkLayoutChange, section } = props;
+    const { isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, showLinkCount, section, onDeleteAllLinks } = props;
     const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState(false);
 
     const [currentSectionTitle, setCurrentSectionTitle] = useState(section.title);
@@ -103,11 +103,11 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                 onTitleEditMode={setTitleEditMode}
                                 onDelete={onDelete}
                                 onOpenLinkDrawer={setOpenLinkCreateDrawer}
-                                onLayoutChange={onLinkLayoutChange}
                                 onOpenSectionTransferer={() => {
                                     setSectionToTransfer(section);
                                     setOpenSectionTransferer(true);
                                 }}
+                                onDeleteAllLinks={onDeleteAllLinks}
                             />
                         </ErrorManager>
                     </HStack>

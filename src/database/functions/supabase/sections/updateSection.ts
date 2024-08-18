@@ -25,7 +25,7 @@ export async function UpdateSection({ token, onSuccess, onError, email, sectionD
         const updatedSection : any = {
             id : sectionData.id,
             title : sectionData.title,
-            linksLayout : sectionData.linksLayout,
+            links_layout : sectionData.links_layout,
             selfLayout : sectionData.selfLayout,
             section_ref : email,
             //created_at : new Date(sectionData.created_at).toISOString(),

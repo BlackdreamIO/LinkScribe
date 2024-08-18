@@ -8,6 +8,7 @@ import ReactConfetti from 'react-confetti';
 
 import { Box, Text } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button";
+import { useDB } from "@/hook/useDB";
 
 const override: CSSProperties = {
     display: "block",
@@ -16,17 +17,17 @@ const override: CSSProperties = {
     width : '100%'
 };
 
-export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
+export const DBLoadComponent = () => {
 
     const [statusText, setStatusText] = useState("GET STARTED BY CREATING NEW DB");
     const [isCreating, setIsCreating] = useState(false);
-    const [createComplete, setCreateComplete] = useState(false);
     const [hideElement, setHideElement] = useState(false);
 
     const [windowSize, setWindowSize] = useState({ x : 0, y : 0 });
 
     const { isSignedIn, isLoaded } = useUser();
-    const { CreateUserDatabase, status, databaseExist } = useDBController()!;
+    //const { CreateUserDatabase, status, databaseExist } = useDBController();
+    const { databaseExist, CreateUserDatabase } = useDB();
 
     useEffect(() => {
         if (isCreating) {
@@ -61,33 +62,14 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
         
             updateStatus();
         }
-    }, [isCreating, CreateUserDatabase]);
-
-    useEffect(() => {
-        if(status == DBTaskStatus.CreatedCollection) {
-            setCreateComplete(true);
-            onCreate();
-            setTimeout(() => {
-                setHideElement(true);
-                if(window) {
-                    window.location.reload();
-                }
-            }, 4000);
-        }
-        if(status == DBTaskStatus.FailedCreateCollection) 
-        {
-            setStatusText("Operation Failed..");
-        }
-    }, [status, isCreating, onCreate])
+    }, [isCreating]);
 
     useEffect(()=>{
-        window.addEventListener('resize', () => {
-            setWindowSize({
-                x : window.innerWidth,
-                y : window.innerHeight
-            })
-        });
-    }, [windowSize]);
+        setWindowSize({
+            x : window.innerWidth,
+            y : window.innerHeight
+        })
+    }, []);
 
     if(isSignedIn && isLoaded) {
         if(!databaseExist) 
@@ -102,17 +84,16 @@ export const DBLoadComponent = ({onCreate} : { onCreate : () => void; }) => {
                     <Button onClick={() => setIsCreating(true)} style={{ display : isCreating ? 'none' : 'flex' }} className='w-96 h-12 dark:bg-theme-bgSecondary dark:hover:bg-theme-bgFifth border-2 dark:border-neutral-800 dark:text-white font-bold rounded-xl'>
                         START
                     </Button>
-                    {
-                        createComplete && (
-                            <ReactConfetti
-                                width={windowSize.x}
-                                height={windowSize.y}
-                                tweenDuration={3000}
-                                recycle={false}
-                            />
-                        )
-                    }
                 </Box>
+            )
+        }
+        else {
+            return (
+                <ReactConfetti
+                    width={windowSize.x}
+                    height={windowSize.y}
+                    recycle={false}
+                />
             )
         }
     }

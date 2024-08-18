@@ -1,10 +1,6 @@
-import { DexieDB } from "@/database/dexie";
 import { SectionScheme } from "@/scheme/Section";
 
 import { GetSections } from "../supabase/sections/getAllSections";
-import { DeleteSection } from "../supabase/sections/deleteSection";
-import { CreateSection } from "../supabase/sections/createSections";
-import { UpdateSection } from "../supabase/sections/updateSection";
 import { DexieGetSections } from "./DexieSections";
 
 //import { isEqual } from "lodash";
@@ -53,7 +49,6 @@ export async function SynchronizeToSupabase(token: string, email: string)
             const supabaseSection = sortedSupabaseSections.find((s) => s.id === section.id);
             return supabaseSection && !isEqual({...section}, {...supabaseSection});
         })
-
         const newSections = getNewSections(sortedDexieSections, newIds);
         const deletedSections = getNewSections(sortedSupabaseSections, deletedIds);
         const updatedSections = getNewSections(updatedSectionss, updatedIds);

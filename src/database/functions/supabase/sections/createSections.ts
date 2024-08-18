@@ -29,7 +29,7 @@ export async function CreateSection({ token, onSuccess, onError, email, sectionD
             title : sectionData.title,
             //totalLinksCount : sectionData.totalLinksCount,
             //links : sectionData.links,
-            linksLayout : sectionData.linksLayout,
+            links_layout : sectionData.links_layout,
             selfLayout : sectionData.selfLayout,
             section_ref : email,
             created_at : new Date(sectionData.created_at).toISOString(),

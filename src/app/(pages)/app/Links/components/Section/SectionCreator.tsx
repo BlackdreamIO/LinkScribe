@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useSectionContext } from "@/context/SectionContextProvider";
 import { useSectionController } from "@/context/SectionControllerProviders";
 
-import { Box, Text } from "@chakra-ui/react";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Box } from "@chakra-ui/react";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
 import { useUser } from "@clerk/nextjs";
@@ -19,11 +19,11 @@ export const SectionCreator = () => {
     const { user } = useUser();
     const { openCreatorDialog, setOpenCreatorDialog } = useSectionContext()!;
 
-    const handleCreateSection = async () => {
+    const handleCreateSection = () => {
         setOpenCreatorDialog(false);
         if(user && user.primaryEmailAddress && sectionTitle) {
             const uniqID = crypto.randomUUID().slice(0, 12);
-            await CreateSection({
+            CreateSection({
                 newSection : {
                     id : uniqID, // gen 8 character long random string
                     title : sectionTitle,
@@ -31,7 +31,10 @@ export const SectionCreator = () => {
                     totalLinksCount : 0,
                     created_at : new Date().toString(),
                     _deleted : false,
-                    linksLayout : "Grid Detailed",
+                    links_layout : {
+                        layout : "List Detailed",
+                        size : 1
+                    },
                     selfLayout : "Grid",
                     section_ref : RefineEmail(user.primaryEmailAddress.emailAddress),
                 }

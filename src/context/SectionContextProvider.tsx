@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
-import useLocalStorage from '@/hook/useLocalStorage';
+import { LinkLayout } from '@/scheme/Link';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +14,9 @@ interface SectionContextData {
 
     openCreatorDialog: boolean;
     setOpenCreatorDialog: Dispatch<SetStateAction<boolean>>;
+
+    linksLayout: LinkLayout;
+    setLinksLayout: Dispatch<SetStateAction<LinkLayout>>;
 }
 
 interface SectionContextVoids {
@@ -30,13 +33,20 @@ type SectionContextProviderProps = {
 
 const SectionContext = createContext<SectionContextType | undefined>(undefined);
 
-export const useSectionContext = () => useContext(SectionContext);
+export const useSectionContext = () => useContext(SectionContext)!;
 
 export const SectionContextProvider = ({children} : SectionContextProviderProps) => {
 
     const [openCreatorDialog, setOpenCreatorDialog] = useState<boolean>(false);
     const [collapseContexts, setCollapseContexts] = useState<boolean>(false);
     const [highlightContexts, setHighlightContexts] = useState<boolean>(false);
+
+    const [linksLayout, setLinksLayout] = useState<LinkLayout>({ layout : "Grid Detailed", size : 1 });
+
+    useEffect(() => {
+        //setLinksLayout(linksLayout);
+    }, [linksLayout])
+    
     
     const openTransferDialog = (id : string) => {
         
@@ -49,6 +59,8 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
         setCollapseContexts,
         openCreatorDialog,
         setOpenCreatorDialog,
+        linksLayout,
+        setLinksLayout,
 
         openTransferDialog
     };

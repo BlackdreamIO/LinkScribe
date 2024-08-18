@@ -29,14 +29,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 
 const MenubarTriggerStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dark:hover:text-theme-textSecondary 
-data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:text-theme-textSecondary 
+data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:text-theme-textSecondary hover:bg-neutral-200
 text-sm max-sm:text-xs max-xl:text-sm rounded-lg py-2`;
 
 const MenuItemStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dark:hover:text-theme-textSecondary 
-data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary
+data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary hover:bg-neutral-900
 text-sm max-sm:text-xs max-xl:text-sm rounded-lg py-2`;
 
-const MenubarContentStyle = `dark:bg-theme-bgSecondary border-2 dark:border-neutral-800 mt-3 min-w-80 max-sm:min-w-0 p-2 space-y-3 rounded-xl`;
+const MenubarContentStyle = `dark:bg-theme-bgSecondary bg-neutral-50 border-2 dark:border-neutral-800 border-black mt-3 min-w-80 max-sm:min-w-0 p-2 space-y-3 rounded-xl`;
 
 export default function LinksNavbarSettings()
 {
@@ -93,10 +93,10 @@ export default function LinksNavbarSettings()
                                     <MenubarItem onClick={handleExportAsTxt} className={MenuItemStyle}>Txt</MenubarItem>
                                 </MenubarSubContent>
                             </MenubarSub>
-                            <MenubarSeparator/>
+                            <MenubarSeparator className="dark:bg-neutral-800 bg-neutral-400"/>
                             <MenubarItem className={MenuItemStyle}> Setting </MenubarItem>
                             <MenubarItem className={MenuItemStyle}> Keyboard Shortcut </MenubarItem>
-                            <MenubarSeparator/>
+                            <MenubarSeparator className="dark:bg-neutral-800 bg-neutral-400"/>
                             <MenubarItem className={MenuItemStyle}> Check For Update </MenubarItem>
                             <MenubarItem className={MenuItemStyle}> About </MenubarItem>
                         </MenubarContent>
@@ -106,11 +106,11 @@ export default function LinksNavbarSettings()
                         <MenubarContent className={MenubarContentStyle}>
                             <MenubarItem className={MenuItemStyle}> Zoom In + </MenubarItem>
                             <MenubarItem className={MenuItemStyle}> Zoom Out - </MenubarItem>
-                            <MenubarSeparator/>
+                            <MenubarSeparator className="dark:bg-neutral-800 bg-neutral-400"/>
                             <MenubarItem disabled className={MenubarTriggerStyle}>Search</MenubarItem>
                             <MenubarItem className={MenubarTriggerStyle} onClick={() => handleNormalReload()}>Reload</MenubarItem>
                             <MenubarItem className={MenubarTriggerStyle} onClick={() => handleForceReload()}>Force Reload {'(Fetch Again)'}</MenubarItem>
-                            <MenubarSeparator/>
+                            <MenubarSeparator className="dark:bg-neutral-800 bg-neutral-400"/>
                             <MenubarItem className={MenubarTriggerStyle} onClick={() => setFullscreen(!fullscreen)}>Toggle Fullscreen</MenubarItem>
                         </MenubarContent>
                     </MenubarMenu>
@@ -129,7 +129,7 @@ export default function LinksNavbarSettings()
                     </MenubarMenu>
                 </Menubar>
             </ConditionalRender>
-            <div className={`${menubarOpen ? 'opacity-100' : 'opacity-0  pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150`}></div>
+            <div className={`${menubarOpen ? 'dark:opacity-100 opacity-0' : 'dark:opacity-0 opacity-0 pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150`}></div>
             
             {
                 !isLoaded && (

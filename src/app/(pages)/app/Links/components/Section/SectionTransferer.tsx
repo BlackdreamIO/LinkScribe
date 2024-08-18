@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,6 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/u
 import { SectionScheme } from "@/scheme/Section";
 import { LinkScheme } from "@/scheme/Link";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
-import { CreateSection } from "@/database/functions/supabase/sections/createSections";
-import { RefineEmail } from "@/helpers/NormalizeEmail";
-import { CreateLink } from "@/database/functions/supabase/links/createLink";
 import { useSectionController } from "@/context/SectionControllerProviders";
 
 type SectionTransfererProps = {
@@ -35,44 +32,11 @@ export const SectionTransferer = ({ open, onchange, sectionToTransfer } : Sectio
     const [importLinksData, setImportLinksData] = useState(true);
 
     const { user, isSignedIn, isLoaded } = useUser();
-    const { getToken } = useAuth();
 
     const { TransferSection } = useSectionController()!;
 
 
     const handleTransfer = async () => {
-        // const token = await getToken({ template : "linkscribe-supabase" });
-
-        // if(!token || !isSignedIn) return;
-
-        // console.log(token);
-
-        // if(customLinkImportMode) {
-        //     const newSection : SectionScheme = {...sectionToTransfer, links : selectedLinks};
-        //     await CreateSection({email : RefineEmail(selectedEmail), sectionData : newSection, token : token})
-        // }
-        // else {
-        //     const randomUniqeSectionID = crypto.randomUUID().slice(0, 12);
-
-        //     const newSection : SectionScheme = {
-        //         ...sectionToTransfer,
-        //         id: randomUniqeSectionID,
-        //         section_ref : RefineEmail(selectedEmail),
-        //         links : importLinksData ? sectionToTransfer.links : []
-        //     };
-        //     const updatedSection : LinkScheme[] = newSection.links.map((link) => ({...link, id : crypto.randomUUID().slice(0, 8), ref : randomUniqeSectionID}));
-
-        //     await CreateSection({email : RefineEmail(selectedEmail), sectionData : newSection, token : token});
-
-        //     for(const link of updatedSection) {
-        //         await CreateLink({linkData : link, token : token});
-        //     }
-        //     // console.log({
-        //     //     transferSection : newSection,
-        //     //     transferLinks : updatedSection
-        //     // })
-        // }
-
         await TransferSection({
             email : selectedEmail,
             sectionToTransfer : sectionToTransfer,

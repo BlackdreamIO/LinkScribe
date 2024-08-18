@@ -23,7 +23,7 @@ export async function SynchronizeToDexieDB({ sections, email } : ISynchronizeToD
                 if (!isEqual(existingSection, section)) {
                     await DexieDB.sections.update(section.id, {
                         title: section.title,
-                        linksLayout: section.linksLayout,
+                        links_layout: section.links_layout,
                         selfLayout: section.selfLayout,
                         created_at: section.created_at,
                         totalLinksCount: section.totalLinksCount,

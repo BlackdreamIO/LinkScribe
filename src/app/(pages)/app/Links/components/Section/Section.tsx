@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SectionScheme } from "@/scheme/Section";
-import { LinkLayout } from "@/scheme/Link";
-import dynamic from 'next/dynamic';
 
 import { useSectionController } from "@/context/SectionControllerProviders";
 import { useSectionContext } from "@/context/SectionContextProvider";
@@ -20,17 +18,18 @@ import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 export const Section = ({ currentSection } : {currentSection : SectionScheme}) => {
 
-    const { id, links, title, totalLinksCount, created_at, _deleted, linksLayout, section_ref, selfLayout } = currentSection;
-
-    const [layout, setLayout] = useState<LinkLayout>({ layout : "Grid Detailed", size : 1 });
+    const { id, links } = currentSection;
 
     const [minimize, setMinimize] = useState(true);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
-    const { CreateLink } = useLinkController()!;
     const { UpdateSection, DeleteSections } = useSectionController()!;
-    const { highlightContexts, collapseContexts } = useSectionContext()!;
+    const { highlightContexts, collapseContexts, linksLayout } = useSectionContext()!;
+    const { CreateLink } = useLinkController()!;
     const { showLinkCount, sectionsDefaultOpen } = useSettingContext()!;
+
+    const prevLinksLayout = useRef(linksLayout);
+    const prevCurrentSection = useRef(currentSection);
 
     useEffect(() => {
         setMinimize(collapseContexts);
@@ -44,18 +43,38 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
         return () => clearTimeout(currentTomout);
     }, [sectionsDefaultOpen])
 
+    useEffect(() => {
+        if (prevLinksLayout.current !== linksLayout || prevCurrentSection.current !== currentSection) {
+            const currentTimeout = setTimeout(() => {
+                UpdateSection({
+                    currentSection: currentSection,
+                    updatedSection: { ...currentSection, links_layout: linksLayout }
+                });
+            }, 50);
+
+            prevLinksLayout.current = linksLayout;
+            prevCurrentSection.current = currentSection;
+
+            console.log(linksLayout)
+
+            return () => clearTimeout(currentTimeout);
+        }
+        console.log("f")
+    }, [linksLayout, currentSection]);
+    
+
     // dark:bg-theme-bgFourth
     return (
         <Box onContextMenu={(e) => e.preventDefault()}  id="section-element" className={`w-full dark:bg-theme-bgFourth bg-white border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
-            ${contextMenuOpen && !highlightContexts ? "border-indigo-300" : highlightContexts ? "border-white " : "dark:border-neutral-900 "}
-            ${highlightContexts ? "pointer-events-none" : "pointer-events-auto"}`}
+            ${contextMenuOpen && !highlightContexts ? "border-indigo-300" : highlightContexts ? "dark:border-white border-black " : "dark:border-neutral-900 "}
+            ${highlightContexts ? "pointer-events-none" : "pointer-events-auto"} dark:shadow-none shadow-sm shadow-black`}
         >  
+
             <ErrorManager>
                 <SectionHeader
                     section={currentSection}
                     showLinkCount={showLinkCount}
                     isMinimzied={minimize}
-                    onLinkLayoutChange={(layt) => setLayout(layt)}
                     onContextMenu={(v) => setContextMenuOpen(v)}
                     onMinimize={() => setMinimize(!minimize)}
                     onRename={(newTitle) => {
@@ -64,6 +83,12 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
                             updatedSection : {...currentSection, title : newTitle}
                         })}}
                     onDelete={() => DeleteSections(id)}
+                    onDeleteAllLinks={() => {
+                        UpdateSection({
+                            currentSection : currentSection,
+                            updatedSection : {...currentSection, links : []}
+                        })
+                    }}
                     onCreateLink={(link) => CreateLink({
                         sectionID : id,
                         linkData :link
@@ -73,7 +98,7 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
 
             <ConditionalRender render={!minimize}>
                 <ErrorManager>
-                    <LinksLayout id={id} links={links} layout={layout} />
+                    <LinksLayout id={id} links={links} layout={currentSection.links_layout} />
                 </ErrorManager>
             </ConditionalRender>
         </Box>

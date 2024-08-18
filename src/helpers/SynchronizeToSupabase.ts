@@ -13,6 +13,7 @@ import { DeleteLink } from "@/database/functions/supabase/links/deleteLink";
 import { UpdateLink } from "@/database/functions/supabase/links/updateLink";
 import { DexieGetSectionsByEmail } from "@/database/functions/dexie/DexieSectionByEmail";
 import { SyncStatus } from "@/types/Sync";
+import { DateToDayMonthYear } from "./DateToDayMonthYear";
 
 interface ISynchronizeToSupabase {
     token : string;
@@ -62,14 +63,47 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
 
         const updatedSectionss: SectionScheme[] = sortedDexieSections.filter((section) => {
             const supabaseSection = sortedSupabaseSections.find((s) => s.id === section.id);
-            return supabaseSection && !isEqual({...section, links : []}, {...supabaseSection, links : []});
+
+            console.log(section, supabaseSection);
+
+            return supabaseSection && !isEqual(
+                {
+                    id : section.id,
+                    title : section.title,
+                    totalLinksCount :  section.totalLinksCount,
+                    links : [],
+                    links_layout : { layout : section.links_layout.layout, size : section.links_layout.size },
+                    selfLayout : section.selfLayout,
+                    section_ref : section.section_ref,
+                },
+                {
+                    id : supabaseSection.id,
+                    title : supabaseSection.title,
+                    totalLinksCount :  supabaseSection.totalLinksCount,
+                    links : [],
+                    links_layout : { layout : supabaseSection.links_layout.layout, size : supabaseSection.links_layout.size },
+                    selfLayout : supabaseSection.selfLayout,
+                    section_ref : supabaseSection.section_ref,
+                }
+            );
         })
 
         const updatedLinks : LinkScheme[] = sortedDexieSections.flatMap(section => section.links).filter((link) => {
             const supabaseLinks = sortedSupabaseSections.flatMap(section => section.links).find((s) => s.id === link.id);
+
             return supabaseLinks && !isEqual(
-                {...link, created_at : new Date(link.created_at).toISOString()},
-                {...supabaseLinks, created_at : new Date(link.created_at).toISOString()}
+                {
+                    id : link.id,
+                    title : link.title,
+                    url : link.url,
+                    visitCount : link.visitCount,
+                },
+                {
+                    id : supabaseLinks.id,
+                    title : supabaseLinks.title,
+                    url : supabaseLinks.url,
+                    visitCount : supabaseLinks.visitCount,
+                }
             );
         })
 
@@ -93,7 +127,7 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
         await CreateSectionToSupabase({ email, sections : newSections, token, onSyncError : (e) => onSyncError?.(e) }).catch(() => hadError=true);
         await DeleteSectionToSupabase({ sections : deletedSections, token, onSyncError : (e) => onSyncError?.(e) }).catch(() => hadError=true);
         await UpdateSectionToSupabase({ sections : updatedSections, token, email, onSyncError : (e) => onSyncError?.(e) }).catch(() => hadError=true);
-    
+
         await CreateLinkToSupabase({ links : newLinks, token, email, onSyncError : (e) => onSyncError?.(e) }).catch(() => hadError=true);;
         await DeleteLinkToSupabase({ links : deletedLinks, token, onSyncError : (e) => onSyncError?.(e) }).catch(() => hadError=true);;
         await UpdateLinkToSupabase({ updatedLinks : updatedLinks, token, onSyncError : (e) => onSyncError?.(e) }).catch(() => hadError=true);;
@@ -182,8 +216,6 @@ async function UpdateSectionToSupabase({ email, token, sections, onSyncError } :
     let totalOperationCount = sections.length;
 
     if(totalOperationCount === 0) return;
-
-    console.log("Updated : ", sections);
 
     for (const section of sections) {
         await UpdateSection({

@@ -9,6 +9,16 @@ interface ICreateUser {
     onError? : (error : any) => void;
 }
 
+/**
+ * Creates a new database user with the provided user data and token.
+ *
+ * @param {ICreateUser} params - An object containing the user data, token, and callback functions.
+ * @param {string} params.token - The authentication token for the database client.
+ * @param {IDatabaseUser} params.user - The user data to be inserted into the database.
+ * @param {(data: any) => void} [params.onSuccess] - An optional callback function to be executed on successful user creation.
+ * @param {(error: any) => void} [params.onError] - An optional callback function to be executed on error.
+ * @return {Promise<void>}
+ */
 export async function CreateDatabaseUser({ user, token, onSuccess, onError} : ICreateUser)
 {
     try

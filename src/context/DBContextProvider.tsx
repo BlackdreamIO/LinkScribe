@@ -5,6 +5,7 @@ import { useAuth, useUser } from '@clerk/nextjs';
 import { GetDatabaseUser } from '@/database/functions/supabase/users/getDatabaseUser';
 import { CreateDatabaseUser } from '@/database/functions/supabase/users/createDatabaseUser';
 import { DEFAULT_APP_SETTING } from '@/lib/defaultAppSetting';
+import { RefineEmail } from '@/helpers/NormalizeEmail';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,9 @@ export interface DBContextType{
     databaseExist : boolean;
     setDatabaseExist: Dispatch<SetStateAction<boolean>>;
 
+    isLoading : boolean;
+    setIsLoading: Dispatch<SetStateAction<boolean>>;
+
     CreateUserDatabase : () => Promise<void>;
 }
 
@@ -43,24 +47,24 @@ export const DBContextProvider = ({children} : DBContextProviderProps) => {
     const [status, setStatus] = useState<DBTaskStatus>(DBTaskStatus.NoTask);
 
     const [databaseExist, setDatabaseExist] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { isSignedIn, isLoaded, user } = useUser();
     const { getToken } = useAuth();
 
     const CheckDatabaseExist = async () => {
-        setStatus(DBTaskStatus.Loading);
         const token = await getToken({ template : "linkscribe-supabase" });
         if(user && user.primaryEmailAddress && isSignedIn && token) {
+            setIsLoading(true);
             const response = await GetDatabaseUser({
-                email : user.primaryEmailAddress.emailAddress,
+                email : RefineEmail(user.primaryEmailAddress.emailAddress),
                 token : token,
                 onSuccess : (user) => setDatabaseExist(user !== undefined),
                 onError(error) {
                     setDatabaseExist(false);
                 },
             })
-            console.log(response);
-            setStatus(DBTaskStatus.Loaded);
+            setIsLoading(false);
         }
     }
 
@@ -72,12 +76,13 @@ export const DBContextProvider = ({children} : DBContextProviderProps) => {
         if(user && user.primaryEmailAddress && isSignedIn && token) {
 
             if(databaseExist) return;
-
+            setIsLoading(true);
+            setStatus(DBTaskStatus.CreatingCollection);
             await CreateDatabaseUser({
                 token : token,
                 user : {
                     created_at : new Date(),
-                    user_email : user.primaryEmailAddress.emailAddress,
+                    user_email : RefineEmail(user.primaryEmailAddress.emailAddress),
                     id : UniqeUserID,
                     settings : DEFAULT_APP_SETTING,
                     subcription : "free",
@@ -85,9 +90,14 @@ export const DBContextProvider = ({children} : DBContextProviderProps) => {
                 onSuccess(user) {
                     console.log("user db created");
                     setDatabaseExist(true);
+                    setIsLoading(false);
+                    setStatus(DBTaskStatus.CreatedCollection);
                 },
                 onError(error) {
                     console.log("user db creation failed ", error);
+                    setIsLoading(false);
+                    setDatabaseExist(false);
+                    setStatus(DBTaskStatus.FailedCreateCollection);
                 },
             })
         }
@@ -97,37 +107,14 @@ export const DBContextProvider = ({children} : DBContextProviderProps) => {
         CheckDatabaseExist();
     }, [user, isSignedIn, isLoaded]);
 
-    useEffect(() => {
-        // Function to trigger the webhook
-        const triggerWebhook = async () => {
-            try {
-                const response = await fetch(`${window.location.origin}/api/wenbhook`, {
-                    method: 'POST',
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Webhook triggered successfully:', result);
-                } else {
-                    console.error('Failed to trigger webhook:', response.statusText);
-                }
-            } catch (error) {
-                console.error('Error triggering webhook:', error);
-            }
-        };
-
-        // Trigger the webhook when the component mounts
-        triggerWebhook();
-    }, []);
-
-    
-    
 
     const contextValue: DBContextType = {
         status,
         setStatus,
         databaseExist,
         setDatabaseExist,
+        isLoading,
+        setIsLoading,
 
         CreateUserDatabase
     };

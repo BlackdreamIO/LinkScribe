@@ -9,7 +9,7 @@ export const LinkFavIcon = ({ faviconUrl } : { faviconUrl : string }) => {
             return `${domain.origin}/favicon.ico`;
         }
         catch (error) {
-            console.error('Invalid URL : Failed To Load favicon');
+            //console.error('Invalid URL : Failed To Load favicon');
             return '';
         }
     };

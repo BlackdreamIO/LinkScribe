@@ -13,7 +13,6 @@ import { CreateSection as ClientSideCreateSection } from '@/database/functions/s
 import { CreateLink as ClientSideCreateLink } from '@/database/functions/supabase/links/createLink';
 
 import { isEqual, SynchronizeToDexieDB, SynchronizeToSupabase } from '@/helpers';
-import { DexieGetSections } from '@/database/functions/dexie/DexieSections';
 import { RefineEmail } from '@/helpers/NormalizeEmail';
 import { LinkScheme } from '@/scheme/Link';
 import { DexieGetSectionsByEmail } from '@/database/functions/dexie/DexieSectionByEmail';
@@ -33,12 +32,12 @@ interface SectionContextData {
 }
 
 export interface SectionContextType extends SectionContextData {
-    CreateSection: ({ newSection } : { newSection: SectionScheme }) => Promise<void>;
-    GetSections: (revalidateFetch? : boolean) => Promise<SectionScheme[]>;
-    UpdateSection: ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => Promise<void>;
-    DeleteSections: (id: string) => Promise<any>;
+    CreateSection: ({ newSection } : { newSection: SectionScheme }) => void;
+    GetSections: (revalidateFetch? : boolean) => void;
+    UpdateSection: ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => void;
+    DeleteSections: (id: string) => any;
 
-    TransferSection: ({ email, sectionToTransfer, importCustomLinks, importLinks, links } : { email : string, importLinks : boolean, sectionToTransfer : SectionScheme, importCustomLinks : boolean, links : LinkScheme[] }) => Promise<void>;
+    TransferSection: ({ email, sectionToTransfer, importCustomLinks, importLinks, links } : { email : string, importLinks : boolean, sectionToTransfer : SectionScheme, importCustomLinks : boolean, links : LinkScheme[] }) => void;
 
     SaveContextSections: () => void;
     RestoreContextSections: () => void;
@@ -51,7 +50,7 @@ type SectionContextProviderProps = {
 
 const SectionController = createContext<SectionContextType | undefined>(undefined);
 
-export const useSectionController = () => useContext(SectionController);
+export const useSectionController = () => useContext(SectionController)!;
 
 export const SectionControllerProvider = ({children} : SectionContextProviderProps) => {
 
@@ -107,17 +106,8 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
 
             setServerOperationInterrupted(true);
             setContextSections(prev => [...prev, newSection]);
-            await SynchronizeToDexieDB({ sections : contextSections, email : currentUserEmail });
-        }
-        else {
-            toast({
-                title: "Failed Create Section Please Try Again 😁",
-                description: "INTERNAL SERVER ERROR 500",
-                action : <ToastAction altText="Ok">Ok</ToastAction>,
-                className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
-            });
-
-            ToastMessage("No Sections Found", "STORAGE SYSTEM", "Warning");
+            await SynchronizeToDexieDB({ sections : [...contextSections, newSection], email : currentUserEmail })
+                .catch(() => ToastMessage("Failed Create Section Please Try Again", "INTERNAL SERVER ERROR 500", "Error"));
         }
     }
 

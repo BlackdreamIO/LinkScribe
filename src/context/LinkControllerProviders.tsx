@@ -58,13 +58,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                         )
                     );
                 }
-                
-                //const response = await createLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData));
-                //await SynchronizeToDexieDB({ sections : contextSections });
                 SaveContextSections();
-                //console.log(response);
-                
-                //return response;
             }
         }
         catch (error : any) {
@@ -94,23 +88,35 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                             visitCount: linkData.visitCount,
                             created_at: linkData.created_at
                         };
-                
+                        
+                        if(currentLink.title == linkData.title && currentLink.url == linkData.url) {
+                            return;
+                        }
+
+                        const newUpdatedSection = contextSections.map((section) => {
+                            if(section.id === sectionID) {
+                                return {
+                                    ...section,
+                                    links: updatedLinks
+                                }
+                            }
+                            else {
+                                return section;
+                            }
+                        })
+
                         // Update the contextSections state
-                        setContextSections((prevSections) =>
-                            prevSections.map((section) =>
-                                section.id === sectionID ? { ...section, links: updatedLinks } : section
-                            )
-                        );
+                        // setContextSections((prevSections) =>
+                        //     prevSections.map((section) =>
+                        //         section.id === sectionID ? { ...section, links: updatedLinks } : section
+                        //     )
+                        // );
+
+                        setContextSections(newUpdatedSection);
+                        await SynchronizeToDexieDB({ sections : newUpdatedSection, email : ConvertEmailString(user.primaryEmailAddress.emailAddress) });
                     }
                 }
-                
-                if(currentLink.title == linkData.title && currentLink.url == linkData.url) {
-                    return;
-                }
                 else {
-                    //const response = await updateLink(ConvertEmailString(user.primaryEmailAddress.emailAddress), sectionID, JSON.stringify(linkData), window.location.origin);
-                    //console.log(response);
-                    await SynchronizeToDexieDB({ sections : contextSections, email : ConvertEmailString(user.primaryEmailAddress.emailAddress) });
                 }
             }
         }
