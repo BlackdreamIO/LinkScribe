@@ -38,16 +38,26 @@ export const SectionContainer = () => {
     const GetImage = async () => {
         const response = await fetch(`${window.location.origin}/api/takescreenshot`, {
             method : "POST",
-            mode : "no-cors",
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body : JSON.stringify({
                 url : targetWebsiteURL
             })
         });
 
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
         // Assuming the server responds with the screenshot in Base64
         const { screenshotBase64 } = await response.json();
 
-        
+        if (!screenshotBase64) {
+            throw new Error('Invalid Base64 string received');
+        }
+
 		const byteCharacters = atob(screenshotBase64);
         const byteArrays = [];
 
