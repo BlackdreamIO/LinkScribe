@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react";
-import { useSectionContext } from "@/context/SectionContextProvider";
 import { useSectionController } from "@/context/SectionControllerProviders";
 
 import { Box } from "@chakra-ui/react";
@@ -17,10 +16,10 @@ export const SectionCreator = () => {
 
     const { CreateSection } = useSectionController()!;
     const { user } = useUser();
-    const { openCreatorDialog, setOpenCreatorDialog } = useSectionContext()!;
+    //const { openCreatorDialog, setOpenCreatorDialog } = useSectionContext()!;
 
     const handleCreateSection = () => {
-        setOpenCreatorDialog(false);
+        //setOpenCreatorDialog(false);
         if(user && user.primaryEmailAddress && sectionTitle) {
             const uniqID = crypto.randomUUID().slice(0, 12);
             CreateSection({
@@ -43,7 +42,7 @@ export const SectionCreator = () => {
     }
 
     return (
-        <Dialog open={openCreatorDialog} onOpenChange={() => setOpenCreatorDialog(false)}>
+        <Dialog open={false} onOpenChange={() => {}}>
             <DialogContent className="dark:bg-theme-bgFourth rounded-xl p-4 space-y-4">
                 <Box className="w-full space-y-4">
                     <DialogTitle className="text-2xl">Enter Section Name</DialogTitle>
@@ -63,7 +62,7 @@ export const SectionCreator = () => {
                     <Button
                         variant={"ghost"}
                         className="w-56 dark:bg-theme-bgFifth dark:hover:bg-theme-bgThird border-[1px] dark:border-neutral-800 rounded-lg"
-                        onClick={() => setOpenCreatorDialog(false)}>
+                        onClick={() => {}}>
                             Close
                     </Button>
                 </DialogFooter>

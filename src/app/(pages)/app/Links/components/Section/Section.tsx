@@ -1,12 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { SectionScheme } from "@/scheme/Section";
 
-import { useSectionController } from "@/context/SectionControllerProviders";
-import { useSectionContext } from "@/context/SectionContextProvider";
-import { useLinkController } from "@/context/LinkControllerProviders";
 import { useSettingContext } from "@/context/SettingContextProvider";
+import { useSectionContext } from "@/context/SectionContextProvider";
 
 import { Box } from "@chakra-ui/react";
 
@@ -20,47 +18,15 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
 
     const { id, links } = currentSection;
 
-    const [minimize, setMinimize] = useState(true);
+    const [minimize, setMinimize] = useState(false);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
-    const { UpdateSection, DeleteSections } = useSectionController()!;
-    const { highlightContexts, collapseContexts, linksLayout } = useSectionContext()!;
-    const { CreateLink } = useLinkController()!;
-    const { showLinkCount, sectionsDefaultOpen } = useSettingContext()!;
-
-    const prevLinksLayout = useRef(linksLayout);
-    const prevCurrentSection = useRef(currentSection);
+    const { highlightContexts, setCurrentSection } = useSectionContext();
+    const { showLinkCount, sectionsDefaultOpen } = useSettingContext();
 
     useEffect(() => {
-        setMinimize(collapseContexts);
-    }, [collapseContexts])
-
-    useEffect(() => {
-        const currentTomout = setTimeout(() => {
-            //setMinimize(!sectionsDefaultOpen);
-        }, 50);
-
-        return () => clearTimeout(currentTomout);
-    }, [sectionsDefaultOpen])
-
-    useEffect(() => {
-        if (prevLinksLayout.current !== linksLayout || prevCurrentSection.current !== currentSection) {
-            const currentTimeout = setTimeout(() => {
-                UpdateSection({
-                    currentSection: currentSection,
-                    updatedSection: { ...currentSection, links_layout: linksLayout }
-                });
-            }, 50);
-
-            prevLinksLayout.current = linksLayout;
-            prevCurrentSection.current = currentSection;
-
-            console.log(linksLayout)
-
-            return () => clearTimeout(currentTimeout);
-        }
-        console.log("f")
-    }, [linksLayout, currentSection]);
+        setCurrentSection(currentSection)
+    }, [currentSection])
     
 
     // dark:bg-theme-bgFourth
@@ -77,22 +43,6 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
                     isMinimzied={minimize}
                     onContextMenu={(v) => setContextMenuOpen(v)}
                     onMinimize={() => setMinimize(!minimize)}
-                    onRename={(newTitle) => {
-                        UpdateSection({ 
-                            currentSection : currentSection,
-                            updatedSection : {...currentSection, title : newTitle}
-                        })}}
-                    onDelete={() => DeleteSections(id)}
-                    onDeleteAllLinks={() => {
-                        UpdateSection({
-                            currentSection : currentSection,
-                            updatedSection : {...currentSection, links : []}
-                        })
-                    }}
-                    onCreateLink={(link) => CreateLink({
-                        sectionID : id,
-                        linkData :link
-                    })}
                 />
             </ErrorManager>
 

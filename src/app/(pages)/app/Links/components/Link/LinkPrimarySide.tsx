@@ -13,6 +13,7 @@ import { ConditionalRender } from "@/components/ui/conditionalRender";
 import Link from "next/link";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
 import { useLinkController } from "@/context/LinkControllerProviders";
+import { Button } from "@/components/ui/button";
 
 type LinkPrimarySideProps = {
     link : LinkScheme;
@@ -56,7 +57,7 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
                 <Input
                     value={linkTitle}
                     className={`flex flex-grow text-lg max-lg:text-base max-sm:text-xs p-2 dark:border-transparent border-2 border-transparent 
-                        !ring-0 !outline-none focus-visible:!border-theme-borderNavigation disabled:opacity-100 disabled:cursor-default
+                        !ring-0 !outline-none focus-visible:!border-theme-borderNavigation disabled:opacity-100 disabled:cursor-default truncate
                         ${titleEditMode ? "selection:bg-teal-800" : "selection:bg-transparent"}
                         ${titleEditMode ? "dark:bg-neutral-800 bg-neutral-200" : "!bg-transparent "} `}
                     disabled={!titleEditMode}
@@ -84,13 +85,13 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
                 </Box>
             </ConditionalRender>
             <ConditionalRender render={(layout.layout == "Grid Compact" || layout.layout == "List Compact" || layout.layout == "Compact")}>
-                <Box className={`w-full flex flex-row items-center justify-end overflow-hidden`}>
+                <Box className={`w-6/12 flex flex-row items-center justify-end overflow-hidden`}>
                     <Link
                         target="_blank"
                         href={link.url}
                         onClick={() => console.log("Did Visit")}
                         className="text-sm text-end max-lg:text-xs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
-                            {link.url}
+                            Visit
                     </Link>
                 </Box>
             </ConditionalRender>

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { LinkLayout } from '@/scheme/Link';
+import { SectionScheme } from '@/scheme/Section';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,21 +16,38 @@ interface SectionContextData {
     openCreatorDialog: boolean;
     setOpenCreatorDialog: Dispatch<SetStateAction<boolean>>;
 
-    linksLayout: LinkLayout;
-    setLinksLayout: Dispatch<SetStateAction<LinkLayout>>;
+    openLinkCreateDrawer: boolean;
+    setOpenLinkCreateDrawer: Dispatch<SetStateAction<boolean>>;
+
+    currentSection: SectionScheme;
+    setCurrentSection: Dispatch<SetStateAction<SectionScheme>>;
+
+    sectionToTransfer: SectionScheme;
+    setSectionToTransfer: Dispatch<SetStateAction<SectionScheme>>;
+
+    openSectionTransferer: boolean;
+    setOpenSectionTransferer: Dispatch<SetStateAction<boolean>>;
 }
 
 interface SectionContextVoids {
     openTransferDialog : (id : string) => void;
 }
 
-export interface SectionContextType extends SectionContextData, SectionContextVoids {
-    
+const defaultSectionData : SectionScheme = {
+    id : "",
+    title : "",
+    totalLinksCount : 0,
+    links : [],
+    links_layout : { layout : "Grid Detailed", size : 1 },
+    selfLayout : "Grid",
+    section_ref : "",
+    created_at : "",
+    _deleted : false
 }
 
-type SectionContextProviderProps = {
-    children : ReactNode;
-}
+export interface SectionContextType extends SectionContextData, SectionContextVoids {};
+
+type SectionContextProviderProps = { children : ReactNode };
 
 const SectionContext = createContext<SectionContextType | undefined>(undefined);
 
@@ -37,9 +55,14 @@ export const useSectionContext = () => useContext(SectionContext)!;
 
 export const SectionContextProvider = ({children} : SectionContextProviderProps) => {
 
+    const [currentSection, setCurrentSection] = useState<SectionScheme>(defaultSectionData);
     const [openCreatorDialog, setOpenCreatorDialog] = useState<boolean>(false);
     const [collapseContexts, setCollapseContexts] = useState<boolean>(false);
     const [highlightContexts, setHighlightContexts] = useState<boolean>(false);
+
+    const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState<boolean>(false);
+    const [openSectionTransferer, setOpenSectionTransferer] = useState<boolean>(false);
+    const [sectionToTransfer, setSectionToTransfer] = useState<SectionScheme>(defaultSectionData);
 
     const [linksLayout, setLinksLayout] = useState<LinkLayout>({ layout : "Grid Detailed", size : 1 });
 
@@ -59,8 +82,15 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
         setCollapseContexts,
         openCreatorDialog,
         setOpenCreatorDialog,
-        linksLayout,
-        setLinksLayout,
+
+        currentSection,
+        setCurrentSection,
+        openLinkCreateDrawer,
+        setOpenLinkCreateDrawer,
+        sectionToTransfer,
+        setSectionToTransfer,
+        openSectionTransferer,
+        setOpenSectionTransferer,
 
         openTransferDialog
     };

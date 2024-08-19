@@ -20,18 +20,15 @@ import {
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { Button } from "@/components/ui/button";
 import { useSectionContext } from "@/context/SectionContextProvider";
+import { useSectionController } from "@/context/SectionControllerProviders";
+import { LinkLayout } from "@/scheme/Link";
 
 type SectionHeaderOptionsProsp = {
     minimized : boolean;
-    linkCount : number;
     showLinkCount : boolean;
-    id : string;
     onTitleEditMode : (open : boolean) => void;
     handleMinimzie : () => void;
-    onOpenLinkDrawer : (open : boolean) => void;
     onDelete : () => void;
-    onDeleteAllLinks : () => void;
-    onOpenSectionTransferer : () => void;
 }
 
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
@@ -42,7 +39,7 @@ const dropdownMenuItemStyle = `text-md max-sm:text-xxs py-2 font-normal rounded-
 
 export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
 
-    const { minimized, linkCount, onTitleEditMode, onDelete, handleMinimzie, onOpenLinkDrawer, showLinkCount, onOpenSectionTransferer, onDeleteAllLinks } = props;
+    const { minimized, onTitleEditMode, onDelete, handleMinimzie, showLinkCount } = props;
 
     const [openLinksDeleteConfirmation, setOpenLinksDeleteConfirmation] = useState(false);
 
@@ -52,14 +49,30 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
     useKeyboardNavigation({ role: 'tab', parentRef : parentEmailSelectModalRef, direction : "vertical" });
 
     const { linkLayoutDefaultSize } = useSettingContext()!;
-    const { linksLayout, setLinksLayout } = useSectionContext();
+    const { currentSection, setOpenLinkCreateDrawer, setOpenSectionTransferer } = useSectionContext();
+    const { UpdateSection } = useSectionController();
+
+    
+    const handleUpdateLinkLayout = (layout : LinkLayout) => {
+        UpdateSection({
+            currentSection: currentSection,
+            updatedSection : { ...currentSection, links_layout : layout }
+        })
+    }
+
+    const handleDeleteAllLinks = () => {
+        UpdateSection({
+            currentSection: currentSection,
+            updatedSection : { ...currentSection, links : [] }
+        })
+    }
 
     return (
         <Stack ref={parentRef} direction={"row"} role="tablist" tabIndex={1} className="z-0 space-x-2 border-2 !outline-none !border-transparent focus-visible:!border-theme-borderKeyboardParentNavigation rounded-xl">
             <ConditionalRender render={showLinkCount}>
-                <Text role="tab" className="dark:text-neutral-500 max-sm:text-sm">{linkCount}</Text>
+                <Text role="tab" className="dark:text-neutral-500 max-sm:text-sm">{currentSection.links.length}</Text>
             </ConditionalRender>
-            <Button role="tab" onClick={() => onOpenLinkDrawer(true)} className={buttonStyle}>
+            <Button role="tab" onClick={() => setOpenLinkCreateDrawer(true)} className={buttonStyle}>
                 <PlusIcon className="max-sm:w-4" />
             </Button>
             <Button role="tab" onClick={() => handleMinimzie()} className={`${buttonStyle} ${minimized ? "dark:text-white text-black" : ""}`}>
@@ -83,42 +96,34 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                     
                     <DropdownMenuItem
                         onClick={() => {
-                            //setCurrentLayout("Grid Detailed");
-                            //setCurrentLayoutSize(linkLayoutDefaultSize);
-                            setLinksLayout({ layout : "Grid Detailed", size : linkLayoutDefaultSize });
+                            handleUpdateLinkLayout({ layout : "Grid Detailed", size : linkLayoutDefaultSize });
                         }}
                         className={dropdownMenuItemStyle}>
                             Grid {"(Large)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => {
-                            //setCurrentLayout("Grid Compact");
-                            //setCurrentLayoutSize(linkLayoutDefaultSize);
-                            setLinksLayout({ layout : "Grid Compact", size : linkLayoutDefaultSize });
+                            handleUpdateLinkLayout({ layout : "Grid Compact", size : linkLayoutDefaultSize });
                         }}
                         className={dropdownMenuItemStyle}>
                             Grid {"(Compact)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => {
-                            //setCurrentLayout("List Compact");
-                            //setCurrentLayoutSize(1);
-                            setLinksLayout({ layout : "List Compact", size : 1 });
+                            handleUpdateLinkLayout({ layout : "List Compact", size : 1 });
                         }}
                         className={dropdownMenuItemStyle}>
                             List {"(Compact)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => {
-                            //setCurrentLayout("List Detailed");
-                            //setCurrentLayoutSize(1);
-                            setLinksLayout({ layout : "List Detailed", size : 1 });
+                            handleUpdateLinkLayout({ layout : "List Detailed", size : 1 });
                         }}
                         className={dropdownMenuItemStyle}>
                             List {"(Large)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                        onClick={() => setLinksLayout({ layout : "Compact", size : linkLayoutDefaultSize })}
+                        onClick={() => handleUpdateLinkLayout({ layout : "Compact", size : linkLayoutDefaultSize })}
                         className={dropdownMenuItemStyle}>
                             Compact
                     </DropdownMenuItem>
@@ -133,7 +138,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                                         key={i}
                                         className={`${dropdownMenuItemStyle} w-full flex flex-row items-center justify-center dark:bg-neutral-900 border border-neutral-700 rounded-md p-1`}
                                         tabIndex={1}
-                                        onClick={() => setLinksLayout({ ...linksLayout, size : i + 1 })}
+                                        onClick={() => handleUpdateLinkLayout({ ...currentSection.links_layout, size : i + 1 })}
                                     >
                                         {i + 1}
                                     </DropdownMenuItem>
@@ -157,18 +162,18 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                     <DropdownMenuItem onClick={() => onTitleEditMode(true)} className={dropdownMenuItemStyle}>
                         Rename Section
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onOpenLinkDrawer(true)} className={dropdownMenuItemStyle}>
+                    <DropdownMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>
                         Add New Link
                     </DropdownMenuItem>
                     <DropdownMenuItem className={dropdownMenuItemStyle}>
                         Collapse/Expand Section
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onOpenSectionTransferer()} className={dropdownMenuItemStyle}>
+                    <DropdownMenuItem onClick={() => setOpenSectionTransferer(true)} className={dropdownMenuItemStyle}>
                         Share
                     </DropdownMenuItem>
                     <DropdownMenuSeparator/>
-                    <DropdownMenuItem onClick={() => setOpenLinksDeleteConfirmation(true)} disabled={linkCount==0} className={`${dropdownMenuItemStyle} data-[highlighted]:!bg-red-500 data-[highlighted]:dark:text-white dark:hover:!bg-red-500 dark:hover:!text-white`}>
-                        Delete All Links {`(${linkCount})`}
+                    <DropdownMenuItem onClick={() => setOpenLinksDeleteConfirmation(true)} disabled={currentSection.links.length==0} className={`${dropdownMenuItemStyle} data-[highlighted]:!bg-red-500 data-[highlighted]:dark:text-white dark:hover:!bg-red-500 dark:hover:!text-white`}>
+                        Delete All Links {`(${currentSection.links.length})`}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onDelete()} className={`${dropdownMenuItemStyle} data-[highlighted]:!bg-red-500 data-[highlighted]:dark:text-white dark:hover:!bg-red-500 dark:hover:!text-white`}>
                         Delete Section
@@ -184,7 +189,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                         <Button className="my-2 rounded-lg bg-red-500 hover:bg-red-600 !ring-0 !border-none focus-visible:outline-theme-borderNavigation outline-4 outline-transparent outline-double" variant={"destructive"}
                             onClick={() => {
                                 setOpenLinksDeleteConfirmation(false);
-                                onDeleteAllLinks();
+                                handleDeleteAllLinks();
                             }}>
                             Delete
                         </Button>

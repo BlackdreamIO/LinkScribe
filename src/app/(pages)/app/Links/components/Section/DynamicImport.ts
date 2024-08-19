@@ -14,3 +14,4 @@ export const ContextMenuItem = dynamic(() => import('@radix-ui/react-context-men
 export const ContextMenuTrigger = dynamic(() => import('@radix-ui/react-context-menu').then((mod) => mod.ContextMenuTrigger), { ssr: true });
 
 export const SectionHeaderLinkDrawer = dynamic(() => import('./SectionHeaderLinkDrawer').then((mod) => mod.SectionHeaderLinkDrawer), { ssr: true });
+export const SectionTransferer = dynamic(() => import('./SectionTransferer').then((mod) => mod.SectionTransferer), { ssr: true });

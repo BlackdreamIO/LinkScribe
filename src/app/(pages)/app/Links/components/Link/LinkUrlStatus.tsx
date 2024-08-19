@@ -13,11 +13,13 @@ export const LinkUrlStatus = ( { linkUrl } : { linkUrl : string }) => {
 
     const GetURLStatus = useCallback(async () => {
         const url = linkUrl;
-        const status = await fetch(`${window.location.origin}/api/checkUrl?url=${url}`, {
-            method : "POST",
-        });
+        // const status = await fetch(`${window.location.origin}/api/checkUrl?url=${url}`, {
+        //     method : "POST",
+        // });
         
-        const statusJSON : URLStatus = await status.json();
+        setUrlStatus(URLStatus.Valid);
+        /*
+        const statusJSON : URLStatus = URLStatus.Valid;
 
         switch (statusJSON) {
             case URLStatus.Valid:
@@ -35,6 +37,7 @@ export const LinkUrlStatus = ( { linkUrl } : { linkUrl : string }) => {
             default:
                 break;
         }
+                */
     }, [linkUrl])
 
     useEffect(() => {

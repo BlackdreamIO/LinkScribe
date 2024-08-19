@@ -93,7 +93,7 @@ const initialSettings : ISettings = {
 
 const SettingContext = createContext<SettingContextType | undefined>(undefined);
 
-export const useSettingContext = () => useContext(SettingContext);
+export const useSettingContext = () => useContext(SettingContext)!;
 
 export const SettingContextProvider = ({children} : SettingContextProviderProps) => {
 

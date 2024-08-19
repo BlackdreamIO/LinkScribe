@@ -30,7 +30,6 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
         <section>
             <DBContextProvider>
                 <SectionControllerProvider> { /* CRUD OPERATIONS */ }
-                    <SectionContextProvider> { /* UI SIDE */ }
                         <LinkControllerProvider> { /* CRUD OPERATIONS */ }
                             <SettingContextProvider> { /* App Settings */ }
                                 <Flex flexDir="row" className="no-scrollbar">
@@ -42,7 +41,6 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
                                 <Toaster />
                             </SettingContextProvider>
                         </LinkControllerProvider>
-                    </SectionContextProvider>
                 </SectionControllerProvider>
             </DBContextProvider>
         </section>

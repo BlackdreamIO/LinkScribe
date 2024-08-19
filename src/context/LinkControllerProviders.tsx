@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useState, Dispatch, SetStateAction } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useSectionController } from './SectionControllerProviders';
 import { ConvertEmailString } from '@/global/convertEmailString';
@@ -13,6 +13,9 @@ interface LinkContextData {
     CreateLink : ({ sectionID, linkData } : { sectionID : string, linkData : LinkScheme }) => Promise<void>;
     UpdateLink : ({ sectionID, linkData } : { sectionID : string, currentLink : LinkScheme, linkData : LinkScheme }) => Promise<void>;
     DeleteLink : ({ sectionID, linkId } : { sectionID : string, linkId : string }) => Promise<void>;
+
+    isloading : boolean;
+    setIsLoading : Dispatch<SetStateAction<boolean>>
 }
 
 export interface LinkContextType extends LinkContextData {};
@@ -23,16 +26,18 @@ type LinkProviderProps = {
 
 const LinkController = createContext<LinkContextType | undefined>(undefined);
 
-export const useLinkController = () => useContext(LinkController);
+export const useLinkController = () => useContext(LinkController)!;
 
 export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
     const { isSignedIn, isLoaded, user } = useUser();
+    const [isloading, setIsLoading] = useState(true);
 
     const { SaveContextSections, RestoreContextSections, contextSections, setContextSections } = useSectionController()!;
    
     const CreateLink = async ({ sectionID, linkData } : { sectionID : string, linkData : LinkScheme }) => {
         try {
+            setIsLoading(true);
             if(isSignedIn && isLoaded && user.primaryEmailAddress)
             {
                 const targetSection = contextSections.find((section) => section.id === sectionID);
@@ -59,10 +64,13 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     );
                 }
                 SaveContextSections();
+                setIsLoading(false);
             }
+            setIsLoading(false);
         }
         catch (error : any) {
             RestoreContextSections();
+            setIsLoading(false);
             throw new Error(error);
         }
     }
@@ -161,7 +169,10 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
     const contextValue: LinkContextType = {
        CreateLink,
        UpdateLink,
-       DeleteLink
+       DeleteLink,
+
+       isloading,
+       setIsLoading
     };
 
     return (

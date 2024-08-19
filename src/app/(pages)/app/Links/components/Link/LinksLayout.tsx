@@ -1,8 +1,10 @@
 "use client"
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
+
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
+import { useSectionContext } from "@/context/SectionContextProvider";
 
 import { Box, Text } from "@chakra-ui/react";
 import { LinkComponent } from "./Link";
@@ -10,13 +12,12 @@ import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layout : LinkLayout, id : string }) => {
 
-
     const parentRef = useRef<HTMLDivElement>(null);
-    useKeyboardNavigation({
-        parentRef : parentRef,
-        role : "tab",
-        direction : "both"
-    })
+    //useKeyboardNavigation({
+    //    parentRef : parentRef,
+    //    role : "tab",
+    //    direction : "both"
+    //})
 
     const MemoizedContentDisplay = useMemo(() => {
         if ((links ?? []).length > 0) {
@@ -34,7 +35,7 @@ export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layo
         else {
             return <Text className="text-center mb-4 text-lg max-sm:text-xxs">EMPTY</Text>;
         }
-    }, [links, id]);
+    }, [links, id, layout]);
 
     const GenerateLayoutGrid = () => {
         switch (layout.size) {
@@ -43,13 +44,14 @@ export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layo
             case 2:
                 return "grid-cols-2 max-sm:!grid-cols-1";
             case 3:
-                return "grid-cols-3 max-lg:grid-cols-2 max-sm:!grid-cols-1"
+                return "grid-cols-3 max-lg:grid-cols-2 max-sm:!grid-cols-1";
             case 4:
-                return "grid-cols-4 max-lg:grid-cols-2 max-sm:!grid-cols-1"
+                return "grid-cols-4 max-lg:grid-cols-2 max-sm:!grid-cols-1";
             default:
                 return "grid-cols-1";
         }
     }
+    
 
     return (
         <Box

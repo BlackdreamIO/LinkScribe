@@ -1,15 +1,13 @@
 'use client'
 
 import { useRef, useState } from "react";
-import { LinkScheme } from "@/scheme/Link";
+
+import { useSectionContext } from "@/context/SectionContextProvider";
+
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 
 import { Box, Divider, HStack } from "@chakra-ui/react";  
 import { Input } from "@/components/ui/input";
-  
-import { 
-    SectionHeaderLinkDrawer
-} from './DynamicImport';
 
 import {
     ContextMenu,
@@ -19,9 +17,13 @@ import {
 } from "@radix-ui/react-context-menu";
 
 import { SectionHeaderOptions } from "./SectionHeaderOptions";
-import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
-import { SectionTransferer } from "./SectionTransferer";
 import { SectionScheme } from "@/scheme/Section";
+
+import { SectionHeaderLinkDrawer, SectionTransferer } from "./DynamicImport";
+
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
+import { useSectionController } from "@/context/SectionControllerProviders";
+import { ConditionalRender } from "@/components/ui/conditionalRender";
 
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
@@ -34,28 +36,31 @@ type SectionHeaderProps = {
     showLinkCount : boolean;
     onContextMenu : (open : boolean) => void;
     onMinimize : () => void;
-    onRename : (newName : string) => void;
-    onCreateLink : (link : LinkScheme) => void;
-    onDelete : () => void;
-    onDeleteAllLinks : () => void;
 }
 
 export const SectionHeader = (props : SectionHeaderProps) => {
 
-    const { isMinimzied, onMinimize, onRename, onDelete, onCreateLink, onContextMenu, showLinkCount, section, onDeleteAllLinks } = props;
-    const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState(false);
+    const { isMinimzied, onMinimize, onContextMenu, showLinkCount, section } = props;
 
     const [currentSectionTitle, setCurrentSectionTitle] = useState(section.title);
     const [titleEditMode, setTitleEditMode] = useState(false);
 
-    const [sectionToTransfer, setSectionToTransfer] = useState<SectionScheme>(section);
-    const [openSectionTransferer, setOpenSectionTransferer] = useState(false);
-
     const parentRef = useRef<HTMLDivElement>(null);
     useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "both" });
 
+    const { UpdateSection, DeleteSections } = useSectionController();
+    const { setOpenLinkCreateDrawer, currentSection } = useSectionContext();
+
     const handleMinimzie = () => {
         onMinimize();
+    }
+
+    const handleRename = (newTitle : string) => {
+        if(currentSectionTitle.length < 1) return;
+        UpdateSection({ 
+            currentSection : currentSection,
+            updatedSection : {...currentSection, title : newTitle}
+        })
     }
 
     return (
@@ -72,7 +77,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                 onBlur={() => {
                                     setTitleEditMode(false);
                                     if(currentSectionTitle.length > 3) {
-                                        onRename(currentSectionTitle);
+                                        handleRename(currentSectionTitle);
                                     }
                                     else {
                                         setCurrentSectionTitle(section.title);
@@ -83,7 +88,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                     if(e.key == "Enter") {
                                         setTitleEditMode(false);
                                         if(currentSectionTitle.length > 3) {
-                                            onRename(currentSectionTitle);
+                                            handleRename(currentSectionTitle);
                                         }
                                         else {
                                             setCurrentSectionTitle(section.title);
@@ -95,42 +100,21 @@ export const SectionHeader = (props : SectionHeaderProps) => {
 
                         <ErrorManager>
                             <SectionHeaderOptions
-                                id={section.id}
-                                linkCount={section.links.length}
                                 minimized={isMinimzied}
                                 showLinkCount={showLinkCount}
                                 handleMinimzie={handleMinimzie}
                                 onTitleEditMode={setTitleEditMode}
-                                onDelete={onDelete}
-                                onOpenLinkDrawer={setOpenLinkCreateDrawer}
-                                onOpenSectionTransferer={() => {
-                                    setSectionToTransfer(section);
-                                    setOpenSectionTransferer(true);
-                                }}
-                                onDeleteAllLinks={onDeleteAllLinks}
+                                onDelete={() => DeleteSections(currentSection.id)}
                             />
                         </ErrorManager>
                     </HStack>
-                    {
-                        !isMinimzied && (
-                            <Divider className='dark:bg-neutral-700 w-full h-[1px]' />
-                        )
-                    }
+                    <ConditionalRender render={!isMinimzied}>
+                        <Divider className='dark:bg-neutral-700 w-full h-[1px]' />
+                    </ConditionalRender>
                 </Box>
-
-                <SectionTransferer
-                    open={openSectionTransferer}
-                    onchange={setOpenSectionTransferer}
-                    sectionToTransfer={sectionToTransfer}
-                />
-
-                <SectionHeaderLinkDrawer
-                    openLinkCreateDrawer={openLinkCreateDrawer}
-                    sectionID={section.id}
-                    onOpenChange={setOpenLinkCreateDrawer}
-                    onCreate={onCreateLink}
-                    onClose={() => setOpenLinkCreateDrawer(false)}
-                />
+                
+                <SectionTransferer/>
+                <SectionHeaderLinkDrawer/>
                 
             </ContextMenuTrigger>
             <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth bg-neutral-50 dark:shadow-black border dark:border-neutral-700 z-20">
@@ -138,7 +122,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                 <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>Add Link</ContextMenuItem>
                 <ContextMenuItem className={dropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>
                 <ContextMenuItem 
-                    onClick={() => onDelete()} 
+                    onClick={() => DeleteSections(currentSection.id)} 
                     className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
                         Delete
                 </ContextMenuItem>

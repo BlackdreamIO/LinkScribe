@@ -27,14 +27,14 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
 
     const { children } = props;
     
-    const { 
-        highlightContexts,
-        setHighlightContexts,
-        openCreatorDialog,
-        setOpenCreatorDialog,
-        collapseContexts,
-        setCollapseContexts 
-    } = useSectionContext()!;
+    // const { 
+    //     highlightContexts,
+    //     setHighlightContexts,
+    //     openCreatorDialog,
+    //     setOpenCreatorDialog,
+    //     collapseContexts,
+    //     setCollapseContexts 
+    // } = useSectionContext()!;
     const {
         contextSections,
         DeleteSections
@@ -49,14 +49,14 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         mode :"Multi Key",
         key : ["Control","a"],
         enable : keyboardShortcutStatus == "Full Controll",
-        callback : () => setHighlightContexts(!highlightContexts)
+        callback : () => {}
     })
     // Mac
     useKeyPress({
         mode :"Multi Key",
         key : ["Meta","a"],
         enable : keyboardShortcutStatus == "Full Controll",
-        callback : () => setHighlightContexts(!highlightContexts)
+        callback : () => {}
     })
 
     useKeyPress({
@@ -64,9 +64,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         key : "Escape",
         enable : keyboardShortcutStatus != "Disabled",
         callback() {
-            if(highlightContexts) {
-                setHighlightContexts(false);
-            }
+            
         },
     })
 
@@ -77,7 +75,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         preventDefault : false,
         preventElementFocus : false,
         enable : keyboardShortcutStatus == "Full Controll",
-        callback: () => setOpenCreatorDialog(!openCreatorDialog)
+        callback: () => {}
     })
 
     // Mac
@@ -87,7 +85,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         preventDefault : true,
         enable : keyboardShortcutStatus == "Full Controll",
         callback() {
-            setOpenCreatorDialog(true);
+            {}
         },
     })
 
@@ -98,18 +96,18 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         preventElementFocus : false,
         enable : keyboardShortcutStatus == "Full Controll",
         callback: () => {
-            if(highlightContexts) {
-                setCollapseContexts(!collapseContexts);
-            }
+            // if(highlightContexts) {
+            //     setCollapseContexts(!collapseContexts);
+            // }
         }
     })
 
     useOutsideClick({
         ref : contextMenuRef,
         handler(e) {
-            if(highlightContexts) {
-                setHighlightContexts(false);
-            }
+            // if(highlightContexts) {
+            //     setHighlightContexts(false);
+            // }
         },
     })
 
@@ -134,7 +132,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                 {children}
             </ContextMenuTrigger>
             <ContextMenuContent sticky="partial" className="w-80 space-y-2 rounded-md p-2 dark:bg-theme-bgFourth/30 !backdrop-blur-xl !backdrop-filter dark:shadow-black border dark:border-neutral-700">
-                <ContextMenuItem onClick={() => setOpenCreatorDialog(true)} className={dropdownMenuItemStyle}>
+                <ContextMenuItem onClick={() => {}} className={dropdownMenuItemStyle}>
                     New Section <Labelkey label="CTRL + SHIFT + C"/>
                 </ContextMenuItem>
                 <ContextMenuItem className={dropdownMenuItemStyle}>
@@ -144,11 +142,11 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                     Sort By <Labelkey label=""/>
                 </ContextMenuItem>
                 <Separator/>
-                <ContextMenuItem onClick={() => setHighlightContexts(!highlightContexts)} className={dropdownMenuItemStyle}>
-                    {!highlightContexts ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="ESC"/></>}
+                <ContextMenuItem onClick={() => {}} className={dropdownMenuItemStyle}>
+                    {!true ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="ESC"/></>}
                 </ContextMenuItem>
-                <ContextMenuItem disabled={!highlightContexts} onClick={() => setCollapseContexts(!collapseContexts)} className={dropdownMenuItemStyle}>
-                    {collapseContexts ? "Expand All" : "Collapse All"} <Labelkey label="CTRL + M"/>
+                <ContextMenuItem disabled={!true} onClick={() => {}} className={dropdownMenuItemStyle}>
+                    {true ? "Expand All" : "Collapse All"} <Labelkey label="CTRL + M"/>
                 </ContextMenuItem>
                 <ContextMenuSub>
                     <ContextMenuSubTrigger className={dropdownMenuItemStyle}>
@@ -160,7 +158,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                     </ContextMenuSubContent>
                 </ContextMenuSub>
                 <Separator/>
-                <ContextMenuItem onClick={() => handleDelete()} disabled={!highlightContexts} className={dropdownMenuItemStyle}>
+                <ContextMenuItem onClick={() => handleDelete()} disabled={!true} className={dropdownMenuItemStyle}>
                     Delete <Labelkey label="CTRL + DEL"/>
                 </ContextMenuItem>
             </ContextMenuContent>

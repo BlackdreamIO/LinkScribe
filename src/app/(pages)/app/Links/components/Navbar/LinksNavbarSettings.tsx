@@ -45,7 +45,7 @@ export default function LinksNavbarSettings()
     const [_, setTheme] = useTheme();
     const [fullscreen, setFullscreen] = useFullscreenToggle();
     const { GetSections, contextSections } = useSectionController()!;
-    const { setOpenCreatorDialog } = useSectionContext()!;
+    //const { setOpenCreatorDialog } = useSectionContext()!;
     const { isLoaded, isSignedIn } = useUser();
 
     const handleMenubarOpen = (value : string) => setMenubarOpen(value != '');
@@ -80,10 +80,10 @@ export default function LinksNavbarSettings()
                     <MenubarMenu>
                         <MenubarTrigger role="tab" className={MenubarTriggerStyle}>File</MenubarTrigger>
                         <MenubarContent className={MenubarContentStyle}>
-                            <MenubarItem className={MenuItemStyle} onClick={() => setOpenCreatorDialog(true)}>
+                            <MenubarItem className={MenuItemStyle} onClick={() => {}}>
                                 New Section
                             </MenubarItem>
-                            <MenubarItem className={MenuItemStyle} onClick={() => setOpenCreatorDialog(true)}>
+                            <MenubarItem className={MenuItemStyle} onClick={() => {}}>
                                 Save
                             </MenubarItem>
                             <MenubarSub>
