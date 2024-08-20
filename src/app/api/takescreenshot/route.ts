@@ -30,7 +30,7 @@ export async function POST (req: NextRequest, res : NextResponse) {
 
 		await browser.close();
 
-        return NextResponse.json({ screenshotBase64 : screenshotBase64, status: 200 });
+        return NextResponse.json({ screenshotBase64, status: 200 });
     }
     catch (error) {
         return NextResponse.json({ error : 'Internal Server Error', status: 500 });

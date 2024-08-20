@@ -54,6 +54,9 @@ export const SectionContainer = () => {
         // Assuming the server responds with the screenshot in Base64
         const { screenshotBase64 } = await response.json();
 
+        console.log('Generated Base64 length:', screenshotBase64?.length);
+        console.log('Generated Base64:', screenshotBase64.slice(0, 100));
+
         if (!screenshotBase64) {
             throw new Error('Invalid Base64 string received');
         }
