@@ -64,8 +64,6 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
         const updatedSectionss: SectionScheme[] = sortedDexieSections.filter((section) => {
             const supabaseSection = sortedSupabaseSections.find((s) => s.id === section.id);
 
-            console.log(section, supabaseSection);
-
             return supabaseSection && !isEqual(
                 {
                     id : section.id,
@@ -97,12 +95,14 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
                     title : link.title,
                     url : link.url,
                     visitCount : link.visitCount,
+                    image : link.image,
                 },
                 {
                     id : supabaseLinks.id,
                     title : supabaseLinks.title,
                     url : supabaseLinks.url,
                     visitCount : supabaseLinks.visitCount,
+                    image : supabaseLinks.image,
                 }
             );
         })
@@ -257,6 +257,7 @@ async function CreateLinkToSupabase({ email, token, links, onSyncError } : ICrea
         url: link.url,
         ref: link.ref,
         created_at: new Date(link.created_at).toISOString(),
+        image: link.image
     }));
 
     await CreateLink({

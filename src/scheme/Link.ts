@@ -6,6 +6,7 @@ export interface LinkScheme {
     visitCount : number;
     created_at : string;
     ref : string;
+    image : string;
 }
 
 export type LinkLayout = {

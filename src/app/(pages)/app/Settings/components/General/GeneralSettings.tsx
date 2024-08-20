@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 import { useSettingContext } from "@/context/SettingContextProvider";
 import { AutoSyncTimeType, DefaultExportType, KeyboardShortcutStatusType, LinkLayoutType } from '@/types/SettingTypes';
-import { ROUTES, DEFAULT_EXPORT_MODE, KEYBAORD_SHORTCUT_MODE, SYNC_INTERVAL, GRID_SIZES } from "@/lib/appSetting";
+import { ROUTES, DEFAULT_EXPORT_MODE, KEYBAORD_SHORTCUT_MODE, SYNC_INTERVAL, GRID_SIZES } from "@/utils/appSetting";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";

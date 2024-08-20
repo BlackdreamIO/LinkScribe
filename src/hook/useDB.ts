@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { GetDatabaseUser } from '@/database/functions/supabase/users/getDatabaseUser';
 import { CreateDatabaseUser } from '@/database/functions/supabase/users/createDatabaseUser';
-import { DEFAULT_APP_SETTING } from '@/lib/defaultAppSetting';
+import { DEFAULT_APP_SETTING } from '@/utils/defaultAppSetting';
 import { RefineEmail } from '@/helpers/NormalizeEmail';
 
 export enum DBTaskStatus {

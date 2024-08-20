@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+import path from 'path';
 const nextConfig = {
     async headers() {
         return [
@@ -12,6 +13,9 @@ const nextConfig = {
                 ],
               },
         ];
+    },
+    serverActions: {
+      serverActionsBodySizeLimit : '4mb' // Set desired value here
     },
     images: {
       remotePatterns: [

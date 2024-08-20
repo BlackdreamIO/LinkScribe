@@ -53,7 +53,8 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                                 url: linkData.url,
                                 visitCount: linkData.visitCount,
                                 created_at: new Date().toString(),
-                                ref : linkData.ref
+                                ref : linkData.ref,
+                                image : linkData.image
                             }
                         ]
                     };
@@ -94,10 +95,12 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                             title: linkData.title,
                             url: linkData.url,
                             visitCount: linkData.visitCount,
-                            created_at: linkData.created_at
+                            created_at: linkData.created_at,
+                            ref : linkData.ref,
+                            image : linkData.image
                         };
                         
-                        if(currentLink.title == linkData.title && currentLink.url == linkData.url) {
+                        if(currentLink == linkData) {
                             return;
                         }
 

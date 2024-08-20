@@ -43,6 +43,7 @@ export async function CreateLink({ token, onSuccess, onError, linkData, useBulkI
             url : linkData.url,
             ref : linkData.ref,
             created_at : new Date(linkData.created_at).toISOString(),
+            image : linkData.image
         }
 
         const { data, error, status, statusText } = await CreateSupabaseServerDBClient(token).from("links").insert(dataToInsert);

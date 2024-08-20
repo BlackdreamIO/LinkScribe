@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DBLoadComponent } from '../DBLoadComponent';
 import { SectionContextProvider } from '@/context/SectionContextProvider';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { UploadImageToCloudinary } from '@/app/actions/cloudnary/uploadImage';
 
 const Section = dynamic(() => import('../Section/Section').then((mod) => mod.Section),
 { ssr : true, loading : () => <Skeleton className='w-full dark:bg-theme-bgFourth animate-none h-16 rounded-xl' /> });
@@ -30,59 +30,6 @@ export const SectionContainer = () => {
     const { isSignedIn, isLoaded } = useUser();
     const { contextSections } = useSectionController();
     const { databaseExist, isLoading } = useDBController();
-    
-    const [targetWebsiteURL, setTargetWebsiteURL] = useState("");
-
-    const [imageURL, setImageURL] = useState("");
-
-    const GetImage = async () => {
-        const response = await fetch(`${window.location.origin}/api/takescreenshot`, {
-            method : "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body : JSON.stringify({
-                url : targetWebsiteURL
-            })
-        });
-
-        
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        // Assuming the server responds with the screenshot in Base64
-        const { screenshotBase64 } = await response.json();
-
-        console.log('Generated Base64 length:', screenshotBase64?.length);
-        console.log('Generated Base64:', screenshotBase64.slice(0, 100));
-
-        if (!screenshotBase64) {
-            throw new Error('Invalid Base64 string received');
-        }
-
-		const byteCharacters = atob(screenshotBase64);
-        const byteArrays = [];
-
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-          const slice = byteCharacters.slice(offset, offset + 512);
-
-          const byteNumbers = new Array(slice.length);
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-
-        const blob = new Blob(byteArrays, { type: 'image/png' });
-        const imageUrl = URL.createObjectURL(blob);
-
-        setImageURL(imageUrl);
-
-    }
-    
 
     const MemoizedContentDisplay = useMemo(() => {
         return contextSections.map((section, i) => (
@@ -110,16 +57,7 @@ export const SectionContainer = () => {
     return (
         <SectionContainerContextWrapper>
             <Box className='w-full h-[93vh]'>
-
-                <Input onChange={(e) => setTargetWebsiteURL(e.target.value)} />
-                <Button onClick={GetImage}>TAKE SCREENSHOT</Button>
-            
-                {
-                    imageURL.length > 0 && (
-                        <img src={imageURL} alt="not found" />
-                    )
-                }
-
+                <Button onClick={() => UploadImageToCloudinary()}>UPLOADD</Button>
                 <VStack className='p-4 h-full overflow-y-scroll scrollbar-dark' gap={50}>
                     {
                         !databaseExist ? <DBLoadComponent/> : <RenderSections/>

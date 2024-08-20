@@ -36,7 +36,8 @@ export const SectionHeaderLinkDrawer = () => {
                         url : linkUrl,
                         visitCount : 0,
                         created_at : new Date().toString(),
-                        ref : currentSection.id
+                        ref : currentSection.id,
+                        image : ""
                     }
                 });
                 setOpenLinkCreateDrawer(false);
