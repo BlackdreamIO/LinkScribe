@@ -45,7 +45,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
         UpdateLink({
             currentLink : link,
             sectionID : sectionID,
-            linkData : {
+            updatedLink : {
                 ...link,
                 url : linkUrl,
             }
@@ -56,7 +56,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
         UpdateLink({
             currentLink : link,
             sectionID : sectionID,
-            linkData : {
+            updatedLink : {
                 ...link,
                 visitCount : link.visitCount ++
             }

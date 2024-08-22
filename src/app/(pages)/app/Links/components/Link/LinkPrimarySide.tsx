@@ -39,14 +39,7 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
         UpdateLink({
             currentLink : link,
             sectionID : sectionID,
-            linkData : {
-                id : link.id,
-                title : linkTitle,
-                url : link.url,
-                visitCount : link.visitCount,
-                created_at : link.created_at,
-                ref : sectionID
-            }
+            updatedLink : { ...link, title : linkTitle, }
         })
     }
 

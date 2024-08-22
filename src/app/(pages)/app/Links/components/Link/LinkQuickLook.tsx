@@ -1,8 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useLinkController } from "@/context/LinkControllerProviders";
+
 import { LinkScheme } from "@/scheme/Link";
 import Image from "next/image";
+
+import { GetCloudinaryImage } from "@/app/actions/cloudnary/getImage";
+import { UploadImageToCloudinary } from "@/app/actions/cloudnary/uploadImage";
+
+import { RefineEmail } from "@/helpers/NormalizeEmail";
+import { FileToBase64 } from "@/helpers/FileToBase64";
 
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Box, HStack, Text } from "@chakra-ui/react";
@@ -15,14 +24,7 @@ import { ConditionalRender } from "@/components/ui/conditionalRender";
 
 import blankImage from "../../../../../../../public/images/blankImage.webp";
 import { Label } from "@/components/ui/label";
-
-import { useLinkController } from "@/context/LinkControllerProviders";
-import { GetCloudinaryImage } from "@/app/actions/cloudnary/getImage";
-import { UploadImageToCloudinary } from "@/app/actions/cloudnary/uploadImage";
-import { useUser } from "@clerk/nextjs";
-import { RefineEmail } from "@/helpers/NormalizeEmail";
-import { WhatTheFuck } from "@/app/actions/cloudnary/whatthefuck";
-import { useCloudinary } from "@/hook/useCloudinary";
+import { useSectionController } from "@/context/SectionControllerProviders";
 
 type LinkQuickLookProps = {
     link : LinkScheme;
@@ -42,8 +44,8 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     const [uploadedFile, setUploadedFile] = useState<File | undefined>(undefined);
     
     const { user, isSignedIn } = useUser();
+    const { Sync } = useSectionController();
     const { UpdateLink } = useLinkController();
-    //const { GetImageURL, UploadImageToCloudinary } = useCloudinary();
 
     useEffect(() => {
         if(uploadedFile !== undefined) {
@@ -52,61 +54,50 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
         }
 
     }, [uploadedFile]);
+
+    useEffect(() => {
+        if(linkPreviewImage == "") {
+            GetLinkPreviewImageByID();
+        }
+    }, [linkPreviewImage, open])
     
-    function FileToBase64(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
-            // Check if window is defined (browser environment)
-            if (typeof window !== 'undefined')
-            { 
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-    
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = (error) => reject(error);
-            }
-            else {
-                reject(new Error('FileReader is not supported in this environment'));
-            }
-        });
+    const GetLinkPreviewImageByID = async () => {
+
+        console.log("Getting Link Preview Image...");
+
+        const result = await GetCloudinaryImage({ publicID : link.id });
+        //setLinkPreviewImage(result.imageURL ?? "");
+        console.log(result)
     }
 
-    const handleClick = async() => {
-        if(user && isSignedIn && user.primaryEmailAddress) {
-            if(uploadedFile !== undefined) {
-
+    const handleSave = async() => {
+        if(user && isSignedIn && user.primaryEmailAddress)
+        {
+            if(uploadedFile !== undefined)
+            {
                 const convertedBase64 = await FileToBase64(uploadedFile);
+                const { imageURL, error } = await UploadImageToCloudinary({
+                    file : convertedBase64,
+                    filename : link.id,
+                    folder : RefineEmail(user.primaryEmailAddress.emailAddress)
+                });
 
-                const formData = new FormData();
-                formData.append('base64', convertedBase64);
-                formData.append('fileName', link.id);
-                formData.append('folder', RefineEmail(user.primaryEmailAddress.emailAddress));
+                if(error) {
+                    console.error(error);
+                    return;
+                }
 
-                try {
-                    // const { publicID, imageURL, error } = await UploadImageToCloudinary(formData);
-    
-                    const { publicID, imageURL, error } = await UploadImageToCloudinary({
-                        file : convertedBase64,
-                        filename : link.id,
-                        folder : RefineEmail(user.primaryEmailAddress.emailAddress)
-                    });
-
-                    if(error) {
-                        console.error(error);
-                        return;
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : imageURL,
                     }
+                })
 
-                    UpdateLink({
-                        currentLink : link,
-                        sectionID : link.ref,
-                        linkData : {
-                            ...link,
-                            image : imageURL,
-                        }
-                    })  
-                }
-                catch (error) {
-                    console.log(error);
-                }
+                Sync();
+                
             }
             else {
                 // code to enter the site
@@ -170,7 +161,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                 </ConditionalRender>
 
                 <DialogFooter className="w-full flex flex-row items-center justify-end gap-4">
-                    <Button onClick={() => handleClick()} variant={"ghost"} className={ButtonStyle}>
+                    <Button onClick={() => handleSave()} variant={"ghost"} className={ButtonStyle}>
                         {uploadedFile !== undefined ? "Save" : "Visit"}
                     </Button>
                     <Button variant={"ghost"} className={ButtonStyle}> Close </Button>

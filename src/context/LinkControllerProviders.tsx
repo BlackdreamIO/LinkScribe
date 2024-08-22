@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 interface LinkContextData {
     CreateLink : ({ sectionID, linkData } : { sectionID : string, linkData : LinkScheme }) => Promise<void>;
-    UpdateLink : ({ sectionID, linkData } : { sectionID : string, currentLink : LinkScheme, linkData : LinkScheme }) => Promise<void>;
+    UpdateLink : ({ sectionID, updatedLink } : { sectionID : string, currentLink : LinkScheme, updatedLink : LinkScheme }) => void;
     DeleteLink : ({ sectionID, linkId } : { sectionID : string, linkId : string }) => Promise<void>;
 
     isloading : boolean;
@@ -76,7 +76,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
     }
 
-    const UpdateLink = async ({ sectionID, currentLink, linkData } : { sectionID : string, currentLink : LinkScheme, linkData : LinkScheme }) => {
+    const UpdateLink = async ({ sectionID, currentLink, updatedLink } : { sectionID : string, currentLink : LinkScheme, updatedLink : LinkScheme }) => {
         try 
         {
             if(isSignedIn && isLoaded && user.primaryEmailAddress)
@@ -92,15 +92,15 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                         const updatedLinks = [...targetSection.links];
                         updatedLinks[linkIndex] = {
                             ...updatedLinks[linkIndex],
-                            title: linkData.title,
-                            url: linkData.url,
-                            visitCount: linkData.visitCount,
-                            created_at: linkData.created_at,
-                            ref : linkData.ref,
-                            image : linkData.image
+                            title: updatedLink.title,
+                            url: updatedLink.url,
+                            visitCount: updatedLink.visitCount,
+                            created_at: updatedLink.created_at,
+                            ref : updatedLink.ref,
+                            image : updatedLink.image
                         };
                         
-                        if(currentLink == linkData) {
+                        if(currentLink == updatedLink) {
                             return;
                         }
 
@@ -115,13 +115,6 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                                 return section;
                             }
                         })
-
-                        // Update the contextSections state
-                        // setContextSections((prevSections) =>
-                        //     prevSections.map((section) =>
-                        //         section.id === sectionID ? { ...section, links: updatedLinks } : section
-                        //     )
-                        // );
 
                         setContextSections(newUpdatedSection);
                         await SynchronizeToDexieDB({ sections : newUpdatedSection, email : ConvertEmailString(user.primaryEmailAddress.emailAddress) });
@@ -159,7 +152,6 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
 
                 const currentEmail = ConvertEmailString(user.primaryEmailAddress.emailAddress);
-                //await deleteLink(currentEmail, sectionID, linkId, window.location.origin);
                 await SynchronizeToDexieDB({ sections : contextSections, email : currentEmail });
             }
         }

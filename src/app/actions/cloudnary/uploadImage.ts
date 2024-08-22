@@ -16,13 +16,14 @@ interface IUploadImageToCloudinaryOuput {
 }
 
 
+/**
+ * Uploads an image to Cloudinary.
+ *
+ * @param {IUploadImageToCloudinary} options - An object containing the file, filename, and folder to upload.
+ * @return {Promise<IUploadImageToCloudinaryOuput>} A promise resolving to an object with the public ID, image URL, and error (if any) of the uploaded image.
+ */
 export async function UploadImageToCloudinary({ file, filename, folder } : IUploadImageToCloudinary)  : Promise<IUploadImageToCloudinaryOuput>
 {
-
-    
-    //const file = formData.get("base64") as string;
-    //const filename = formData.get("fileName") as string;
-    //const folder = formData.get("folder") as string;
 
     if(file === null || filename === null || folder === null) {
         return {
@@ -37,16 +38,14 @@ export async function UploadImageToCloudinary({ file, filename, folder } : IUplo
         unique_filename: true,
         overwrite: true,
         folder: folder,
+        public_id: filename
     };
 
     try
     {
-
-        console.log(file);
-
         const result = await Cloudinary.uploader.upload(file, options);
         const cldImage = Cloudinary.image(result.public_id);
-//
+
         const urlMatch = cldImage.match(/src='([^']+)'/);
         const imageURL = urlMatch ? urlMatch[1] : '';
 
