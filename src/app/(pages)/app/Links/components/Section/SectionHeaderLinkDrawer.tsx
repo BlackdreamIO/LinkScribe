@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { v4 as uuidv4 } from 'uuid';
 
 import { useLinkController } from "@/context/LinkControllerProviders";
 import { useSectionContext } from "@/context/SectionContextProvider";
@@ -26,12 +27,11 @@ export const SectionHeaderLinkDrawer = () => {
 
     const handleCreateLink = async () => {
         if(user && user.primaryEmailAddress) {
-            const uniqID = crypto.randomUUID().slice(0, 8).replaceAll("-", "");
             if(linkTitle.length > 3 && linkUrl.length > 5) {
                 await CreateLink({
                     sectionID : currentSection.id,
                     linkData : {
-                        id : uniqID,
+                        id : uuidv4().slice(0, 16),
                         title : linkTitle,
                         url : linkUrl,
                         visitCount : 0,

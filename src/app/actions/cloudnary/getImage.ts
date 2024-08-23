@@ -14,6 +14,12 @@ interface IGetCloudinaryImageOutput {
     error : any | null;
 }
 
+/**
+ * Retrieves an image from Cloudinary based on the provided public ID and user email.
+ *
+ * @param {IGetCloudinaryImage} args - An object containing the public ID and user email.
+ * @return {Promise<IGetCloudinaryImageOutput>} A promise resolving to an object containing the image URL, error message, and error status.
+ */
 export async function GetCloudinaryImage(args : IGetCloudinaryImage) : Promise<IGetCloudinaryImageOutput>
 {
     if(args.publicID.length < 1 || args.userEmail.length < 1)

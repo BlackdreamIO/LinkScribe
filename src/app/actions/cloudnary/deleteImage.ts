@@ -15,11 +15,11 @@ export async function DeleteCloudinaryImage({ publicID } : IDeleteCloudinaryImag
 {
     try
     {
-        const result = await Cloudinary.uploader.destroy(publicID, { invalidate: true });
+        const result = await Cloudinary.uploader.destroy(publicID, { resource_type : "image", invalidate: true });
 
         return {
-            sucess : result.public_id,
-            error : null
+            sucess : result.result == "ok",
+            error : result.result
         }
     }
     catch (error)

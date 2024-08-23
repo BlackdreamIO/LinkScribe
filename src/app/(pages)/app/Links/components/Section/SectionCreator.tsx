@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { useSectionController } from "@/context/SectionControllerProviders";
+import { v5 as uuidv5 } from "uuid";
 
 import { Box } from "@chakra-ui/react";
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
-import { useUser } from "@clerk/nextjs";
 import { RefineEmail } from "@/helpers/NormalizeEmail";
 
 export const SectionCreator = () => {
@@ -21,10 +22,9 @@ export const SectionCreator = () => {
     const handleCreateSection = () => {
         //setOpenCreatorDialog(false);
         if(user && user.primaryEmailAddress && sectionTitle) {
-            const uniqID = crypto.randomUUID().slice(0, 12);
             CreateSection({
                 newSection : {
-                    id : uniqID, // gen 8 character long random string
+                    id : uuidv5.URL.slice(0, 16), // gen 16 character long random string
                     title : sectionTitle,
                     links : [],
                     totalLinksCount : 0,

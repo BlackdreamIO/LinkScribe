@@ -10,6 +10,7 @@ import { FileToBase64 } from '@/helpers/FileToBase64';
 import { UploadImageToCloudinary } from '@/app/actions/cloudnary/uploadImage';
 import { RefineEmail } from '@/helpers/NormalizeEmail';
 import { useSendToastMessage } from '@/hook/useSendToastMessage';
+import { DeleteCloudinaryImage } from '@/app/actions/cloudnary/deleteImage';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,7 @@ interface IAddPreviewImage {
     link : LinkScheme;
     onSucess? : () => void;
     onError? : () => void;
+    onCallback? : ({loading} : { loading : boolean }) => void;
 }
 
 interface LinkContextData {
@@ -28,7 +30,7 @@ interface LinkContextData {
     UpdateLink : ({ sectionID, updatedLink } : { sectionID : string, currentLink : LinkScheme, updatedLink : LinkScheme }) => void;
     DeleteLink : ({ sectionID, linkId } : { sectionID : string, linkId : string }) => void;
 
-    AddPreviewImage : ({ file, url, useFileMethod, link, autoSyncAfterUpload, onSucess, onError } : IAddPreviewImage) => void;
+    AddPreviewImage : ({ file, url, useFileMethod, link, autoSyncAfterUpload, onSucess, onError, onCallback } : IAddPreviewImage) => void;
 
     isloading : boolean;
     setIsLoading : Dispatch<SetStateAction<boolean>>
@@ -178,19 +180,19 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
     }
 
-    const AddPreviewImage = async ({ file, url, useFileMethod, autoSyncAfterUpload, link, onSucess, onError } : IAddPreviewImage) => {
+    const AddPreviewImage = async ({ file, url, useFileMethod, autoSyncAfterUpload, link, onSucess, onError, onCallback } : IAddPreviewImage) => {
         if(user && isSignedIn && user.primaryEmailAddress)
         {
             if(file !== undefined)
             {
-                setIsLoading(true);
+                onCallback?.({ loading : true });
                 const convertedBase64 = await FileToBase64(file);
                 const { imageURL, error } = await UploadImageToCloudinary({
                     file : convertedBase64,
                     filename : link.id,
                     folder : RefineEmail(user.primaryEmailAddress.emailAddress)
                 });
-                setIsLoading(false);
+                onCallback?.({ loading : false });
 
                 if(error) {
                     console.error(error);
@@ -213,7 +215,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
             }
             else if(!useFileMethod && url && url.length > 5)
             {
-                setIsLoading(true);
+                onCallback?.({ loading : true });
 
                 // Convert the fetched image to blob
                 const imageBlob = await fetch(url).then(res => res.blob());
@@ -225,7 +227,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     folder : RefineEmail(user.primaryEmailAddress.emailAddress)
                 });
 
-                setIsLoading(false);
+                onCallback?.({ loading : false });
 
                 if(error) {
                     console.error(error);
@@ -250,6 +252,14 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                 ToastMessage({ message : "Please Provide A File Or URL", type : "Warning" });
                 onSucess?.();
             }
+        }
+    }
+
+    const DeletePreviewImage = async ({ link } : { link : LinkScheme }) => {
+        if(user && isSignedIn && user.primaryEmailAddress) {
+            if(link.image !== "") {
+                const { sucess, error } = await DeleteCloudinaryImage({ publicID : `${RefineEmail(user.primaryEmailAddress.emailAddress)}/${link.id}` });
+            }   
         }
     }
 

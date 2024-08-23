@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useSectionController } from "@/context/SectionControllerProviders";
 import { useLinkController } from "@/context/LinkControllerProviders";
 import { useSendToastMessage } from "@/hook/useSendToastMessage";
 
@@ -10,10 +9,6 @@ import { LinkScheme } from "@/scheme/Link";
 import Image from "next/image";
 
 import { GetCloudinaryImage } from "@/app/actions/cloudnary/getImage";
-import { UploadImageToCloudinary } from "@/app/actions/cloudnary/uploadImage";
-
-import { RefineEmail } from "@/helpers/NormalizeEmail";
-import { FileToBase64 } from "@/helpers/FileToBase64";
 
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Box, HStack, Text, VStack } from "@chakra-ui/react";
@@ -27,6 +22,8 @@ import { ConditionalRender } from "@/components/ui/conditionalRender";
 import blankImage from "../../../../../../../public/images/blankImage.webp";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
+import { DeleteCloudinaryImage } from "@/app/actions/cloudnary/deleteImage";
+import { RefineEmail } from "@/helpers/NormalizeEmail";
 
 
 type LinkQuickLookProps = {
@@ -50,7 +47,6 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     const [isImageUrlValid, setIsImageUrlValid] = useState<boolean>(false);
     
     const { user, isSignedIn } = useUser();
-    const { Sync } = useSectionController();
     const { UpdateLink, AddPreviewImage } = useLinkController();
     const { ToastMessage } = useSendToastMessage();
 
@@ -62,158 +58,67 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     }, [uploadedFile]);
 
     useEffect(() => {
-        if(!open || linkPreviewImage.length > 2) return;
-        GetLinkPreviewImageByID();
+        if(!open) {
+            if(linkPreviewImage !== link.image) {
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : linkPreviewImage,
+                    }
+                })
+            }
+        }
+        if(open) {
+            GetLinkPreviewImageByID();
+        }
     }, [open])
     
     const GetLinkPreviewImageByID = async () => {
 
         if(!link || !user) return;
 
-        if(linkPreviewImage.length < 2)
-        {
-            const { imageURL, hasError } = await GetCloudinaryImage({ publicID : link.id, userEmail : user?.primaryEmailAddress?.emailAddress ?? "" });
+        if(link.image !== "") return setLinkPreviewImage(link.image);
 
-            const hasImage = imageURL.length > 5;
+        else {
+            const { imageURL, hasError, error } = await GetCloudinaryImage({ publicID : link.id, userEmail : user?.primaryEmailAddress?.emailAddress ?? "" });
 
-            if(!hasError && hasImage)
-            {
+            if(!hasError && imageURL) {
                 setLinkPreviewImage(imageURL);
-                UpdateLink({
-                    currentLink : link,
-                    sectionID : link.ref,
-                    updatedLink : {
-                        ...link,
-                        image : imageURL,
-                    }
-                })
-                ToastMessage({ message : "Fetched. Link Preview Image", type : "Status" });
             }
-            else if(!hasError && !hasImage)
-            {
-                const imageBlob = await fetch(blankImage.src).then(res => res.blob());
-                const convertedBase64 = await FileToBase64(imageBlob);
-                setLinkPreviewImage(convertedBase64);
+        }
+    }
 
-                UpdateLink({
-                    currentLink : link,
-                    sectionID : link.ref,
-                    updatedLink : {
-                        ...link,
-                        image : convertedBase64,
-                    }
-                })
-            }
-            else {
-                const imageBlob = await fetch(blankImage.src).then(res => res.blob());
-                const convertedBase64 = await FileToBase64(imageBlob);
-                setLinkPreviewImage(convertedBase64);
-
-                UpdateLink({
-                    currentLink : link,
-                    sectionID : link.ref,
-                    updatedLink : {
-                        ...link,
-                        image : convertedBase64,
-                    }
-                })
-            }
+    const handleDelete = async () => {
+        const { sucess, error } = await DeleteCloudinaryImage({ publicID : `${RefineEmail(user?.primaryEmailAddress?.emailAddress ?? "")}/${link.id}` })
+        if(sucess) {
+            UpdateLink({
+                currentLink : link,
+                sectionID : link.ref,
+                updatedLink : {
+                    ...link,
+                    image : "",
+                }
+            })
+            setLinkPreviewImage("");
+            ToastMessage({ message : "Link Preview Image Deleted Successfully", type : "Success" });
         }
         else {
-            //ToastMessage("You need to sign in to perform this action", undefined, "Status")
-            //onClose(true);
+            ToastMessage({ message : "Something went wrong", description : error, type : "Error" });
         }
     }
 
-    /*
-    const handleSave = async() => {
-        if(user && isSignedIn && user.primaryEmailAddress)
-        {
-            if(uploadedFile !== undefined)
-            {
-                setIsLoading(true);
-                const convertedBase64 = await FileToBase64(uploadedFile);
-                const { imageURL, error } = await UploadImageToCloudinary({
-                    file : convertedBase64,
-                    filename : link.id,
-                    folder : RefineEmail(user.primaryEmailAddress.emailAddress)
-                });
-                setIsLoading(false);
-
-                if(error) {
-                    console.error(error);
-                    return;
-                }
-
-                UpdateLink({
-                    currentLink : link,
-                    sectionID : link.ref,
-                    updatedLink : {
-                        ...link,
-                        image : imageURL,
-                    }
-                })
-
-                Sync();
-                ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
-                
-                onClose(true);
-            }
-            else if(uploadedImageURL.length > 5) {
-                setIsLoading(true);
-                const imageBlob = await fetch(uploadedImageURL).then(res => res.blob());
-                const convertedBase64 = await FileToBase64(imageBlob);
-
-                const { imageURL, error } = await UploadImageToCloudinary({
-                    file : convertedBase64,
-                    filename : link.id,
-                    folder : RefineEmail(user.primaryEmailAddress.emailAddress)
-                });
-
-                setIsLoading(false);
-
-                if(error) {
-                    console.error(error);
-                    return;
-                }
-
-                UpdateLink({
-                    currentLink : link,
-                    sectionID : link.ref,
-                    updatedLink : {
-                        ...link,
-                        image : imageURL,
-                    }
-                })
-
-                Sync();
-                ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
-                
-                onClose(true);
-            }
-            else {
-                // code to enter the site
-                console.log("uploadedFile not found");
-                ToastMessage({ message : "File Not found", type : "Warning" });
-                onClose(true);
-            }
-        }
-    }
-    */
-
-    const handleSave = async() => {
+    const handleSave = () => {
         AddPreviewImage({
             file : uploadedFile,
             url : uploadedImageURL,
             useFileMethod : uploadedImageURL.length < 5,
-            autoSyncAfterUpload : true,
+            autoSyncAfterUpload : false,
             link : link,
-            onSucess() {
-                onClose(true);
-            },
-            onError() {
-                onClose(true);
-            },
+            onSucess: () => onClose(true),
+            onCallback: ({ loading }) => setIsLoading(loading),
+            onError: () => onClose(false),
         })
     }
 
@@ -237,7 +142,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     
 
     return (
-        <Dialog open={open} onOpenChange={() => {}} modal={true}>
+        <Dialog open={open} onOpenChange={() => onClose(false)} modal={true}>
             <DialogContent className="dark:bg-theme-bgSecondary rounded-xl max-h-[90%] space-y-4 overflow-y-scroll no-scrollbar" onContextMenu={(e) => e.preventDefault()}>
                 <HStack justifyContent={"space-between"}>
                     <DialogTitle className="text-2xl text-center">{link.title}</DialogTitle>
@@ -313,7 +218,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                     <Button disabled={isLoading || uploadedImageURL.length > 5 && !isImageUrlValid} onClick={() => handleSave()} variant={"ghost"} className={ButtonStyle}>
                         {isLoading ? "Processing..."  : uploadedFile !== undefined || uploadedImageURL.length > 5 ? "Save" : "Visit"}
                     </Button>
-                    <Button variant={"ghost"} className={ButtonStyle} onClick={() => onClose(true)}> Close </Button>
+                    <Button variant={"ghost"} className={ButtonStyle} onClick={() => handleDelete()}> Close </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
