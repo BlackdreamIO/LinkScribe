@@ -6,13 +6,29 @@ import { useSectionController } from './SectionControllerProviders';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
 import { SynchronizeToDexieDB } from '@/helpers';
+import { FileToBase64 } from '@/helpers/FileToBase64';
+import { UploadImageToCloudinary } from '@/app/actions/cloudnary/uploadImage';
+import { RefineEmail } from '@/helpers/NormalizeEmail';
+import { useSendToastMessage } from '@/hook/useSendToastMessage';
 
 export const dynamic = 'force-dynamic';
+
+interface IAddPreviewImage {
+    file : File | undefined;
+    url? : string;
+    useFileMethod? : boolean;
+    autoSyncAfterUpload? : boolean;
+    link : LinkScheme;
+    onSucess? : () => void;
+    onError? : () => void;
+}
 
 interface LinkContextData {
     CreateLink : ({ sectionID, linkData } : { sectionID : string, linkData : LinkScheme }) => Promise<void>;
     UpdateLink : ({ sectionID, updatedLink } : { sectionID : string, currentLink : LinkScheme, updatedLink : LinkScheme }) => void;
-    DeleteLink : ({ sectionID, linkId } : { sectionID : string, linkId : string }) => Promise<void>;
+    DeleteLink : ({ sectionID, linkId } : { sectionID : string, linkId : string }) => void;
+
+    AddPreviewImage : ({ file, url, useFileMethod, link, autoSyncAfterUpload, onSucess, onError } : IAddPreviewImage) => void;
 
     isloading : boolean;
     setIsLoading : Dispatch<SetStateAction<boolean>>
@@ -33,7 +49,8 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
     const { isSignedIn, isLoaded, user } = useUser();
     const [isloading, setIsLoading] = useState(true);
 
-    const { SaveContextSections, RestoreContextSections, contextSections, setContextSections } = useSectionController()!;
+    const { SaveContextSections, RestoreContextSections, contextSections, setContextSections, Sync } = useSectionController()!;
+    const { ToastMessage } = useSendToastMessage();
    
     const CreateLink = async ({ sectionID, linkData } : { sectionID : string, linkData : LinkScheme }) => {
         try {
@@ -161,10 +178,87 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
     }
 
+    const AddPreviewImage = async ({ file, url, useFileMethod, autoSyncAfterUpload, link, onSucess, onError } : IAddPreviewImage) => {
+        if(user && isSignedIn && user.primaryEmailAddress)
+        {
+            if(file !== undefined)
+            {
+                setIsLoading(true);
+                const convertedBase64 = await FileToBase64(file);
+                const { imageURL, error } = await UploadImageToCloudinary({
+                    file : convertedBase64,
+                    filename : link.id,
+                    folder : RefineEmail(user.primaryEmailAddress.emailAddress)
+                });
+                setIsLoading(false);
+
+                if(error) {
+                    console.error(error);
+                    onError?.();
+                    return;
+                }
+
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : imageURL,
+                    }
+                })
+
+                autoSyncAfterUpload && Sync();
+                ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
+                onSucess?.();
+            }
+            else if(!useFileMethod && url && url.length > 5)
+            {
+                setIsLoading(true);
+
+                // Convert the fetched image to blob
+                const imageBlob = await fetch(url).then(res => res.blob());
+                const convertedBase64 = await FileToBase64(imageBlob);
+
+                const { imageURL, error } = await UploadImageToCloudinary({
+                    file : convertedBase64,
+                    filename : link.id,
+                    folder : RefineEmail(user.primaryEmailAddress.emailAddress)
+                });
+
+                setIsLoading(false);
+
+                if(error) {
+                    console.error(error);
+                    onError?.();
+                    return;
+                }
+
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : imageURL,
+                    }
+                })
+
+                autoSyncAfterUpload && Sync();
+                ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
+                onSucess?.();
+            }
+            else {
+                ToastMessage({ message : "Please Provide A File Or URL", type : "Warning" });
+                onSucess?.();
+            }
+        }
+    }
+
     const contextValue: LinkContextType = {
        CreateLink,
        UpdateLink,
        DeleteLink,
+
+       AddPreviewImage,
 
        isloading,
        setIsLoading

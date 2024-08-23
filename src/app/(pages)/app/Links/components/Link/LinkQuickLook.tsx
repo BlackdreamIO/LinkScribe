@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useSectionController } from "@/context/SectionControllerProviders";
 import { useLinkController } from "@/context/LinkControllerProviders";
+import { useSendToastMessage } from "@/hook/useSendToastMessage";
 
 import { LinkScheme } from "@/scheme/Link";
 import Image from "next/image";
@@ -14,7 +16,7 @@ import { RefineEmail } from "@/helpers/NormalizeEmail";
 import { FileToBase64 } from "@/helpers/FileToBase64";
 
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button";
 
 import { Settings } from "lucide-react";
@@ -24,7 +26,8 @@ import { ConditionalRender } from "@/components/ui/conditionalRender";
 
 import blankImage from "../../../../../../../public/images/blankImage.webp";
 import { Label } from "@/components/ui/label";
-import { useSectionController } from "@/context/SectionControllerProviders";
+import { Switch } from "@/components/ui/switch"
+
 
 type LinkQuickLookProps = {
     link : LinkScheme;
@@ -40,47 +43,102 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
 
     const [openSettings, setOpenSettings] = useState(false);
     const [linkPreviewImage, setLinkPreviewImage] = useState(link.image);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [uploadedFile, setUploadedFile] = useState<File | undefined>(undefined);
+    const [uploadedImageURL, setUploadedImageURL] = useState<string>("");
+    const [isImageUrlValid, setIsImageUrlValid] = useState<boolean>(false);
     
     const { user, isSignedIn } = useUser();
     const { Sync } = useSectionController();
-    const { UpdateLink } = useLinkController();
+    const { UpdateLink, AddPreviewImage } = useLinkController();
+    const { ToastMessage } = useSendToastMessage();
 
     useEffect(() => {
         if(uploadedFile !== undefined) {
             setLinkPreviewImage(URL.createObjectURL(uploadedFile));
             setOpenSettings(false);
         }
-
     }, [uploadedFile]);
 
     useEffect(() => {
-        if(linkPreviewImage == "") {
-            GetLinkPreviewImageByID();
-        }
-    }, [linkPreviewImage, open])
+        if(!open || linkPreviewImage.length > 2) return;
+        GetLinkPreviewImageByID();
+    }, [open])
     
     const GetLinkPreviewImageByID = async () => {
 
-        console.log("Getting Link Preview Image...");
+        if(!link || !user) return;
 
-        const result = await GetCloudinaryImage({ publicID : link.id });
-        //setLinkPreviewImage(result.imageURL ?? "");
-        console.log(result)
+        if(linkPreviewImage.length < 2)
+        {
+            const { imageURL, hasError } = await GetCloudinaryImage({ publicID : link.id, userEmail : user?.primaryEmailAddress?.emailAddress ?? "" });
+
+            const hasImage = imageURL.length > 5;
+
+            if(!hasError && hasImage)
+            {
+                setLinkPreviewImage(imageURL);
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : imageURL,
+                    }
+                })
+                ToastMessage({ message : "Fetched. Link Preview Image", type : "Status" });
+            }
+            else if(!hasError && !hasImage)
+            {
+                const imageBlob = await fetch(blankImage.src).then(res => res.blob());
+                const convertedBase64 = await FileToBase64(imageBlob);
+                setLinkPreviewImage(convertedBase64);
+
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : convertedBase64,
+                    }
+                })
+            }
+            else {
+                const imageBlob = await fetch(blankImage.src).then(res => res.blob());
+                const convertedBase64 = await FileToBase64(imageBlob);
+                setLinkPreviewImage(convertedBase64);
+
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : convertedBase64,
+                    }
+                })
+            }
+        }
+        else {
+            //ToastMessage("You need to sign in to perform this action", undefined, "Status")
+            //onClose(true);
+        }
     }
 
+    /*
     const handleSave = async() => {
         if(user && isSignedIn && user.primaryEmailAddress)
         {
             if(uploadedFile !== undefined)
             {
+                setIsLoading(true);
                 const convertedBase64 = await FileToBase64(uploadedFile);
                 const { imageURL, error } = await UploadImageToCloudinary({
                     file : convertedBase64,
                     filename : link.id,
                     folder : RefineEmail(user.primaryEmailAddress.emailAddress)
                 });
+                setIsLoading(false);
 
                 if(error) {
                     console.error(error);
@@ -97,18 +155,89 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                 })
 
                 Sync();
+                ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
                 
+                onClose(true);
+            }
+            else if(uploadedImageURL.length > 5) {
+                setIsLoading(true);
+                const imageBlob = await fetch(uploadedImageURL).then(res => res.blob());
+                const convertedBase64 = await FileToBase64(imageBlob);
+
+                const { imageURL, error } = await UploadImageToCloudinary({
+                    file : convertedBase64,
+                    filename : link.id,
+                    folder : RefineEmail(user.primaryEmailAddress.emailAddress)
+                });
+
+                setIsLoading(false);
+
+                if(error) {
+                    console.error(error);
+                    return;
+                }
+
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : imageURL,
+                    }
+                })
+
+                Sync();
+                ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
+                
+                onClose(true);
             }
             else {
                 // code to enter the site
                 console.log("uploadedFile not found");
+                ToastMessage({ message : "File Not found", type : "Warning" });
+                onClose(true);
             }
         }
     }
+    */
+
+    const handleSave = async() => {
+        AddPreviewImage({
+            file : uploadedFile,
+            url : uploadedImageURL,
+            useFileMethod : uploadedImageURL.length < 5,
+            autoSyncAfterUpload : true,
+            link : link,
+            onSucess() {
+                onClose(true);
+            },
+            onError() {
+                onClose(true);
+            },
+        })
+    }
+
+    async function checkImage(url : string)
+    {
+        try {
+            const res = await fetch(url);
+            const buff = await res.blob();
+            
+            const isImage = buff.type.startsWith('image/');
+            setIsImageUrlValid(isImage);
+        }
+        catch (error) {
+            setIsImageUrlValid(false);
+        }
+    }
+
+    useEffect(() => {
+        checkImage(uploadedImageURL);
+    }, [uploadedImageURL])
     
 
     return (
-        <Dialog open={open} onOpenChange={onClose} modal={true}>
+        <Dialog open={open} onOpenChange={() => {}} modal={true}>
             <DialogContent className="dark:bg-theme-bgSecondary rounded-xl max-h-[90%] space-y-4 overflow-y-scroll no-scrollbar" onContextMenu={(e) => e.preventDefault()}>
                 <HStack justifyContent={"space-between"}>
                     <DialogTitle className="text-2xl text-center">{link.title}</DialogTitle>
@@ -117,7 +246,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                     </Button>
                 </HStack>
                 <ConditionalRender render={!openSettings}>
-                    <Box className="w-full flex flex-row items-center justify-center space-y-4">
+                    <Box className="w-full flex flex-col items-center justify-center space-y-4">
                         <Image
                             src={linkPreviewImage.length > 2 ? linkPreviewImage : blankImage.src}
                             alt="image not found"
@@ -134,37 +263,57 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                 </ConditionalRender>
 
                 <ConditionalRender render={openSettings}>
-                    <Box className="w-full flex flex-row items-center justify-center space-y-4">
-                        <Box className="flex items-center justify-center w-full">
-                            <Label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-theme-primaryAccent/10 dark:bg-theme-bgSecondary hover:bg-gray-100 dark:border-theme-primaryAccent/50 dark:hover:border-gray-500">
-                                <Box className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                                    </svg>
-                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                        <span className="font-semibold">Click to upload </span> 
-                                        or drag and drop
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
-                                </Box>
-                                <Input
-                                    id="dropzone-file"
-                                    type="file"
-                                    className="hidden" 
-                                    accept="image/*"
-                                    multiple={false}
-                                    onChange={e => setUploadedFile(e.target.files![0])}
-                                />
-                            </Label>
-                        </Box> 
+                    <Box className="w-full flex flex-col items-center justify-center space-y-4">
+                        <ConditionalRender render={uploadedImageURL.length < 5}>
+                            <Box className="flex items-center justify-center w-full">
+                                <Label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-theme-primaryAccent/10 dark:bg-theme-bgSecondary hover:bg-gray-100 dark:border-theme-primaryAccent/50 dark:hover:border-gray-500">
+                                    <Box className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                        </svg>
+                                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                            <span className="font-semibold">Click to upload </span> 
+                                            or drag and drop
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                                    </Box>
+                                    <Input
+                                        id="dropzone-file"
+                                        type="file"
+                                        className="hidden" 
+                                        accept="image/*"
+                                        multiple={false}
+                                        onChange={e => setUploadedFile(e.target.files![0])}
+                                    />
+                                </Label>
+                            </Box>
+                        </ConditionalRender>
+
+                        <Input
+                            className={`w-full h-12 border !ring-0 !outline-none 
+                                ${uploadedImageURL.length > 5 ? isImageUrlValid ? "border-theme-primaryAccent" : "border-red-500" : ""} rounded-lg`}
+                            placeholder="Or past the url here"
+                            onChange={(e) => setUploadedImageURL(e.target.value)} 
+                        />
+
+                        <VStack className="w-full space-y-4 p-4 rounded-lg border bg-theme-primaryAccent/5">
+                            <Box className="w-full flex flex-row items-center justify-between">
+                                <Text> Optimize Image For Less Bandwith </Text>
+                                <Switch />
+                            </Box>
+                            <Box className="w-full flex flex-row items-center justify-between">
+                                <Text> Cache Image For Faster Load {"(Reccomended)"} </Text>
+                                <Switch />
+                            </Box>
+                        </VStack>
                     </Box>
                 </ConditionalRender>
 
                 <DialogFooter className="w-full flex flex-row items-center justify-end gap-4">
-                    <Button onClick={() => handleSave()} variant={"ghost"} className={ButtonStyle}>
-                        {uploadedFile !== undefined ? "Save" : "Visit"}
+                    <Button disabled={isLoading || uploadedImageURL.length > 5 && !isImageUrlValid} onClick={() => handleSave()} variant={"ghost"} className={ButtonStyle}>
+                        {isLoading ? "Processing..."  : uploadedFile !== undefined || uploadedImageURL.length > 5 ? "Save" : "Visit"}
                     </Button>
-                    <Button variant={"ghost"} className={ButtonStyle}> Close </Button>
+                    <Button variant={"ghost"} className={ButtonStyle} onClick={() => onClose(true)}> Close </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

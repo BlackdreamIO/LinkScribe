@@ -1,7 +1,6 @@
 "use client"
 
 import dynamic from 'next/dynamic';
-
 import { Box} from '@chakra-ui/react';
 
 const LinksNavbar = dynamic(() => import('./components/Navbar/LinksNavbar'));
@@ -12,9 +11,9 @@ export default function LinkPage()
 {
     return (
         <Box onContextMenu={(e) => e.preventDefault()} className="w-full h-screen overflow-scroll no-scrollbar dark:bg-black bg-neutral-100">
-          <LinksNavbar />
-          <SectionContainer/>
-          <SectionCreator />
+            <LinksNavbar />
+            <SectionContainer/>
+            <SectionCreator />
         </Box>
     );
 }

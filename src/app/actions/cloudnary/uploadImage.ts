@@ -44,7 +44,7 @@ export async function UploadImageToCloudinary({ file, filename, folder } : IUplo
     try
     {
         const result = await Cloudinary.uploader.upload(file, options);
-        const cldImage = Cloudinary.image(result.public_id);
+        const cldImage = Cloudinary.image(result.public_id, { fetch_format : "webp", width : 500, quality : "auto", crop : "scale" });
 
         const urlMatch = cldImage.match(/src='([^']+)'/);
         const imageURL = urlMatch ? urlMatch[1] : '';

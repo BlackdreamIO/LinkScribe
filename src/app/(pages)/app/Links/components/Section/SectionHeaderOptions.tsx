@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { useSectionContext } from "@/context/SectionContextProvider";
 import { useSectionController } from "@/context/SectionControllerProviders";
 import { LinkLayout } from "@/scheme/Link";
+import { useSendToastMessage } from "@/hook/useSendToastMessage";
 
 type SectionHeaderOptionsProsp = {
     minimized : boolean;
@@ -52,6 +53,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
     const { currentSection, setOpenLinkCreateDrawer, setOpenSectionTransferer } = useSectionContext();
     const { UpdateSection } = useSectionController();
 
+    const { ToastMessage } = useSendToastMessage();
     
     const handleUpdateLinkLayout = (layout : LinkLayout) => {
         UpdateSection({
@@ -65,6 +67,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
             currentSection: currentSection,
             updatedSection : { ...currentSection, links : [] }
         })
+        ToastMessage({ message : "All links deleted", type : "Success" })
     }
 
     return (

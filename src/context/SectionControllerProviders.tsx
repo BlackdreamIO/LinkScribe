@@ -3,10 +3,9 @@
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { SectionScheme } from '@/scheme/Section';
-import useLocalStorage from '@/hook/useLocalStorage';
 
-import { useToast } from "@/components/ui/use-toast";
-import { ToastAction } from '@/components/ui/toast';
+import useLocalStorage from '@/hook/useLocalStorage';
+import { useSendToastMessage } from '@/hook/useSendToastMessage';
 
 import { GetSections as ClientSideGetSections } from '@/database/functions/supabase/sections/getAllSections';
 import { CreateSection as ClientSideCreateSection } from '@/database/functions/supabase/sections/createSections';
@@ -67,31 +66,8 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
 
     const { isSignedIn, isLoaded, user } = useUser();
     const { getToken } = useAuth();
-    const { toast } = useToast();
 
-    const ToastMessage = (message : string, descirption? : string, type : "Status" | "Error" | "Warning" = "Status") => {
-        let className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary";
-        switch (type) {
-            case "Status":
-                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary";
-                break;
-            case "Error":
-                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-red-500"
-                break;
-            case "Error":
-                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-yellow-400"
-                break;
-            default:
-                className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary";    
-                break;
-        }
-        toast({
-            title: message,
-            description: descirption,
-            action : <ToastAction altText="Ok">Ok</ToastAction>,
-            className : className
-        })
-    }
+    const { ToastMessage } = useSendToastMessage();
 
     const CreateSection = async ({ newSection } : { newSection: SectionScheme }) => {
         if(isSignedIn && isLoaded && user.primaryEmailAddress)
@@ -107,7 +83,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             setServerOperationInterrupted(true);
             setContextSections(prev => [...prev, newSection]);
             await SynchronizeToDexieDB({ sections : [...contextSections, newSection], email : currentUserEmail })
-                .catch(() => ToastMessage("Failed Create Section Please Try Again", "INTERNAL SERVER ERROR 500", "Error"));
+                .catch(() => ToastMessage({message : "Failed Create Section Please Try Again", description : "INTERNAL SERVER ERROR 500", type : "Error"}));
         }
     }
 
@@ -145,7 +121,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                     },
                     onEmpty() {  },
                     onError(error) {
-                        ToastMessage("Failed Operation During Fetching Sections From Database", "SYSTEM", "Error");
+                        ToastMessage({message : "Failed Operation During Fetching Sections From Database", description : "SYSTEM", type : "Error"});
                         console.error("Error While Fetching Sections : ", error);
                     },
                 });
@@ -170,12 +146,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         }
         catch (error : any) {
             RestoreContextSections();
-            toast({
-                title: "Failed To Update Please Be Paitent Your Data Synced",
-                description: "INTERNAL SERVER ERROR 500",
-                action : <ToastAction altText="Ok">Ok</ToastAction>,
-                className : "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary"
-            });
+            ToastMessage({ message : "Failed To Update Please Be Paitent Your Data Synced", description : "INTERNAL SERVER ERROR 500", type : "Error" })
             throw new Error(error);
         }
     }
@@ -194,7 +165,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             const decreamnentAmount = 1;
 
             if(totalContextsLength - decreamnentAmount < 1) {
-                ToastMessage("You Must Have Atleast 1 Document In Order To Maintain Storage Invalidation", "STORAGE", "Warning");
+                ToastMessage({ message : "You Must Have Atleast 1 Document In Order To Maintain Storage Invalidation", description : "STORAGE", type : "Warning"});
                 return;
             }
             setContextSections(prevSections => {
@@ -222,7 +193,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         const sections = await DexieGetSectionsByEmail(RefineEmail(email));
 
         if(sections && sections.find(section => section.title === sectionToTransfer.title)) {
-            ToastMessage("Section Already Exists", "SYSTEM", "Error");
+            ToastMessage({message : "Section Already Exists", description : "SYSTEM", type : "Error"});
             return;
         }
         
@@ -290,6 +261,9 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         {
             const currentUserEmail = RefineEmail(user?.primaryEmailAddress?.emailAddress ?? "");
             await SynchronizeToSupabase({ token, email : currentUserEmail, onStatusCallback : setSyncStatus });
+        }
+        else{
+
         }
     }
     

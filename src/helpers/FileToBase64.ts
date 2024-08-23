@@ -1,10 +1,10 @@
 /**
  * Converts a file to a base64 encoded string.
  *
- * @param {File} file - The file to be converted.
+ * @param {File | Blob} file/Blob - The file/Blob to be converted.
  * @return {Promise<string>} A promise that resolves with the base64 encoded string.
  */
-export function FileToBase64(file: File): Promise<string>
+export function FileToBase64(file: File | Blob): Promise<string>
 {
     return new Promise((resolve, reject) => {
         // Check if window is defined (browser environment)

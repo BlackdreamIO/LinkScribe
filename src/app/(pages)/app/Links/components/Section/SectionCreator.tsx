@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSectionController } from "@/context/SectionControllerProviders";
 
 import { Box } from "@chakra-ui/react";
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
 import { useUser } from "@clerk/nextjs";
@@ -42,7 +42,8 @@ export const SectionCreator = () => {
     }
 
     return (
-        <Dialog open={false} onOpenChange={() => {}}>
+        <Dialog >
+            <DialogTrigger>CREATE ME</DialogTrigger>
             <DialogContent className="dark:bg-theme-bgFourth rounded-xl p-4 space-y-4">
                 <Box className="w-full space-y-4">
                     <DialogTitle className="text-2xl">Enter Section Name</DialogTitle>

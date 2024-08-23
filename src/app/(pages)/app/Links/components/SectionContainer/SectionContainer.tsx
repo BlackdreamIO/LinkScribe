@@ -1,6 +1,6 @@
 "use client"
 
-import { CSSProperties, useEffect, useMemo, useState } from 'react';
+import { CSSProperties, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useSectionController } from '@/context/SectionControllerProviders';
 import { useDBController } from '@/context/DBContextProvider';
@@ -14,8 +14,6 @@ import BarLoader from "react-spinners/BarLoader";
 import { Skeleton } from '@/components/ui/skeleton';
 import { DBLoadComponent } from '../DBLoadComponent';
 import { SectionContextProvider } from '@/context/SectionContextProvider';
-import { Button } from '@/components/ui/button';
-import { UploadImageToCloudinary } from '@/app/actions/cloudnary/uploadImage';
 
 const Section = dynamic(() => import('../Section/Section').then((mod) => mod.Section),
 { ssr : true, loading : () => <Skeleton className='w-full dark:bg-theme-bgFourth animate-none h-16 rounded-xl' /> });
@@ -57,7 +55,6 @@ export const SectionContainer = () => {
     return (
         <SectionContainerContextWrapper>
             <Box className='w-full h-[93vh]'>
-                <Button onClick={() => UploadImageToCloudinary()}>UPLOADD</Button>
                 <VStack className='p-4 h-full overflow-y-scroll scrollbar-dark' gap={50}>
                     {
                         !databaseExist ? <DBLoadComponent/> : <RenderSections/>

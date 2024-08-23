@@ -12,7 +12,6 @@ import { Box, Flex } from "@chakra-ui/react";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
 
-import { SectionContextProvider } from "@/context/SectionContextProvider";
 import { LinkControllerProvider } from "@/context/LinkControllerProviders";
 import { SettingContextProvider } from "@/context/SettingContextProvider";
 //import { KeyboardNavigationContextProvider } from "@/context/KeyboardNavigationContext";
