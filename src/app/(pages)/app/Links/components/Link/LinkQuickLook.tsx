@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
 import { DeleteCloudinaryImage } from "@/app/actions/cloudnary/deleteImage";
 import { RefineEmail } from "@/helpers/NormalizeEmail";
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 
 type LinkQuickLookProps = {
@@ -47,7 +48,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     const [isImageUrlValid, setIsImageUrlValid] = useState<boolean>(false);
     
     const { user, isSignedIn } = useUser();
-    const { UpdateLink, AddPreviewImage } = useLinkController();
+    const { UpdateLink, AddPreviewImage, DeletePreviewImage } = useLinkController();
     const { ToastMessage } = useSendToastMessage();
 
     useEffect(() => {
@@ -60,14 +61,16 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     useEffect(() => {
         if(!open) {
             if(linkPreviewImage !== link.image) {
-                UpdateLink({
-                    currentLink : link,
-                    sectionID : link.ref,
-                    updatedLink : {
-                        ...link,
-                        image : linkPreviewImage,
-                    }
-                })
+                // UpdateLink({
+                //     currentLink : link,
+                //     sectionID : link.ref,
+                //     updatedLink : {
+                //         ...link,
+                //         image : linkPreviewImage,
+                //     }
+                // })
+
+                console.log(linkPreviewImage)
             }
         }
         if(open) {
@@ -86,27 +89,20 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
 
             if(!hasError && imageURL) {
                 setLinkPreviewImage(imageURL);
+                UpdateLink({
+                    currentLink : link,
+                    sectionID : link.ref,
+                    updatedLink : {
+                        ...link,
+                        image : linkPreviewImage,
+                    }
+                })
             }
         }
     }
 
     const handleDelete = async () => {
-        const { sucess, error } = await DeleteCloudinaryImage({ publicID : `${RefineEmail(user?.primaryEmailAddress?.emailAddress ?? "")}/${link.id}` })
-        if(sucess) {
-            UpdateLink({
-                currentLink : link,
-                sectionID : link.ref,
-                updatedLink : {
-                    ...link,
-                    image : "",
-                }
-            })
-            setLinkPreviewImage("");
-            ToastMessage({ message : "Link Preview Image Deleted Successfully", type : "Success" });
-        }
-        else {
-            ToastMessage({ message : "Something went wrong", description : error, type : "Error" });
-        }
+        DeletePreviewImage({link : link})
     }
 
     const handleSave = () => {
@@ -114,7 +110,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
             file : uploadedFile,
             url : uploadedImageURL,
             useFileMethod : uploadedImageURL.length < 5,
-            autoSyncAfterUpload : false,
+            autoSyncAfterUpload : true,
             link : link,
             onSucess: () => onClose(true),
             onCallback: ({ loading }) => setIsLoading(loading),
@@ -144,6 +140,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     return (
         <Dialog open={open} onOpenChange={() => onClose(false)} modal={true}>
             <DialogContent className="dark:bg-theme-bgSecondary rounded-xl max-h-[90%] space-y-4 overflow-y-scroll no-scrollbar" onContextMenu={(e) => e.preventDefault()}>
+                <ErrorManager>
                 <HStack justifyContent={"space-between"}>
                     <DialogTitle className="text-2xl text-center">{link.title}</DialogTitle>
                     <Button onClick={() => setOpenSettings(!openSettings)} variant={"ghost"} className="dark:text-neutral-500 dark:hover:text-white p-0 w-auto h-auto !ring-0 !outline-none focus-visible:border-4 focus-visible:!border-theme-borderNavigation">
@@ -159,9 +156,10 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                             height={1080}
                             unoptimized
                             quality={100}
+                            loading="lazy"
                             className={`
                                 ${linkPreviewImage.length > 2 ? "w-full" : "w-6/12"} rounded-md 
-                                ${linkPreviewImage.length > 2 ? "border-4 dark:border-theme-primaryAccent shadow-lg shadow-theme-primaryAccent" : ""}
+                                ${linkPreviewImage.length > 2 ? `border-4 ${isLoading ? 'dark:border-neutral-500' : 'dark:border-theme-primaryAccent shadow-lg shadow-theme-primaryAccent'}` : ""}
                             `}
                         />
                     </Box>
@@ -171,7 +169,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                     <Box className="w-full flex flex-col items-center justify-center space-y-4">
                         <ConditionalRender render={uploadedImageURL.length < 5}>
                             <Box className="flex items-center justify-center w-full">
-                                <Label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-theme-primaryAccent/10 dark:bg-theme-bgSecondary hover:bg-gray-100 dark:border-theme-primaryAccent/50 dark:hover:border-gray-500">
+                                <Label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-theme-primaryAccent/10 dark:bg-theme-bgSecondary hover:bg-gray-100 dark:border-theme-primaryAccent/50 dark:hover:border-gray-500`}>
                                     <Box className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
@@ -188,7 +186,9 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                                         className="hidden" 
                                         accept="image/*"
                                         multiple={false}
-                                        onChange={e => setUploadedFile(e.target.files![0])}
+                                        onChange={e => {
+                                            setUploadedFile(e.target.files![0]);
+                                        }}
                                     />
                                 </Label>
                             </Box>
@@ -204,22 +204,24 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                         <VStack className="w-full space-y-4 p-4 rounded-lg border bg-theme-primaryAccent/5">
                             <Box className="w-full flex flex-row items-center justify-between">
                                 <Text> Optimize Image For Less Bandwith </Text>
-                                <Switch />
+                                <Switch defaultChecked />
                             </Box>
                             <Box className="w-full flex flex-row items-center justify-between">
                                 <Text> Cache Image For Faster Load {"(Reccomended)"} </Text>
-                                <Switch />
+                                <Switch defaultChecked />
                             </Box>
                         </VStack>
+                        <Text className="text-neutral-500">Warning Uploading New Image Will Replace And Delete The Current Image</Text>
                     </Box>
                 </ConditionalRender>
 
                 <DialogFooter className="w-full flex flex-row items-center justify-end gap-4">
                     <Button disabled={isLoading || uploadedImageURL.length > 5 && !isImageUrlValid} onClick={() => handleSave()} variant={"ghost"} className={ButtonStyle}>
-                        {isLoading ? "Processing..."  : uploadedFile !== undefined || uploadedImageURL.length > 5 ? "Save" : "Visit"}
+                        {isLoading ? "Processing..."  : uploadedFile !== undefined || uploadedImageURL.length > 5 || openSettings ? "Save" : "Visit"}
                     </Button>
                     <Button variant={"ghost"} className={ButtonStyle} onClick={() => handleDelete()}> Close </Button>
                 </DialogFooter>
+                </ErrorManager>
             </DialogContent>
         </Dialog>
     )

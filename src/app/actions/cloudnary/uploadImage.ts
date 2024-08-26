@@ -25,6 +25,8 @@ interface IUploadImageToCloudinaryOuput {
 export async function UploadImageToCloudinary({ file, filename, folder } : IUploadImageToCloudinary)  : Promise<IUploadImageToCloudinaryOuput>
 {
 
+    console.log("Calling : UploadImageToCloudinary()")
+
     if(file === null || filename === null || folder === null) {
         return {
             publicID : "",
@@ -43,6 +45,22 @@ export async function UploadImageToCloudinary({ file, filename, folder } : IUplo
 
     try
     {
+        const public_id = `${folder}/${filename}`;
+
+        // const existingImage = await Cloudinary.api.resource(public_id);
+
+
+        // // Delete Any Existing Image Before Uploading New Image
+        // if(existingImage !== null || existingImage !== undefined) {
+        //     if(existingImage?.secure_url) {
+        //         const deleteStatus = await Cloudinary.uploader.destroy(public_id, { resource_type : "image", invalidate: true });
+        //         if(deleteStatus.result != "ok") {
+        //             onError?.(deleteStatus.result);
+        //         }
+        //     }
+        // }
+
+        // Upload Image To Cloudinary
         const result = await Cloudinary.uploader.upload(file, options);
         const cldImage = Cloudinary.image(result.public_id);
 

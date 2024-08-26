@@ -168,10 +168,7 @@ async function CreateSectionToSupabase({ email, token, sections, onSyncError } :
         })
     }
 
-    console.log("Synchronization Completed Successfully");
-
     if(operationDone === totalOperationCount) {
-        console.log("All Synchronization");
         operationDone = 0;
     }
 }
@@ -197,10 +194,7 @@ async function DeleteSectionToSupabase({ token, sections, onSyncError } : IDelet
         })
     }
 
-    console.log("Synchronization Deleted Completed");
-
     if(operationDone === totalOperationCount) {
-        console.log("All Deletation Synchronization");
         operationDone = 0;
     }
 }
@@ -227,10 +221,7 @@ async function UpdateSectionToSupabase({ email, token, sections, onSyncError } :
         })
     }
 
-    console.log("Synchronization Update Completed");
-
     if(operationDone === totalOperationCount) {
-        console.log("All Update Synchronization");
         operationDone = 0;
     }
 }
@@ -268,9 +259,7 @@ async function CreateLinkToSupabase({ email, token, links, onSyncError } : ICrea
         onError: (error) => onSyncError(`Error creating links in Supabase: ${error}`)
     })
 
-    console.log("Links Synchronization Completed Successfully");
     if(operationDone === totalOperationCount) {
-        console.log("All Links Creation Synchronization");
         operationDone = 0;
     }
 }
@@ -294,9 +283,7 @@ async function UpdateLinkToSupabase({ token, updatedLinks, onSyncError } : IUpda
             onError: (error) => onSyncError(`Error updating links in Supabase: ${error}`)
         })
     }
-    console.log("Links Synchronization Updated Successfully");
     if(operationDone === totalOperationCount) {
-        console.log("All Links Update Synchronization");
         operationDone = 0;
     }
 }
@@ -319,9 +306,7 @@ async function DeleteLinkToSupabase({ token, links, onSyncError } : IDeleteLinkT
             onError: (error) => onSyncError(`Error deleting links in Supabase: ${error}`)
         })
     }
-    console.log("Links Synchronization Deleted Successfully");
     if(operationDone === totalOperationCount) {
-        console.log("All Links Deletion Synchronization");
         operationDone = 0;
     }
 }

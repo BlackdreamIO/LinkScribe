@@ -9,6 +9,7 @@ import { LinkLayout, LinkScheme } from "@/scheme/Link";
 import { Box } from "@chakra-ui/react";
 
 import { LinkContextMenuWrapper } from "./LinkContextMenuWrapper";
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 const LinkQuickLook = dynamic(() => import('./LinkQuickLook').then((mod) => mod.LinkQuickLook), { ssr: true });
 const LinkPrimarySide = dynamic(() => import('./LinkPrimarySide').then((mod) => mod.LinkPrimarySide), { ssr: true });
@@ -98,12 +99,14 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
                     showMobileOptions={showMobileOptions}
                     handleDeleteLink={handleDeleteLink}
                 />
-
-                <LinkQuickLook
-                    link={link}
-                    open={openQL}
-                    onClose={setOpenQL}
-                />
+                
+                <ErrorManager>
+                    <LinkQuickLook
+                        link={link}
+                        open={openQL}
+                        onClose={setOpenQL}
+                    />
+                </ErrorManager>
 
             </Box>
         </LinkContextMenuWrapper>

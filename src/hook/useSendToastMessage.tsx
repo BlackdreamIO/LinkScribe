@@ -7,6 +7,7 @@ import { ToastAction } from '@/components/ui/toast';
 interface IToastMessage {
     message : string;
     description? : string;
+    duration? : number;
     type : "Status" | "Error" | "Warning" | "Success";
     actionText? : string;
     action? : () => void;
@@ -16,7 +17,7 @@ export function useSendToastMessage ()
 {
     const { toast } = useToast();
 
-    const ToastMessage = ({message, description, type = "Status", action, actionText="Ok"} : IToastMessage) => {
+    const ToastMessage = ({message, description, type = "Status", action, actionText="Ok", duration=3000} : IToastMessage) => {
 
         let className = "fixed bottom-5 right-2 w-6/12 max-sm:w-auto rounded-xl border-2 border-theme-borderSecondary capitalize";
         switch (type) {
@@ -41,7 +42,8 @@ export function useSendToastMessage ()
             title: message,
             description: description,
             action : <ToastAction onClick={() => action?.()} altText={actionText}>{actionText}</ToastAction>,
-            className : className
+            className : className,
+            duration : duration
         })
     }
 

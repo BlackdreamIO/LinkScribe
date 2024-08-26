@@ -2,6 +2,7 @@
 
 import { RefineEmail } from "@/helpers/NormalizeEmail";
 import { Cloudinary, cloudinaryConfig } from "@/lib/Cloudinary";
+import { ResponseCallback } from "cloudinary";
 
 interface IGetCloudinaryImage {
     publicID : string;
@@ -35,10 +36,10 @@ export async function GetCloudinaryImage(args : IGetCloudinaryImage) : Promise<I
     {
         const result = await Cloudinary.api.resource(`${RefineEmail(args.userEmail)}/${args.publicID}`);
 
-        if(!result || result == undefined || result == null){
+        if(result.error.http_code !== 200) {
             return {
                 imageURL : "",
-                error : "No Image Found",
+                error : result?.error?.message,
                 hasError: true
             }
         }
@@ -51,10 +52,10 @@ export async function GetCloudinaryImage(args : IGetCloudinaryImage) : Promise<I
             };
         }
     }
-    catch (error) {
+    catch (error : any) {
         return {
             imageURL : "",
-            error : error,
+            error : error?.error,
             hasError: true
         }
     }
