@@ -5,10 +5,8 @@ import { useUser } from '@clerk/nextjs';
 import { useSectionController } from './SectionControllerProviders';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
-import { SynchronizeToDexieDB } from '@/helpers';
-import { FileToBase64 } from '@/helpers/FileToBase64';
 import { UploadImageToCloudinary } from '@/app/actions/cloudnary/uploadImage';
-import { RefineEmail } from '@/helpers/NormalizeEmail';
+import { RefineEmail, SynchronizeToDexieDB, FileToBase64 } from '@/helpers';
 import { useSendToastMessage } from '@/hook/useSendToastMessage';
 import { DeleteCloudinaryImage } from '@/app/actions/cloudnary/deleteImage';
 

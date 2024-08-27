@@ -22,8 +22,6 @@ import { ConditionalRender } from "@/components/ui/conditionalRender";
 import blankImage from "../../../../../../../public/images/blankImage.webp";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
-import { DeleteCloudinaryImage } from "@/app/actions/cloudnary/deleteImage";
-import { RefineEmail } from "@/helpers/NormalizeEmail";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 

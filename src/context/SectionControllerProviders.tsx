@@ -7,15 +7,16 @@ import { SectionScheme } from '@/scheme/Section';
 import useLocalStorage from '@/hook/useLocalStorage';
 import { useSendToastMessage } from '@/hook/useSendToastMessage';
 
-import { GetSections as ClientSideGetSections } from '@/database/functions/supabase/sections/getAllSections';
-import { CreateSection as ClientSideCreateSection } from '@/database/functions/supabase/sections/createSections';
-import { CreateLink as ClientSideCreateLink } from '@/database/functions/supabase/links/createLink';
+import { GetSections as ClientSideGetSections } from '@/database/actions/sections/getAllSections';
+import { CreateSection as ClientSideCreateSection } from '@/database/actions/sections/createSections';
+import { CreateLink as ClientSideCreateLink } from '@/database/actions/links/createLink';
 
-import { isEqual, SynchronizeToDexieDB, SynchronizeToSupabase } from '@/helpers';
-import { RefineEmail } from '@/helpers/NormalizeEmail';
+import { isEqual, RefineEmail } from '@/helpers';
 import { LinkScheme } from '@/scheme/Link';
-import { DexieGetSectionsByEmail } from '@/database/functions/dexie/DexieSectionByEmail';
+import { DexieGetSectionsByEmail } from '@/database/dexie/helper/DexieSectionByEmail';
 import { SyncStatus } from '@/types/Sync';
+import { SynchronizeToDexieDB } from '@/database/dexie/functions/SynchronizeToDexie';
+import SynchronizeToSupabase from '@/database/supabase/functions/SynchronizeToSupabase';
 
 //PouchDB.plugin(PouchDBLocalStorageAdapter);
 
@@ -260,7 +261,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         if (isSignedIn && isLoaded && user.primaryEmailAddress)
         {
             const currentUserEmail = RefineEmail(user?.primaryEmailAddress?.emailAddress ?? "");
-            await SynchronizeToSupabase({ token, email : currentUserEmail, onStatusCallback : setSyncStatus });
+            await SynchronizeToSupabase({ token, email : currentUserEmail });
         }
         else{
 

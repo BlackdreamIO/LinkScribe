@@ -3,7 +3,7 @@ import { LinkScheme } from "@/scheme/Link";
 
 interface IUpdateLink {
     token: string;
-    updatedLink: LinkScheme;
+    linkData: LinkScheme;
     onSuccess?: (data: any) => void;
     onError?: (error: any) => void;
 }
@@ -14,19 +14,17 @@ interface IUpdateLink {
  * @param {string} token - The authentication token for accessing the Supabase database.
  * @param {Function} [onSuccess] - The callback function to be called on success.
  * @param {Function} [onError] - The callback function to be called on error.
- * @param {LinkScheme} updatedLink - The updated link data to be saved in the database.
+ * @param {LinkScheme} linkData - The updated link data to be saved in the database.
  * @return {Promise<Object[]|void>} - The updated link data on success, or an empty array on error.
  */
-export async function UpdateLink({ token, onSuccess, onError, updatedLink }: IUpdateLink) {
+export async function UpdateLink({ token, onSuccess, onError, linkData }: IUpdateLink) : Promise<any> {
     try {
 
         const database = CreateSupabaseServerDBClient(token);
 
         const { data, error, status, statusText } = await database.from("links")
-            .update({...updatedLink, created_at : new Date(updatedLink.created_at).toDateString()})
-            .eq("id", updatedLink.id);
-
-        console.log({statusText : statusText, status : status, data : data, error : error});
+            .update({...linkData, created_at : new Date(linkData.created_at).toDateString()})
+            .eq("id", linkData.id);
 
         if (!error && status == 204) {
             onSuccess?.(statusText);

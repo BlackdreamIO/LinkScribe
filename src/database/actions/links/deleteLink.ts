@@ -8,7 +8,7 @@ interface IDeleteLink {
     onError? : (error : any) => void;
 }
 
-export async function DeleteLink({ token, onSuccess, onError, linkData} : IDeleteLink)
+export async function DeleteLink({ token, onSuccess, onError, linkData} : IDeleteLink) : Promise<any>
 {
     try
     {

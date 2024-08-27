@@ -1,7 +1,7 @@
 import { DexieDB } from "@/database/dexie";
 import { SectionScheme } from "@/scheme/Section";
 import { isEqual } from "./isEqual";
-import { DexieGetSectionsByEmail } from "@/database/functions/dexie/DexieSectionByEmail";
+import { DexieGetSectionsByEmail } from "@/database/dexie/helper/DexieSectionByEmail";
 
 interface ISynchronizeToDexieDB {
     email : string;
@@ -37,35 +37,12 @@ export async function SynchronizeToDexieDB({ sections, email } : ISynchronizeToD
                 // Add new section
                 await DexieDB.sections.add(section);
             }
-
-            /*
-            for (const link of section.links) {
-                const existingLink = await DexieDB.links.get(link.id);
-                if (existingLink) {
-                    // Update existing link if there are changes
-                    if (!isEqual(existingLink, link)) {
-                        await DexieDB.links.update(link.id, {
-                            created_at : link.created_at,
-                            title : link.title,
-                            url : link.url,
-                            visitCount : link.visitCount
-                        });
-                    }
-                    else {
-                        //await DexieDB.links.add(link);
-                    }
-                }
-                else { await DexieDB.links.add(link); }
-            }
-            */
-
             currentSectionIds.delete(section.id); // Remove processed section ID from the set
         }
 
         // Delete sections that are no longer present
         for (const id of Array.from(currentSectionIds)) {
             await DexieDB.sections.where('id').equals(id).delete();
-            await DexieDB.links.where('section_ref').equals(id).delete();
         }
     }
     catch (error) {

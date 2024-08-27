@@ -18,7 +18,7 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
 
     const { id, links } = currentSection;
 
-    const [minimize, setMinimize] = useState(false);
+    const [minimize, setMinimize] = useState(currentSection.minimized || false);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
     const { highlightContexts, setCurrentSection } = useSectionContext();

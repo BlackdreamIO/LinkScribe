@@ -1,5 +1,5 @@
 import { CreateSupabaseServerDBClient } from "@/database/supabase";
-import { RefineEmail } from "@/helpers/NormalizeEmail";
+import { RefineEmail } from "@/helpers";
 import { IDatabaseUser } from "@/interface/User";
 
 interface ICreateUser {

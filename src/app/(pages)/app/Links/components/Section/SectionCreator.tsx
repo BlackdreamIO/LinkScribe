@@ -9,7 +9,7 @@ import { Box } from "@chakra-ui/react";
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
-import { RefineEmail } from "@/helpers/NormalizeEmail";
+import { RefineEmail } from "@/helpers";
 
 export const SectionCreator = () => {
 

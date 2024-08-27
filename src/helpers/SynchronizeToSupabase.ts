@@ -1,17 +1,16 @@
 import { SectionScheme } from "@/scheme/Section";
 
-import { GetSections } from "@/database/functions/supabase/sections/getAllSections";
-import { DexieGetSections } from "@/database/functions/dexie/DexieSections";
+import { GetSections } from "@/database/actions/sections/getAllSections";
 import { isEqual } from "./isEqual";
 
-import { CreateSection } from "@/database/functions/supabase/sections/createSections";
-import { DeleteSection } from "@/database/functions/supabase/sections/deleteSection";
-import { UpdateSection } from "@/database/functions/supabase/sections/updateSection";
+import { CreateSection } from "@/database/actions/sections/createSections";
+import { DeleteSection } from "@/database/actions/sections/deleteSection";
+import { UpdateSection } from "@/database/actions/sections/updateSection";
 import { LinkScheme } from "@/scheme/Link";
-import { CreateLink } from "@/database/functions/supabase/links/createLink";
-import { DeleteLink } from "@/database/functions/supabase/links/deleteLink";
-import { UpdateLink } from "@/database/functions/supabase/links/updateLink";
-import { DexieGetSectionsByEmail } from "@/database/functions/dexie/DexieSectionByEmail";
+import { CreateLink } from "@/database/actions/links/createLink";
+import { DeleteLink } from "@/database/actions/links/deleteLink";
+import { UpdateLink } from "@/database/actions/links/updateLink";
+import { DexieGetSectionsByEmail } from "@/database/dexie/helper/DexieSectionByEmail";
 import { SyncStatus } from "@/types/Sync";
 import { DateToDayMonthYear } from "./DateToDayMonthYear";
 
@@ -69,7 +68,6 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
                     id : section.id,
                     title : section.title,
                     totalLinksCount :  section.totalLinksCount,
-                    links : [],
                     links_layout : { layout : section.links_layout.layout, size : section.links_layout.size },
                     selfLayout : section.selfLayout,
                     section_ref : section.section_ref,
@@ -78,7 +76,6 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
                     id : supabaseSection.id,
                     title : supabaseSection.title,
                     totalLinksCount :  supabaseSection.totalLinksCount,
-                    links : [],
                     links_layout : { layout : supabaseSection.links_layout.layout, size : supabaseSection.links_layout.size },
                     selfLayout : supabaseSection.selfLayout,
                     section_ref : supabaseSection.section_ref,
@@ -278,7 +275,7 @@ async function UpdateLinkToSupabase({ token, updatedLinks, onSyncError } : IUpda
     for (const updatedLink of updatedLinks) {
         await UpdateLink({
             token: token,
-            updatedLink : updatedLink,
+            linkData : updatedLink,
             onSuccess: (data) => operationDone++,
             onError: (error) => onSyncError(`Error updating links in Supabase: ${error}`)
         })

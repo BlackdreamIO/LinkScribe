@@ -10,4 +10,5 @@ export interface SectionScheme {
     section_ref : string;
     created_at : string;
     _deleted : boolean;
+    minimized? : boolean;
 }

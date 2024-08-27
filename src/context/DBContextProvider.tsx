@@ -2,10 +2,10 @@
 
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
-import { GetDatabaseUser } from '@/database/functions/supabase/users/getDatabaseUser';
-import { CreateDatabaseUser } from '@/database/functions/supabase/users/createDatabaseUser';
+import { GetDatabaseUser } from '@/database/actions/users/getDatabaseUser';
+import { CreateDatabaseUser } from '@/database/actions/users/createDatabaseUser';
 import { DEFAULT_APP_SETTING } from '@/utils/defaultAppSetting';
-import { RefineEmail } from '@/helpers/NormalizeEmail';
+import { RefineEmail } from '@/helpers/index';
 
 export const dynamic = 'force-dynamic';
 

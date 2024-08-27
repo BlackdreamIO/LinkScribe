@@ -1,5 +1,5 @@
 import { DexieDB } from "@/database/dexie";
-import { RefineEmail } from "@/helpers/NormalizeEmail";
+import { RefineEmail } from "@/helpers";
 
 export async function DexieGetSectionsByEmail(emai : string)
 {

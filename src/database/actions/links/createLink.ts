@@ -20,7 +20,7 @@ interface ICreateLink {
  * @param {LinkScheme} options.linkData - The data of the link to be created.
  * @return {Promise<Object[]|void>} - The created link data on success, or an empty array on error.
  */
-export async function CreateLink({ token, onSuccess, onError, linkData, useBulkInsert, bulkData } : ICreateLink)
+export async function CreateLink({ token, onSuccess, onError, linkData, useBulkInsert, bulkData } : ICreateLink) : Promise<any>
 {
     try
     {

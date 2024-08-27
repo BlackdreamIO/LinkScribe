@@ -27,13 +27,13 @@ export async function CreateSection({ token, onSuccess, onError, email, sectionD
         const { data, error, status, statusText } = await CreateSupabaseServerDBClient(token).from("sections").insert({
             id : sectionData.id,
             title : sectionData.title,
-            //totalLinksCount : sectionData.totalLinksCount,
-            //links : sectionData.links,
             links_layout : sectionData.links_layout,
             selfLayout : sectionData.selfLayout,
             section_ref : email,
             created_at : new Date(sectionData.created_at).toISOString(),
             // _deleted : sectionData._deleted
+            //totalLinksCount : sectionData.totalLinksCount,
+            //links : sectionData.links,
         });
         
         if(!error && status == 201) {
