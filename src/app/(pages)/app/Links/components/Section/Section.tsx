@@ -5,6 +5,7 @@ import { SectionScheme } from "@/scheme/Section";
 
 import { useSettingContext } from "@/context/SettingContextProvider";
 import { useSectionContext } from "@/context/SectionContextProvider";
+import { useSectionContainerContext } from "@/context/SectionContainerContext";
 
 import { Box } from "@chakra-ui/react";
 
@@ -14,31 +15,35 @@ import { SectionHeader } from "./SectionHeader";
 import { LinksLayout } from "../Link/LinksLayout";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
-export const Section = ({ currentSection } : {currentSection : SectionScheme}) => {
+export const Section = ({ section } : {section : SectionScheme}) => {
 
-    const { id, links } = currentSection;
+    const { id, links } = section;
 
-    const [minimize, setMinimize] = useState(currentSection.minimized || false);
+    const [minimize, setMinimize] = useState(section.minimized || false);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
-    const { highlightContexts, setCurrentSection } = useSectionContext();
+    const { setCurrentSection, currentSection, setOriginalSection } = useSectionContext();
+    const { sectionHighlighted } = useSectionContainerContext();
     const { showLinkCount, sectionsDefaultOpen } = useSettingContext();
 
     useEffect(() => {
-        setCurrentSection(currentSection)
-    }, [currentSection])
+        if(currentSection !== section) {
+            setCurrentSection(section);
+            setOriginalSection(section);
+        }
+    }, [section])
     
 
     // dark:bg-theme-bgFourth
     return (
-        <Box onContextMenu={(e) => e.preventDefault()}  id="section-element" className={`w-full dark:bg-theme-bgFourth bg-white border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
-            ${contextMenuOpen && !highlightContexts ? "border-indigo-300" : highlightContexts ? "dark:border-white border-black " : "dark:border-neutral-900 "}
-            ${highlightContexts ? "pointer-events-none" : "pointer-events-auto"} dark:shadow-none shadow-sm shadow-black`}
+        <Box onContextMenu={(e) => e.preventDefault()}  id="section" className={`w-full dark:bg-theme-bgFourth bg-white border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
+            ${contextMenuOpen && !sectionHighlighted ? "border-indigo-300" : sectionHighlighted ? "dark:border-white border-black " : "dark:border-neutral-900 "}
+            ${sectionHighlighted ? "pointer-events-none" : "pointer-events-auto"} dark:shadow-none shadow-sm shadow-black`}
         >  
 
             <ErrorManager>
                 <SectionHeader
-                    section={currentSection}
+                    section={section}
                     showLinkCount={showLinkCount}
                     isMinimzied={minimize}
                     onContextMenu={(v) => setContextMenuOpen(v)}
@@ -48,7 +53,7 @@ export const Section = ({ currentSection } : {currentSection : SectionScheme}) =
 
             <ConditionalRender render={!minimize}>
                 <ErrorManager>
-                    <LinksLayout id={id} links={links} layout={currentSection.links_layout} />
+                    <LinksLayout id={currentSection.id} links={currentSection.links} layout={section.links_layout} />
                 </ErrorManager>
             </ConditionalRender>
         </Box>

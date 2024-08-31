@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import { Box, HStack } from "@chakra-ui/react";
@@ -37,6 +37,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
     const [linkUrl, setLinkUrl] = useState(link.url);
 
     const { UpdateLink } = useLinkController()!;
+    const linkRef = useRef<HTMLInputElement>(null);
 
     const HandleRenameUrl = () => {
         if(linkUrl.length < 6) return;
@@ -62,6 +63,17 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
             }
         })
     }
+
+    useEffect(() => {
+        if (urlEditMode && linkRef.current) {
+            const currentTimout = setTimeout(() => {
+                linkRef.current?.focus();
+                linkRef.current?.select();
+                linkRef.current?.setSelectionRange(0, linkUrl.length);
+            }, 200);
+            return () => clearTimeout(currentTimout);
+        }
+    }, [urlEditMode]);
 
     const DropdownContents = () => {
         return (
@@ -94,6 +106,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
                 {
                     urlEditMode && (                        
                         <Input
+                            ref={linkRef}
                             defaultValue={linkUrl}
                             className={`flex flex-grow text-base max-lg:text-sm max-sm:text-xs max-tiny:!text-xxs p-2 dark:border-transparent border-2 border-transparent 
                                 !ring-0 !outline-none focus-visible:!border-theme-borderNavigation disabled:opacity-100 disabled:cursor-default

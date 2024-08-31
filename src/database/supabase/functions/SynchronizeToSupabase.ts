@@ -3,7 +3,7 @@ import { GetSections } from "@/database/actions/sections/getAllSections";
 import { SectionScheme } from "@/scheme/Section";
 import { IdentifySectionChanges } from "../helper/IdentifySectionChanges";
 import { IdentifyLinksChanges } from "../helper/IdentifyLinksChanges";
-import { SectionManagerClass, LinkManagerClass } from "@/database/managers";
+import { SectionManagerClass, LinkManagerClass, CloudinaryManagerClass } from "@/database/managers";
 
 interface ISynchronizeToSupabase {
     token : string;
@@ -36,13 +36,17 @@ export default async function SynchronizeToSupabase(args : ISynchronizeToSupabas
             deletedLinks : deletedLinks
         })
 
-        await SectionManagerClass.createSectionToSupabase({ email, token, sections : newSections, onSyncError(err) {} });
-        await SectionManagerClass.deleteSectionToSupabase({ email, token, sections : deletedSections, onSyncError(err) {} });
-        await SectionManagerClass.updateSectionToSupabase({ email, token, sections : updatedSections, onSyncError(err) {} });    
+        SectionManagerClass.InitializeSectionManager({ email, token });
+
+        SectionManagerClass.createSectionToSupabase({ email, token, sections : newSections, onSyncError(err) { console.log(err) } });
+        SectionManagerClass.deleteSectionToSupabase({ email, token, sections : deletedSections, onSyncError(err) {console.log(err)} });
+        SectionManagerClass.updateSectionToSupabase({ email, token, sections : updatedSections, onSyncError(err) {console.log(err)} });    
         
-        await LinkManagerClass.createLinkToSupabase({ email, token, links : newLinks, onSyncError(error) {} });
-        await LinkManagerClass.deleteLinkToSupabase({ email, token, links : deletedLinks, onSyncError(error) {} })
-        await LinkManagerClass.updateLinkToSupabase({ email, token, links : updatedLinkss, onSyncError(error) {} })
+        await LinkManagerClass.createLinkToSupabase({ email, token, links : newLinks, onSyncError(error) {console.log(error)} });
+        await LinkManagerClass.deleteLinkToSupabase({ email, token, links : deletedLinks, onSyncError(error) {console.log(error)} })
+        await LinkManagerClass.updateLinkToSupabase({ email, token, links : updatedLinkss, onSyncError(error) {console.log(error)} })
+
+        await CloudinaryManagerClass.DeleteLinkPreviewImages({ email : email, links : dexieSections.flatMap(section => section.links) });
     }
     catch (error) {
         console.error(error);   

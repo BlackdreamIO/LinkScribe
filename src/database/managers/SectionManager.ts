@@ -10,59 +10,69 @@ interface ISectionManager {
     onSyncError : (err : any) => void; 
 }
 
-
-let operationDone = 0;
-
 export class SectionManagerClass
 {
-    static async createSectionToSupabase({ email, sections, token, onSyncError } : ISectionManager) {
+    private static email : string;
+    private static token : string;
+    private static operationDone: number;
+
+    static InitializeSectionManager({ email, token, } : { email : string, token : string, }) {
+        SectionManagerClass.email = email;
+        SectionManagerClass.token = token;
+    }
+
+    private static resetOperationCount() {
+        SectionManagerClass.operationDone = 0;
+    }
+
+    static async createSectionToSupabase({ sections, onSyncError } : ISectionManager) {
         let totalOperationCount = sections.length;
         if(totalOperationCount === 0) return;
 
         for (const section of sections) {
             await CreateSection({
-                token: token,
-                email: email,
+                token: this.token,
+                email: this.email,
                 sectionData : section,
-                onSuccess: (data) => operationDone++,
+                onSuccess: (data) => this.operationDone++,
                 onError: (error) => onSyncError(`Error creating sections in Supabase: ${error}`)
             })
         }
 
-        if(operationDone === totalOperationCount) operationDone = 0;
+        if(this.operationDone === totalOperationCount) this.resetOperationCount();
     };
 
-    static async deleteSectionToSupabase({ token, sections, onSyncError } : ISectionManager)
+    static async deleteSectionToSupabase({ sections, onSyncError } : ISectionManager)
     {
         let totalOperationCount = sections.length;
         if(totalOperationCount === 0) return;
 
         for (const section of sections) {
             await DeleteSection({
-                token: token,
+                token: this.token,
                 section_id : section.id,
-                onSuccess: (data) => operationDone++,
+                onSuccess: (data) => this.operationDone++,
                 onError: (error) => onSyncError(`Error deleting section in Supabase: ${error}`)
             })
         }
 
-        if(operationDone === totalOperationCount) operationDone = 0;
+        if(this.operationDone === totalOperationCount) this.resetOperationCount();
     };
-    static async updateSectionToSupabase({ email, token, sections, onSyncError } : ISectionManager)
+    static async updateSectionToSupabase({ sections, onSyncError } : ISectionManager)
     {
         let totalOperationCount = sections.length;
         if(totalOperationCount === 0) return;
 
         for (const section of sections) {
             await UpdateSection({
-                token,
-                email,
+                token : this.token,
+                email : this.email,
                 sectionData : section,
-                onSuccess: (data) => operationDone++,
+                onSuccess: (data) => this.operationDone++,
                 onError: (error) => onSyncError(`Error updating section in Supabase: ${error}`)
             })
         }
 
-        if(operationDone === totalOperationCount) operationDone = 0;
+        if(this.operationDone === totalOperationCount) this.resetOperationCount();
     }
 }

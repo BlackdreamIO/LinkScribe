@@ -22,11 +22,11 @@ export function IdentifySectionChanges({ dexieSections, supabaseSections }: { de
         return supabaseSection && !isEqual(
             {
                 ...section,
-                links_layout: { ...section.links_layout }
+                links : [],
             },
             {
                 ...supabaseSection,
-                links_layout: { ...supabaseSection.links_layout }
+                links : [],
             }
         );
     });

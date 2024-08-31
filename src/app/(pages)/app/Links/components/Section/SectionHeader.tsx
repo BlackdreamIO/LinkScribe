@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { useSectionContext } from "@/context/SectionContextProvider";
+import { useSectionController } from "@/context/SectionControllerProviders";
 
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 
@@ -22,8 +23,8 @@ import { SectionScheme } from "@/scheme/Section";
 import { SectionHeaderLinkDrawer, SectionTransferer } from "./DynamicImport";
 
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
-import { useSectionController } from "@/context/SectionControllerProviders";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
+import { SectionLinkSearch } from "./SectionLinkSearch";
 
 const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
     dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
@@ -97,6 +98,8 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                 }}
                             />
                         </Box>
+
+                        <SectionLinkSearch/>
 
                         <ErrorManager>
                             <SectionHeaderOptions

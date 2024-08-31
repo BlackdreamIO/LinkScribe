@@ -4,7 +4,7 @@ export interface LinkScheme {
     title : string;
     url : string;
     visitCount : number;
-    created_at : string;
+    created_at : Date;
     ref : string;
     image : string;
 }

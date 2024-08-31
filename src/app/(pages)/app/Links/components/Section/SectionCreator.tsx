@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
 import { RefineEmail } from "@/helpers";
+import { useSectionContainerContext } from "@/context/SectionContainerContext";
 
 export const SectionCreator = () => {
 
@@ -17,7 +18,7 @@ export const SectionCreator = () => {
 
     const { CreateSection } = useSectionController()!;
     const { user } = useUser();
-    //const { openCreatorDialog, setOpenCreatorDialog } = useSectionContext()!;
+    const { openCreatorDialog, setOpenCreatorDialog } = useSectionContainerContext();
 
     const handleCreateSection = () => {
         //setOpenCreatorDialog(false);
@@ -42,8 +43,7 @@ export const SectionCreator = () => {
     }
 
     return (
-        <Dialog >
-            <DialogTrigger>CREATE ME</DialogTrigger>
+        <Dialog open={openCreatorDialog} onOpenChange={setOpenCreatorDialog}>
             <DialogContent className="dark:bg-theme-bgFourth rounded-xl p-4 space-y-4">
                 <Box className="w-full space-y-4">
                     <DialogTitle className="text-2xl">Enter Section Name</DialogTitle>

@@ -19,11 +19,11 @@ export const useKeyboardNavigation = ({ role, parentRef, direction = "both", ena
                 (
                     activeElement.tagName === "INPUT" || 
                     activeElement.tagName === "TEXTAREA" || 
-                    activeElement.tagName === "SELECT" || 
-                    activeElement.tagName === "DIV" || 
-                    activeElement.tagName === "BUTTON" || 
+                    activeElement.tagName === "SELECT" ||  
                     activeElement.isContentEditable
                 );
+
+            if(isInputFocused) return;
 
             const parentElement = parentRef.current;
             if (!parentElement) return;

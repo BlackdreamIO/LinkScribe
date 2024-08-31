@@ -2,6 +2,7 @@ import { CreateLink } from "@/database/actions/links/createLink";
 import { UpdateLink } from "@/database/actions/links/updateLink";
 import { DeleteLink } from "@/database/actions/links/deleteLink";
 import { LinkScheme } from "@/scheme/Link";
+import { DeleteCloudinaryImage } from "@/app/actions/cloudnary/deleteImage";
 
 interface ILinkManager {
     email : string;
@@ -31,6 +32,7 @@ export class LinkManagerClass {
 
         await CreateLink({
             token,
+            useBulkInsert : true,
             bulkData : linkDataArray,
             onError : onSyncError,
             onSuccess : () => operationDone++
@@ -56,7 +58,7 @@ export class LinkManagerClass {
         if(operationDone === totalOperationCount) operationDone = 0;
         else if (operationDone !== totalOperationCount) onSyncError("Some of the links could not successfully synced.");
     }
-    static async deleteLinkToSupabase({ links, token, onSyncError } : ILinkManager)
+    static async deleteLinkToSupabase({ links, email, token, onSyncError } : ILinkManager)
     {
         let totalOperationCount = links.length;
         if(totalOperationCount === 0) return;

@@ -5,7 +5,7 @@ import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 import { useSettingContext } from "@/context/SettingContextProvider";
 
 import { Box, HStack, Stack, Text } from "@chakra-ui/react";
-import { EllipsisVertical, LayoutPanelTop, PlusIcon, SquareChevronDown, SquareChevronUp } from "lucide-react";
+import { CirclePlus, EllipsisVertical, LayoutPanelTop, PlusIcon, Search, SquareChevronDown, SquareChevronUp, X } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 
 import { 
@@ -50,7 +50,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
     useKeyboardNavigation({ role: 'tab', parentRef : parentEmailSelectModalRef, direction : "vertical" });
 
     const { linkLayoutDefaultSize } = useSettingContext()!;
-    const { currentSection, setOpenLinkCreateDrawer, setOpenSectionTransferer } = useSectionContext();
+    const { currentSection, setOpenLinkCreateDrawer, setOpenSectionTransferer, openLinkSearch, setOpenLinkSearch } = useSectionContext();
     const { UpdateSection } = useSectionController();
 
     const { ToastMessage } = useSendToastMessage();
@@ -75,8 +75,14 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
             <ConditionalRender render={showLinkCount}>
                 <Text role="tab" className="dark:text-neutral-500 max-sm:text-sm">{currentSection.links.length}</Text>
             </ConditionalRender>
+            <Button role="tab" className={buttonStyle} onClick={() => setOpenLinkSearch(!openLinkSearch)}>
+                {
+                    openLinkSearch ? <X className="max-sm:w-4" /> : <Search className="max-sm:w-4" />
+                }
+            </Button>
             <Button role="tab" onClick={() => setOpenLinkCreateDrawer(true)} className={buttonStyle}>
-                <PlusIcon className="max-sm:w-4" />
+                {/* <PlusIcon className="max-sm:w-4" /> */}
+                <CirclePlus className="max-sm:w-4" />
             </Button>
             <Button role="tab" onClick={() => handleMinimzie()} className={`${buttonStyle} ${minimized ? "dark:text-white text-black" : ""}`}>
                 {

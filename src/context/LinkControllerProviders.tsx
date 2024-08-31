@@ -9,6 +9,7 @@ import { UploadImageToCloudinary } from '@/app/actions/cloudnary/uploadImage';
 import { RefineEmail, SynchronizeToDexieDB, FileToBase64 } from '@/helpers';
 import { useSendToastMessage } from '@/hook/useSendToastMessage';
 import { DeleteCloudinaryImage } from '@/app/actions/cloudnary/deleteImage';
+import { useSectionContainerContext } from './SectionContainerContext';
 
 export const dynamic = 'force-dynamic';
 

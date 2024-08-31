@@ -3,13 +3,11 @@
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 import { LinkLayout } from '@/scheme/Link';
 import { SectionScheme } from '@/scheme/Section';
+import { useSectionContainerContext } from './SectionContainerContext';
 
 export const dynamic = 'force-dynamic';
 
 interface SectionContextData {
-    highlightContexts: boolean;
-    setHighlightContexts: Dispatch<SetStateAction<boolean>>;
-
     collapseContexts: boolean;
     setCollapseContexts: Dispatch<SetStateAction<boolean>>;
 
@@ -22,15 +20,22 @@ interface SectionContextData {
     currentSection: SectionScheme;
     setCurrentSection: Dispatch<SetStateAction<SectionScheme>>;
 
+    originalSection: SectionScheme;
+    setOriginalSection: Dispatch<SetStateAction<SectionScheme>>;
+
     sectionToTransfer: SectionScheme;
     setSectionToTransfer: Dispatch<SetStateAction<SectionScheme>>;
 
     openSectionTransferer: boolean;
     setOpenSectionTransferer: Dispatch<SetStateAction<boolean>>;
+
+    openLinkSearch : boolean;
+    setOpenLinkSearch : Dispatch<SetStateAction<boolean>>;
 }
 
 interface SectionContextVoids {
     openTransferDialog : (id : string) => void;
+    
 }
 
 const defaultSectionData : SectionScheme = {
@@ -56,28 +61,35 @@ export const useSectionContext = () => useContext(SectionContext)!;
 export const SectionContextProvider = ({children} : SectionContextProviderProps) => {
 
     const [currentSection, setCurrentSection] = useState<SectionScheme>(defaultSectionData);
+    const [originalSection, setOriginalSection] = useState<SectionScheme>(defaultSectionData);
     const [openCreatorDialog, setOpenCreatorDialog] = useState<boolean>(false);
     const [collapseContexts, setCollapseContexts] = useState<boolean>(false);
-    const [highlightContexts, setHighlightContexts] = useState<boolean>(false);
+
+    const [openLinkSearch, setOpenLinkSearch] = useState<boolean>(false);
 
     const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState<boolean>(false);
     const [openSectionTransferer, setOpenSectionTransferer] = useState<boolean>(false);
     const [sectionToTransfer, setSectionToTransfer] = useState<SectionScheme>(defaultSectionData);
 
-    const [linksLayout, setLinksLayout] = useState<LinkLayout>({ layout : "Grid Detailed", size : 1 });
+    const { sectionHighlighted, setSelectedSections } = useSectionContainerContext();
 
-    useEffect(() => {
-        //setLinksLayout(linksLayout);
-    }, [linksLayout])
+    useEffect(() => {    
+        setSelectedSections((prev) => 
+            sectionHighlighted  ? [...prev, currentSection].filter((v, i, a) => a.indexOf(v) === i) 
+            : prev.filter(section => section !== currentSection)
+        );
+
+    }, [sectionHighlighted, currentSection]);
     
+    const filterSection = () => {
+        
+    }
     
     const openTransferDialog = (id : string) => {
         
     }
 
     const contextValue: SectionContextType = {
-        highlightContexts,
-        setHighlightContexts,
         collapseContexts,
         setCollapseContexts,
         openCreatorDialog,
@@ -91,6 +103,11 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
         setSectionToTransfer,
         openSectionTransferer,
         setOpenSectionTransferer,
+        openLinkSearch,
+        setOpenLinkSearch,
+
+        originalSection,
+        setOriginalSection,
 
         openTransferDialog
     };

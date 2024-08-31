@@ -118,6 +118,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                     onSuccess : async (sections) => {
                         console.log("INITALIZED FROM DATABASE");
                         setContextSections(sections);
+                        setOriginalContextSections(sections);
                         await SynchronizeToDexieDB({ sections : sections, email : currentUserEmail });
                     },
                     onEmpty() {  },
@@ -173,6 +174,7 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                 const updatedSections = prevSections.filter(section => section.id !== id);
                 return updatedSections;
             })
+            SaveContextSections();
 
             await SynchronizeToDexieDB({ sections : contextSections, email : user.primaryEmailAddress.emailAddress });
         }

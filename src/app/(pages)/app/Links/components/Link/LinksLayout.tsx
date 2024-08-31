@@ -13,11 +13,12 @@ import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layout : LinkLayout, id : string }) => {
 
     const parentRef = useRef<HTMLDivElement>(null);
-    //useKeyboardNavigation({
-    //    parentRef : parentRef,
-    //    role : "tab",
-    //    direction : "both"
-    //})
+    useKeyboardNavigation({
+        parentRef : parentRef,
+        role : "tab",
+        enable : true,
+        direction : "both"
+    })
 
     const MemoizedContentDisplay = useMemo(() => {
         if ((links ?? []).length > 0) {
@@ -59,7 +60,7 @@ export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layo
             tabIndex={0}
             ref={parentRef}
             className={`w-full p-2
-                ${links?.length && links?.length > 0 ? `grid grid-rows-5 ${GenerateLayoutGrid()} gap-4` : ""} pointer-events-none
+                ${links?.length && links?.length > 0 ? `grid grid-rows-5 ${GenerateLayoutGrid()} gap-4` : ""}
                 overflow-hidden transition-all duration-200 select-none !border-none !ring-0 focus-visible:!outline-2 focus-visible:!outline-theme-borderKeyboardParentNavigation rounded-xl
             `}>
             {MemoizedContentDisplay}

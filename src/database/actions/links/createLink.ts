@@ -24,6 +24,10 @@ export async function CreateLink({ token, onSuccess, onError, linkData, useBulkI
 {
     try
     {
+        if(!linkData && bulkData && !useBulkInsert) {
+            onError?.("Error While Creating Link : data provided but useBulkInsert was set to false");
+            return;
+        }
         if(!linkData && !bulkData) {
             onError?.("Error While Creating Link : [LN :: 28 >> CREATE_LINK()] | No data provided");
             return;

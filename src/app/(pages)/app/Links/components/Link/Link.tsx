@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import dynamic from 'next/dynamic';
 import { useLinkController } from "@/context/LinkControllerProviders";
 import { useWindowResize } from "@/hook/useWindowResize";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
 
-import { Box } from "@chakra-ui/react";
+import { Box, useOutsideClick } from "@chakra-ui/react";
 
 import { LinkContextMenuWrapper } from "./LinkContextMenuWrapper";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
@@ -29,6 +29,7 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
     const [showMobileOptions, setShowMobileOptions] = useState(false);
 
     const { DeleteLink } = useLinkController()!;
+    const linkRef = useRef<HTMLDivElement>(null);
 
     const handleDeleteLink = async () => {
         DeleteLink({
@@ -63,9 +64,11 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
             <Box
                 tabIndex={1}
                 role="tab"
-                onKeyDown={handleEsacapeOutline}
+                id="link"
+                ref={linkRef}
+                // onKeyDown={handleEsacapeOutline}
                 className={`w-full dark:bg-theme-bgFourth flex flex-col items-center justify-center py-2 px-4 rounded-xl
-                shadow-sm shadow-black transition-all duration-150 !outline-none !ring-0 pointer-events-auto
+                shadow-sm shadow-black transition-all duration-150 !outline-none !ring-0
                 ${layout.layout == "Grid Detailed" || layout.layout == "List Detailed" ? "space-y-4" : "space-y-0"}
                 ${showContextMenuOutline ? "border-2 !border-indigo-300" : "border-[1px] dark:border-neutral-700 focus:outline-none focus-visible:!outline-4 focus-visible:!outline-theme-borderNavigation"}`
             }>

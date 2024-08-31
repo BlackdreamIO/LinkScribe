@@ -34,7 +34,7 @@ export const SectionContainer = () => {
             <SectionContextProvider key={i}>
                 <ErrorManager key={section.id}>
                     <Section
-                        currentSection={section}
+                        section={section}
                         key={section.id}
                     />
                 </ErrorManager>

@@ -30,7 +30,7 @@ export default function ErrorManager(args : ErrorManager)
 
     const ErrorSkeleton = () => {
         return (
-            <Accordion type="single" collapsible className="w-full decoration-transparent !bg-transparent !border-none">
+            <Accordion type="single" collapsible className="w-full decoration-transparent !bg-transparent !border-none z-[10000]">
                 <AccordionItem value="item-1" className="dark:border-neutral-700 rounded-lg w-full px-4 py-2 space-y-4 !border-none">
                     <Flex alignItems={"center"} justifyContent={"space-between"}>
                         <AccordionTrigger className="text-center dark:text-yellow-300 font-extrabold text-xl !no-underline flex-grow flex !border-none">

@@ -11,6 +11,7 @@ import { useWindowResize } from "@/hook/useWindowResize";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "@radix-ui/react-context-menu";
 import { Separator } from "@/components/ui/separator";
 import { Labelkey } from "@/components/ui/key";
+import { useSectionContainerContext } from "@/context/SectionContainerContext";
 //import { ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from "@/components/ui/context-menu";
 
 type SectionContainerContextWrapperProps = {
@@ -35,6 +36,9 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
     //     collapseContexts,
     //     setCollapseContexts 
     // } = useSectionContext()!;
+
+    const { setOpenCreatorDialog } = useSectionContainerContext();
+
     const {
         contextSections,
         DeleteSections
@@ -132,7 +136,7 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                 {children}
             </ContextMenuTrigger>
             <ContextMenuContent sticky="partial" className="w-80 space-y-2 rounded-md p-2 dark:bg-theme-bgFourth/30 !backdrop-blur-xl !backdrop-filter dark:shadow-black border dark:border-neutral-700">
-                <ContextMenuItem onClick={() => {}} className={dropdownMenuItemStyle}>
+                <ContextMenuItem onClick={() => setOpenCreatorDialog(true)} className={dropdownMenuItemStyle}>
                     New Section <Labelkey label="CTRL + SHIFT + C"/>
                 </ContextMenuItem>
                 <ContextMenuItem className={dropdownMenuItemStyle}>
