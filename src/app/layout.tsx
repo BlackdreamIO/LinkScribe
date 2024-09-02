@@ -1,24 +1,18 @@
 import type { Metadata } from "next";
-import ClerkProviderContext from "@/context/ClerkProvider";
-
-import { Inter } from "next/font/google";
-import { GeistSans } from 'geist/font/sans';
 import "@/styles/globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import { Navbar } from "./components/Navbar";
 
 export const metadata: Metadata = {
-    title: "Link Scribe",
+    title: "Blackdream",
     description: "HomePage",
 };
 
 export default function RootLayout({ children,}: Readonly<{children: React.ReactNode;}>) {
     return (
-        <html lang="en" className={inter.className}>
-            <body className="dark" id="app">
-                <ClerkProviderContext>
-                    {children}
-                </ClerkProviderContext>
+        <html lang="en">
+            <body id="app">
+                <Navbar/>
+                {children}
             </body>
         </html>
     );

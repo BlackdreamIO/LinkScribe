@@ -1,30 +1,16 @@
-"use client"
+import { Box } from "@chakra-ui/react";
 
-import { useEffect } from "react";
-import { getSections } from "./actions/action";
-
-export const dynamic = 'force-dynamic';
+import { HeroSection } from "./components/HeroSection";
+import { GlobeDemo } from "./components/GlobeDemo";
+import { Skills } from "./components/Skills";
 
 export default function HomePage()
 {
-    useEffect(() => {
-        try {
-            const fetchData = async () => {
-                const document = await getSections();
-                // log cache data after build
-                console.log(document);
-            }
-
-            fetchData();
-        } catch (error) {
-            console.log(error);
-        }
-    }, [])
-    
-
     return (
-        <div className='dark:bg-black min-h-screen max-h-auto no-scrollbar overflow-y-auto'>
-            <h1 className="text-center text-4xl mt-10">CRUD</h1>
-        </div>
+        <Box>
+            <HeroSection/>
+            <GlobeDemo />
+            <Skills/>
+        </Box>
     )
 }
