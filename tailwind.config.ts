@@ -29,6 +29,8 @@ const config = {
                 textThird : "rgb(150,150,150,255)",
                 textLink : "#90c1f8",
 
+                primaryAccent : "#C8BCF6",
+
                 borderSecondary : "#C8BCF6",
                 borderNavigation : "#38bdf8",
                 borderKeyboardParentNavigation : "#d3fc03",

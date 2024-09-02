@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { Box, Text } from "@chakra-ui/react";
 
 export const Labelkey = ({ label, className } : { label : string, className? : string  }) => {
