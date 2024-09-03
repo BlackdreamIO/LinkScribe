@@ -41,7 +41,7 @@ export async function CreateSection({ token, onSuccess, onError, email, sectionD
             return data;
         }
         else if(error || status != 201) {
-            console.error("Error While Creating Section : [LN :: 33 >> CREATE_SECTION()] | ", error);
+            console.error("Error While Creating Section : [LN :: 44 >> CREATE_SECTION()] | ", error);
             onError?.(statusText);
             return [];
         }

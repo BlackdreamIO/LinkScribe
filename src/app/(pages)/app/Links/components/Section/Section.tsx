@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { SectionScheme } from "@/scheme/Section";
 
 import { useSettingContext } from "@/context/SettingContextProvider";
@@ -15,9 +15,7 @@ import { SectionHeader } from "./SectionHeader";
 import { LinksLayout } from "../Link/LinksLayout";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
-export const Section = ({ section } : {section : SectionScheme}) => {
-
-    const { id, links } = section;
+const NonMemSection = ({ section } : {section : SectionScheme}) => {
 
     const [minimize, setMinimize] = useState(section.minimized || false);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
@@ -59,3 +57,10 @@ export const Section = ({ section } : {section : SectionScheme}) => {
         </Box>
     )
 }
+
+
+export const Section = memo(NonMemSection, (prevProps, nextProps) => {
+    return (
+        prevProps.section === nextProps.section
+    );
+});

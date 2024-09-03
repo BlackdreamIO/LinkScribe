@@ -14,8 +14,8 @@ export const FILTER_QUERIES : IQuery[] = [
         value : "from:<> example"
     },
     {
-        label : "by:<method> [view, date, vaild]",
-        value : "by:<>"
+        label : "view:<0 or 1> ascending/descending",
+        value : "view:<descending>"
     },
     {
         label : "date:<00/00/0000>",

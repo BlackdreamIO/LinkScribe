@@ -38,9 +38,9 @@ export default async function SynchronizeToSupabase(args : ISynchronizeToSupabas
 
         SectionManagerClass.InitializeSectionManager({ email, token });
 
-        SectionManagerClass.createSectionToSupabase({ email, token, sections : newSections, onSyncError(err) { console.log(err) } });
-        SectionManagerClass.deleteSectionToSupabase({ email, token, sections : deletedSections, onSyncError(err) {console.log(err)} });
-        SectionManagerClass.updateSectionToSupabase({ email, token, sections : updatedSections, onSyncError(err) {console.log(err)} });    
+        await SectionManagerClass.createSectionToSupabase({ email, token, sections : newSections, onSyncError(err) { console.log(err) } });
+        await SectionManagerClass.deleteSectionToSupabase({ email, token, sections : deletedSections, onSyncError(err) {console.log(err)} });
+        await SectionManagerClass.updateSectionToSupabase({ email, token, sections : updatedSections, onSyncError(err) {console.log(err)} });    
         
         await LinkManagerClass.createLinkToSupabase({ email, token, links : newLinks, onSyncError(error) {console.log(error)} });
         await LinkManagerClass.deleteLinkToSupabase({ email, token, links : deletedLinks, onSyncError(error) {console.log(error)} })

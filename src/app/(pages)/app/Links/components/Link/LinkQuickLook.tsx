@@ -80,7 +80,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
 
         if(!link || !user) return;
 
-        if(link.image !== "") return setLinkPreviewImage(link.image);
+        if(link.image !== "" && link.image.includes("https")) return setLinkPreviewImage(link.image);
 
         else {
             const { imageURL, hasError, error } = await GetCloudinaryImage({ publicID : link.id, userEmail : user?.primaryEmailAddress?.emailAddress ?? "" });
@@ -100,7 +100,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     }
 
     const handleDelete = async () => {
-        DeletePreviewImage({link : link})
+        //DeletePreviewImage({link : link})
     }
 
     const handleSave = () => {

@@ -25,7 +25,7 @@ export const SectionCreator = () => {
         if(user && user.primaryEmailAddress && sectionTitle) {
             CreateSection({
                 newSection : {
-                    id : uuidv5.URL.slice(0, 16), // gen 16 character long random string
+                    id : crypto.randomUUID(), // gen 16 character long random string
                     title : sectionTitle,
                     links : [],
                     totalLinksCount : 0,

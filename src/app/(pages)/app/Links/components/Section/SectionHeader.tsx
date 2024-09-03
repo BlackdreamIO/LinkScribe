@@ -25,11 +25,7 @@ import { SectionHeaderLinkDrawer, SectionTransferer } from "./DynamicImport";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { SectionLinkSearch } from "./SectionLinkSearch";
-
-const dropdownMenuItemStyle = `text-md py-2 font-normal rounded-lg px-2 transition-none 
-    dark:bg-transparent dark:hover:bg-theme-bgThird dark:text-neutral-300 dark:hover:text-theme-textSecondary
-    hover:bg-neutral-200 data-[highlighted]:bg-neutral-200
-    data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary !outline-none`;
+import { DropdownMenuItemStyle } from "@/styles/componentStyles";
 
 type SectionHeaderProps = {
     section : SectionScheme;
@@ -99,7 +95,9 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                             />
                         </Box>
 
-                        <SectionLinkSearch/>
+                        <ErrorManager>
+                            <SectionLinkSearch/>
+                        </ErrorManager>
 
                         <ErrorManager>
                             <SectionHeaderOptions
@@ -121,12 +119,12 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                 
             </ContextMenuTrigger>
             <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth bg-neutral-50 dark:shadow-black border dark:border-neutral-700 z-20">
-                <ContextMenuItem onClick={() => setTitleEditMode(true)} className={dropdownMenuItemStyle}>Rename Section</ContextMenuItem>
-                <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>Add Link</ContextMenuItem>
-                <ContextMenuItem className={dropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>
+                <ContextMenuItem onClick={() => setTitleEditMode(true)} className={DropdownMenuItemStyle}>Rename Section</ContextMenuItem>
+                <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={DropdownMenuItemStyle}>Add Link</ContextMenuItem>
+                <ContextMenuItem className={DropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>
                 <ContextMenuItem 
                     onClick={() => DeleteSections(currentSection.id)} 
-                    className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
+                    className={`${DropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
                         Delete
                 </ContextMenuItem>
             </ContextMenuContent>

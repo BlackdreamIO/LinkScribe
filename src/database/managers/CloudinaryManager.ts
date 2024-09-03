@@ -16,6 +16,8 @@ export class CloudinaryManagerClass {
 
         const cloudnaryImagesToDelete = [...cloudnaryIds].filter(id => !localLinksIds.has(id));
 
+        if(cloudnaryImagesToDelete.length == 0) return;
+
         const { success, error } = await CloudinaryDeleteResources({ email : email, publicIDs : cloudnaryImagesToDelete});
 
         console.log({

@@ -81,10 +81,6 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
 
     }, [sectionHighlighted, currentSection]);
     
-    const filterSection = () => {
-        
-    }
-    
     const openTransferDialog = (id : string) => {
         
     }

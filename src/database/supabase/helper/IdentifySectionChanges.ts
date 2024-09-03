@@ -33,6 +33,12 @@ export function IdentifySectionChanges({ dexieSections, supabaseSections }: { de
 
     // Get Sections
     const newSections = getNewSections(sortedDexieSections, createdIds);
+
+    console.log({
+        supabaseSectionIds : supabaseSectionIds,
+        dexieSectionIds : dexieSectionIds
+    })
+
     const deletedSections = getNewSections(sortedSupabaseSections, deletedIds);
     const updatedSections = getNewSections(filteredUpdatedSections, updatedIds);
 

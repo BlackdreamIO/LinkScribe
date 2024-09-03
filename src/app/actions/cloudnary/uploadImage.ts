@@ -47,7 +47,7 @@ export async function UploadImageToCloudinary({ file, filename, folder } : IUplo
     {
         const public_id = `${folder}/${filename}`;
 
-        // const existingImage = await Cloudinary.api.resource(public_id);
+        //const existingImage = await Cloudinary.api.resource(public_id);
 
 
         // // Delete Any Existing Image Before Uploading New Image

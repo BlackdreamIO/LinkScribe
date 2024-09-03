@@ -71,7 +71,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                                 title: linkData.title,
                                 url: linkData.url,
                                 visitCount: linkData.visitCount,
-                                created_at: new Date().toString(),
+                                created_at: new Date(),
                                 ref : linkData.ref,
                                 image : linkData.image
                             }
@@ -183,11 +183,12 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
     const AddPreviewImage = async ({ file, url, useFileMethod, autoSyncAfterUpload, link, onSucess, onError, onCallback } : IAddPreviewImage) => {
         if(user && isSignedIn && user.primaryEmailAddress)
         {
+            try{
                 if(file !== undefined)
                 {
                     onCallback?.({ loading : true });
                     const convertedBase64 = await FileToBase64(file);
-                    const { imageURL, error } = await UploadImageToCloudinary({
+                    const { error, publicID } = await UploadImageToCloudinary({
                         file : convertedBase64,
                         filename : link.id,
                         folder : RefineEmail(user.primaryEmailAddress.emailAddress),
@@ -205,7 +206,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                         sectionID : link.ref,
                         updatedLink : {
                             ...link,
-                            image : imageURL,
+                            image : publicID,
                         }
                     })
 
@@ -221,7 +222,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     const imageBlob = await fetch(url).then(res => res.blob());
                     const convertedBase64 = await FileToBase64(imageBlob);
 
-                    const { imageURL, error } = await UploadImageToCloudinary({
+                    const { publicID, error } = await UploadImageToCloudinary({
                         file : convertedBase64,
                         filename : link.id,
                         folder : RefineEmail(user.primaryEmailAddress.emailAddress)
@@ -240,7 +241,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                         sectionID : link.ref,
                         updatedLink : {
                             ...link,
-                            image : imageURL,
+                            image : publicID,
                         }
                     })
 
@@ -252,12 +253,12 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     ToastMessage({ message : "Please Provide A File Or URL", type : "Warning" });
                     onSucess?.();
                 }
-            //}
-            // catch (error : any) {
-            //     console.log(error);
-            //     ToastMessage({ message : "Internal 500 Error", description : String(error), type : "Error" });
-            //     onError?.();
-            // }
+            }
+            catch (error : any) {
+                console.log(error);
+                ToastMessage({ message : "Internal 500 Error", description : String(error), type : "Error" });
+                onError?.();
+            }
         }
     }
 

@@ -59,7 +59,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
             sectionID : sectionID,
             updatedLink : {
                 ...link,
-                visitCount : link.visitCount ++
+                visitCount : link.visitCount + 1
             }
         })
     }

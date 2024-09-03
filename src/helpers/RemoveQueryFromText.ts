@@ -6,9 +6,9 @@
  * @param keys - An optional array of query parameter keys to remove. Defaults to ["from", "date"].
  * @returns The input string with all matched query parameters removed.
  */
-export const RemoveQueryFromText = (input: string, keys: string[] = ["from", "date"]): string => {
+export const RemoveQueryFromText = (input: string, excludeQueryies: string[] = ["from", "date"]): string => {
     // Create a regular expression pattern to match all keys provided
-    const regexPattern = keys.map((key) => `${key}:<[^>]+>`).join("|");
+    const regexPattern = excludeQueryies.map((query) => `${query}:<[^>]+>`).join("|");
     
     // Create a new RegExp object using the combined pattern
     const regex = new RegExp(regexPattern, "g");

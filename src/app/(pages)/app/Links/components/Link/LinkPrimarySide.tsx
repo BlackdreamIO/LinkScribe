@@ -91,7 +91,7 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
                 </Box>
             </ConditionalRender>
             <ConditionalRender render={(layout.layout == "Grid Compact" || layout.layout == "List Compact" || layout.layout == "Compact")}>
-                <Box className={`w-6/12 flex flex-row items-center justify-end overflow-hidden`}>
+                <Box className={`w-auto flex flex-row items-center justify-end overflow-hidden`}>
                     <Link
                         target="_blank"
                         href={link.url}
