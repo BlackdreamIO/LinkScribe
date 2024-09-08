@@ -36,13 +36,14 @@ export const SectionTransferer = () => {
 
 
     const handleTransfer = async () => {
-        await TransferSection({
+        TransferSection({
             email : selectedEmail,
             sectionToTransfer : currentSection,
             importCustomLinks : true,
             importLinks : false,
             links : selectedLinks
         })
+        setOpenSectionTransferer(false);
     }
 
     useEffect(() => {

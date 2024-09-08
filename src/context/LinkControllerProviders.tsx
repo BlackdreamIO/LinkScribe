@@ -104,42 +104,41 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
                 if (targetSection) {
                     // Find the index of the link to update
-                    const linkIndex = targetSection.links.findIndex((link) => link.id === currentLink.id);
-                
+                    const linkIndex = targetSection.links.findIndex(link => link.id === currentLink.id);
+    
                     if (linkIndex !== -1) {
-                        // Update the link at the found index
-                        const updatedLinks = [...targetSection.links];
-                        updatedLinks[linkIndex] = {
-                            ...updatedLinks[linkIndex],
-                            title: updatedLink.title,
-                            url: updatedLink.url,
-                            visitCount: updatedLink.visitCount,
-                            created_at: updatedLink.created_at,
-                            ref : updatedLink.ref,
-                            image : updatedLink.image
-                        };
-                        
-                        if(currentLink == updatedLink) {
-                            return;
+                        // Check if the current link and updated link are the same to avoid unnecessary updates
+                        if (currentLink.id === updatedLink.id &&
+                            currentLink.title === updatedLink.title &&
+                            currentLink.url === updatedLink.url &&
+                            currentLink.visitCount === updatedLink.visitCount &&
+                            currentLink.created_at === updatedLink.created_at &&
+                            currentLink.ref === updatedLink.ref &&
+                            currentLink.image === updatedLink.image) {
+                            return; // No update required
                         }
-
-                        const newUpdatedSection = contextSections.map((section) => {
-                            if(section.id === sectionID) {
-                                return {
-                                    ...section,
-                                    links: updatedLinks
-                                }
-                            }
-                            else {
-                                return section;
-                            }
-                        })
-
-                        setContextSections(newUpdatedSection);
-                        await SynchronizeToDexieDB({ sections : newUpdatedSection, email : ConvertEmailString(user.primaryEmailAddress.emailAddress) });
+    
+                        // Create a new links array with the updated link to maintain immutability
+                        const updatedLinks = targetSection.links.map((link, index) => 
+                            index === linkIndex ? { ...link, ...updatedLink } : link
+                        );
+    
+                        // Create a new sections array with the updated links array
+                        const newUpdatedSections = contextSections.map(section => 
+                            section.id === sectionID ? { ...section, links: updatedLinks } : section
+                        );
+    
+                        setContextSections(newUpdatedSections);
+    
+                        // Synchronize with DexieDB
+                        await SynchronizeToDexieDB({ 
+                            sections: newUpdatedSections, 
+                            email: ConvertEmailString(user.primaryEmailAddress.emailAddress) 
+                        });
                     }
                 }
                 else {
+                    throw new Error('Section not found');
                 }
             }
         }

@@ -17,6 +17,7 @@ import { DexieGetSectionsByEmail } from '@/database/dexie/helper/DexieSectionByE
 import { SyncStatus } from '@/types/Sync';
 import { SynchronizeToDexieDB } from '@/database/dexie/functions/SynchronizeToDexie';
 import SynchronizeToSupabase from '@/database/supabase/functions/SynchronizeToSupabase';
+import { DexieDB } from '@/database/dexie';
 
 //PouchDB.plugin(PouchDBLocalStorageAdapter);
 
@@ -137,9 +138,25 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
 
     const UpdateSection = async ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => {
         const currentUserEmail = RefineEmail(user?.primaryEmailAddress?.emailAddress || "");
-        const filteredSections = contextSections.map((section) => section === currentSection ? { ...section, ...updatedSection } : section );
-        setContextSections(filteredSections);
+        
+        // Create a new array with the updated section
+        //const filteredSections = contextSections.map((section) =>
+        //  section.id === currentSection.id ? { ...section, ...updatedSection } : section
+        //);
 
+        const updateSectionIndex = contextSections.findIndex((section) => section.id === updatedSection.id);
+
+        if (updateSectionIndex !== -1) {
+            // Create a new array with only the updated section
+            const updatedSections = [
+                ...contextSections.slice(0, updateSectionIndex),
+                updatedSection,
+                ...contextSections.slice(updateSectionIndex + 1)
+            ];
+        
+            setContextSections(updatedSections); // Update the state with the updated sections
+        }
+        
         try
         {
             if(currentSection == updatedSection) return;
@@ -180,23 +197,13 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         }
     }
 
-    /**
-     * Transfers a section to a new email address, creating a new section and links if necessary.
-     *
-     * @param {string} email - The email address to transfer the section to.
-     * @param {SectionScheme} sectionToTransfer - The section to transfer.
-     * @param {boolean} importCustomLinks - Whether to import custom links.
-     * @param {LinkScheme[]} links - The links to import if importCustomLinks is true.
-     * @param {boolean} importLinks - Whether to import links from the original section.
-     * @return {Promise<void>} A promise that resolves when the transfer is complete.
-     */
     const TransferSection = async ({ email, sectionToTransfer, importCustomLinks, links, importLinks } : { email : string, importLinks: boolean, sectionToTransfer : SectionScheme, importCustomLinks : boolean, links : LinkScheme[] }) => {
         const token = await getToken({ template : "linkscribe-supabase" });
 
         const sections = await DexieGetSectionsByEmail(RefineEmail(email));
 
-        if(sections && sections.find(section => section.title === sectionToTransfer.title)) {
-            ToastMessage({message : "Section Already Exists", description : "SYSTEM", type : "Error"});
+        if(sections && sections.find(section => section.id === sectionToTransfer.id)) {
+            ToastMessage({message : "Section Already Exists", description : "SYSTEM", type : "Warning"});
             return;
         }
         
@@ -211,20 +218,30 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
             links : importLinks ? sectionToTransfer.links : []
         };
 
-        const newLinks : LinkScheme[] = links.map((link) => ({...link, id : crypto.randomUUID().slice(0, 8), ref : randomUniqeSectionID}));
+        const modifiedLinks : LinkScheme[] = links.map((link) => ({...link, id : crypto.randomUUID().slice(0, 8), ref : randomUniqeSectionID}));
 
-        await ClientSideCreateSection({email : RefineEmail(email), sectionData : newSection, token : token});
+        await ClientSideCreateSection({email : RefineEmail(email), sectionData : newSection, token : token, onSuccess : async () => {
+            const linkDataArray = (importCustomLinks && !importLinks ? modifiedLinks : newSection.links).map(link => ({
+                id: link.id,
+                title: link.title,
+                url: link.url,
+                ref: link.ref,
+                created_at: new Date(link.created_at).toISOString(),
+                image: link.image
+            }));
+            
+            await ClientSideCreateLink({useBulkInsert : true, bulkData : linkDataArray, token : token, onError(error) {
+                ToastMessage({message : `There were some error during creating link to : ${newSection.title}`, description : String(error), type : "Error"});
+            }});
 
-        if(importCustomLinks && !importLinks) {
-            for(const link of newLinks) {
-                await ClientSideCreateLink({linkData : link, token : token});
-            }
-        }
-        else if(importLinks && !importCustomLinks) {
-            for(const link of newSection.links) {
-                await ClientSideCreateLink({linkData : link, token : token});
-            }
-        }
+            const transferAccountLocalSections = await DexieGetSectionsByEmail(email) ?? [];
+
+            await SynchronizeToDexieDB({ sections : [...transferAccountLocalSections, newSection], email : RefineEmail(email) });
+            ToastMessage({message : "Section Successfully Transferred", description : "SYSTEM", type : "Success"});
+        },
+        onError(error) {
+            ToastMessage({message : "Failed To Transfer Please Be Paitent Your Data Synced", description : String(error), type : "Error"});
+        },});
     }
 
     // SAVE CONTEXT SECTION WHEN SERVER SIDE OPERATION COMPLETE
@@ -263,10 +280,9 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         if (isSignedIn && isLoaded && user.primaryEmailAddress)
         {
             const currentUserEmail = RefineEmail(user?.primaryEmailAddress?.emailAddress ?? "");
-            await SynchronizeToSupabase({ token, email : currentUserEmail });
+            await SynchronizeToSupabase({ token, email : currentUserEmail, callback : setSyncStatus });
         }
         else{
-
         }
     }
     

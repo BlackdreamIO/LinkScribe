@@ -41,7 +41,7 @@ export const SectionContainer = () => {
             </SectionContextProvider>
         ))
     }, [contextSections]);
-
+    
     const RenderSections = () => {
         if(contextSections && contextSections.length > 0)
         {

@@ -72,7 +72,7 @@ export const SectionLinkSearch = () => {
         if(searchText.length < 1) {
             setCurrentSection(originalSection);
         }
-    }, [searchText, openLinkSearch])
+    }, [searchText, openLinkSearch]) // eslint-disable-line react-hooks/exhaustive-deps
     
     const handleFilter = () => {
 

@@ -1,6 +1,10 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react";
+import { LinkLayout, LinkScheme } from "@/scheme/Link";
+import { useLinkController } from "@/context/LinkControllerProviders";
+
+import Link from "next/link";
 
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { Input } from "@/components/ui/input";
@@ -10,9 +14,6 @@ import { Eye } from "lucide-react";
 import { LinkFavIcon } from "./LinkFavIcon";
 import { LinkUrlStatus } from "./LinkUrlStatus";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
-import Link from "next/link";
-import { LinkLayout, LinkScheme } from "@/scheme/Link";
-import { useLinkController } from "@/context/LinkControllerProviders";
 
 type LinkPrimarySideProps = {
     link : LinkScheme;

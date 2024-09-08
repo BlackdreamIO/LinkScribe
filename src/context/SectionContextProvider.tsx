@@ -33,10 +33,7 @@ interface SectionContextData {
     setOpenLinkSearch : Dispatch<SetStateAction<boolean>>;
 }
 
-interface SectionContextVoids {
-    openTransferDialog : (id : string) => void;
-    
-}
+interface SectionContextVoids { };
 
 const defaultSectionData : SectionScheme = {
     id : "",
@@ -52,7 +49,9 @@ const defaultSectionData : SectionScheme = {
 
 export interface SectionContextType extends SectionContextData, SectionContextVoids {};
 
-type SectionContextProviderProps = { children : ReactNode };
+type SectionContextProviderProps = { 
+    children : ReactNode;
+};
 
 const SectionContext = createContext<SectionContextType | undefined>(undefined);
 
@@ -79,11 +78,7 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
             : prev.filter(section => section !== currentSection)
         );
 
-    }, [sectionHighlighted, currentSection]);
-    
-    const openTransferDialog = (id : string) => {
-        
-    }
+    }, [sectionHighlighted, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const contextValue: SectionContextType = {
         collapseContexts,
@@ -104,8 +99,6 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
 
         originalSection,
         setOriginalSection,
-
-        openTransferDialog
     };
 
     return (

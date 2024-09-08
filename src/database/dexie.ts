@@ -24,6 +24,11 @@ class LinkScribeDexie extends Dexie {
         this.links = this.table('links');
         this.appLayout = this.table("appLayout");
         this.appTheme = this.table("appTheme");
+
+        
+        this.sections.hook("creating", function (table, data) {
+            console.log("creating", table, data);
+        })
     }
 }
 
