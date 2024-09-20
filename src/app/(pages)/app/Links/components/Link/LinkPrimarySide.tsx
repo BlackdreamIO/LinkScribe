@@ -15,6 +15,15 @@ import { LinkFavIcon } from "./LinkFavIcon";
 import { LinkUrlStatus } from "./LinkUrlStatus";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+  } from "@/components/ui/hover-card"
+import { DexieGetCacheImage } from "@/database/dexie/helper/DexieCacheImages";
+import Image from "next/image";
+  
+
 type LinkPrimarySideProps = {
     link : LinkScheme;
     sectionID : string;
@@ -29,8 +38,9 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
     const { link, sectionID, showMobileOptions, titleEditMode, onTitleEditMode, layout } = props;
 
     const [linkTitle, setLinkTitle] = useState(link.title);
+    const [previewImage, setPreviewImage] = useState<string>("");
 
-    const { UpdateLink } = useLinkController()!;
+    const { UpdateLink, GetCacheImage, IncreaseViewCount } = useLinkController()!;
     const titleRef = useRef<HTMLInputElement>(null);
 
     const HandleRenameTitle = () => {
@@ -54,6 +64,18 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
             return () => clearTimeout(currentTimout);
         }
     }, [titleEditMode]);
+
+    useEffect(() => {
+        const getImage = async () => {
+            const cacheImage = await GetCacheImage({ id : link.id });
+            if(cacheImage) {
+                const url = URL.createObjectURL(cacheImage);
+                setPreviewImage(url);
+            }   
+        }
+        getImage();
+    }, [link])
+    
 
     return (
         <HStack className="w-full" justifyContent={"space-between"}>
@@ -85,7 +107,6 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
                         <Eye className="mr-2" /> {link.visitCount}
                     </Text>
                     <Text className="dark:text-neutral-500 max-xl:text-sm">
-                        {/* {new Date().toLocaleDateString()} */}
                         {new Date(link.created_at).toLocaleDateString()}
                     </Text>
                     <LinkUrlStatus linkUrl={link.url} />
@@ -93,13 +114,22 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
             </ConditionalRender>
             <ConditionalRender render={(layout.layout == "Grid Compact" || layout.layout == "List Compact" || layout.layout == "Compact")}>
                 <Box className={`w-auto flex flex-row items-center justify-end overflow-hidden`}>
-                    <Link
-                        target="_blank"
-                        href={link.url}
-                        onClick={() => console.log("Did Visit")}
-                        className="text-sm text-end max-lg:text-xs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
-                            Visit
-                    </Link>
+                    <HoverCard openDelay={200} closeDelay={200}>
+                        <HoverCardTrigger>
+                            <Link
+                                target="_blank"
+                                href={link.url}
+                                onClick={() => IncreaseViewCount({ link })}
+                                className="text-sm text-end max-lg:text-xs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
+                                    Visit
+                            </Link>
+                        </HoverCardTrigger>
+                        <HoverCardContent>
+                            {
+                                previewImage && <Image width={100} height={100} src={previewImage} alt="image not found" unoptimized className="w-full" />
+                            }
+                        </HoverCardContent>
+                    </HoverCard>
                 </Box>
             </ConditionalRender>
         </HStack>

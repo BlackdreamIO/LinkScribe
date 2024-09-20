@@ -1,22 +1,19 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react";
+import { useDBController } from "@/context/DBContextProvider";
+import { useUser } from "@clerk/nextjs";
 
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 import { useSectionController } from "@/context/SectionControllerProviders";
 
 import useLocalStorage from "@/hook/useLocalStorage";
-
-import { useUser } from "@clerk/nextjs";
-import { SectionScheme } from "@/scheme/Section";
-
-import { ConvertEmailString } from "@/global/convertEmailString";
+import { RecursiveRemoveObjectFields } from "@/helpers/RecursiveRemoveObjectFields";
 
 import { Box, HStack, Text } from "@chakra-ui/react";
-import { DatabaseZap, Network, RefreshCcwDot } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useDBController } from "@/context/DBContextProvider";
 import { Button } from "@/components/ui/button";
+import { DatabaseZap, Network, RefreshCcwDot } from "lucide-react";
 
 
 const TooltipTriggerStyle = "!ring-0 rounded-full outline-8 outline-double outline-transparent focus-visible:!outline-theme-borderNavigation";
@@ -25,13 +22,26 @@ export const LinkNavbarAdditionals = () => {
 
     const { isSignedIn, isLoaded, user } = useUser();
 
-    const { contextSections, syncStatus, Sync } = useSectionController()!;
+    const [isLocalySynced, setIsLocallySynced] = useState(false);
+
+    const { contextSections, databaseContextSections, syncStatus, Sync } = useSectionController()!;
     const { databaseExist } = useDBController();
-    const [_, __, getLocalStorageSectionByKey, ___] = useLocalStorage<SectionScheme[]>('sectionsCache', []);
 
     const parentRef = useRef<HTMLDivElement>(null);
     useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "horizontal" });
+    
 
+    useEffect(() => {
+        const fieldsToExclude = ['created_at', 'visitCount']; // Fields to exclude
+    
+        const cleanedContextSections : any[] = RecursiveRemoveObjectFields(contextSections, fieldsToExclude);
+        const cleanedDatabaseContextSections : any[] = RecursiveRemoveObjectFields(databaseContextSections, fieldsToExclude);
+
+        const sortedLocalSections = cleanedContextSections.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const sortedDatabaseContextSections = cleanedDatabaseContextSections.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        
+        setIsLocallySynced(JSON.stringify(sortedLocalSections) == JSON.stringify(sortedDatabaseContextSections));
+    }, [contextSections, databaseContextSections]);
 
     return (
         <Box className="flex flex-grow items-center justify-end pr-4">
@@ -57,7 +67,7 @@ export const LinkNavbarAdditionals = () => {
                 <TooltipProvider>
                     <Tooltip delayDuration={200}>
                         <TooltipTrigger role="tab" className={TooltipTriggerStyle}>
-                            <Network className={`${true ? "text-green-500" : "text-red-600"}`} />
+                            <Network className={`${isLocalySynced ? "text-theme-primaryAccent" : "text-red-600"}`} />
                         </TooltipTrigger>
                         <TooltipContent className="dark:bg-theme-bgSecondary">
                             <Text className="dark:text-white">

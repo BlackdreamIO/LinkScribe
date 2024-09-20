@@ -8,19 +8,24 @@ import { IdentifyLinksChanges } from "../helper/IdentifyLinksChanges";
 interface ISynchronizeToSupabase {
     token : string;
     email : string;
+    onFetch : (vaildData : SectionScheme[]) => void;
     callback? : (status : "Syncing" | "Synced" | "Error") => void;
 }
 
 export default async function SynchronizeToSupabase(args : ISynchronizeToSupabase) {
     
-    const { email, token, callback } = args;
+    const { email, token, callback, onFetch } = args;
 
     try {
-        const supabaseSections: SectionScheme[] = await GetSections({ email, token, onSuccess: (data) => data,
+        const supabaseSections: SectionScheme[] = await GetSections({ email, token,
+            onSuccess: (data) => {
+                onFetch(data);
+                return data;
+            },
             onError: (error) => console.error("Error fetching sections from Supabase:", error)
         });
     
-        const dexieSections = await DexieGetSectionsByEmail(email) ?? [];
+        const dexieSections = await DexieGetSectionsByEmail({ email }) ?? [];
     
         const { newSections, deletedSections, updatedSections } = IdentifySectionChanges({ dexieSections, supabaseSections });
         const { newLinks, deletedLinks, updatedLinkss } = IdentifyLinksChanges({ dexieSections, supabaseSections });
@@ -41,18 +46,12 @@ export default async function SynchronizeToSupabase(args : ISynchronizeToSupabas
 
         callback?.("Syncing");
         await SectionManagerClass.createSectionToSupabase({ email, token, sections : newSections, onSyncError(err) { console.log(err); callback?.("Error"); } });
-        callback?.("Synced");
         await SectionManagerClass.deleteSectionToSupabase({ email, token, sections : deletedSections, onSyncError(err) {console.log(err); callback?.("Error");} });
-        callback?.("Synced");
         await SectionManagerClass.updateSectionToSupabase({ email, token, sections : updatedSections, onSyncError(err) {console.log(err); callback?.("Error");} });    
-        callback?.("Synced");
 
         await LinkManagerClass.createLinkToSupabase({ email, token, links : newLinks, onSyncError(error) {console.log(error)} });
-        callback?.("Synced");
         await LinkManagerClass.deleteLinkToSupabase({ email, token, links : deletedLinks, onSyncError(error) {console.log(error)} })
-        callback?.("Synced");
         await LinkManagerClass.updateLinkToSupabase({ email, token, links : updatedLinkss, onSyncError(error) {console.log(error)} })
-        callback?.("Synced");
 
         await CloudinaryManagerClass.DeleteLinkPreviewImages({ email : email, links : dexieSections.flatMap(section => section.links) });
         callback?.("Synced");

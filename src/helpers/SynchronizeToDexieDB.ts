@@ -1,4 +1,4 @@
-import { DexieDB } from "@/database/dexie";
+import { DexieDB } from "@/database/dexie/DexieDB";
 import { SectionScheme } from "@/scheme/Section";
 import { isEqual } from "./isEqual";
 import { DexieGetSectionsByEmail } from "@/database/dexie/helper/DexieSectionByEmail";

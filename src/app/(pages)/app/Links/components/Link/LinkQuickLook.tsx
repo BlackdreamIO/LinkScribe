@@ -23,6 +23,11 @@ import blankImage from "../../../../../../../public/images/blankImage.webp";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
+import { CompressImageFromUrl } from "@/helpers/CompressImageAutoFromUrl";
+import { DexieDB } from "@/database/dexie/DexieDB";
+import { RefineEmail } from "@/helpers";
+import { ICacheImage } from "@/scheme/CacheImage";
+import { DexieGetCacheImage } from "@/database/dexie/helper/DexieCacheImages";
 
 
 type LinkQuickLookProps = {
@@ -38,7 +43,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     const { link, open, onClose } = props;
 
     const [openSettings, setOpenSettings] = useState(false);
-    const [linkPreviewImage, setLinkPreviewImage] = useState(link.image);
+    const [linkPreviewImage, setLinkPreviewImage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const [uploadedFile, setUploadedFile] = useState<File | undefined>(undefined);
@@ -59,16 +64,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     useEffect(() => {
         if(!open) {
             if(linkPreviewImage !== link.image) {
-                // UpdateLink({
-                //     currentLink : link,
-                //     sectionID : link.ref,
-                //     updatedLink : {
-                //         ...link,
-                //         image : linkPreviewImage,
-                //     }
-                // })
-
-                console.log(linkPreviewImage)
+                //console.log(linkPreviewImage)
             }
         }
         if(open) {
@@ -80,21 +76,40 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
 
         if(!link || !user) return;
 
-        if(link.image !== "" && link.image.includes("https")) return setLinkPreviewImage(link.image);
+        if(1+1 == 4 && link.image !== "" && link.image.includes("https")) return setLinkPreviewImage(link.image);
 
         else {
-            const { imageURL, hasError, error } = await GetCloudinaryImage({ publicID : link.id, userEmail : user?.primaryEmailAddress?.emailAddress ?? "" });
 
-            if(!hasError && imageURL) {
+            const cacheImage = await DexieGetCacheImage({ id : link.id, email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
+
+            if(cacheImage) {
+                const imageURL = URL.createObjectURL(cacheImage);
                 setLinkPreviewImage(imageURL);
-                UpdateLink({
-                    currentLink : link,
-                    sectionID : link.ref,
-                    updatedLink : {
-                        ...link,
-                        image : linkPreviewImage,
-                    }
-                })
+                return;
+            }
+
+            else
+            {
+                console.log("Requesting Cloudinary Image...");
+                const { imageURL, hasError } = await GetCloudinaryImage({ publicID : link.image });
+
+                if(hasError) return;
+                console.log("Sucessfully Fetched Image...");
+
+                console.log("Running Compression...");
+                const compressedOutput = await CompressImageFromUrl(imageURL);
+                console.log("Compression Done...");
+
+                const cacheImage : ICacheImage = {
+                    id : link.id,
+                    blob : compressedOutput,
+                    ref : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
+                    url : imageURL
+                }
+
+                await DexieDB.cacheImages.add(cacheImage);
+
+                setLinkPreviewImage(imageURL);
             }
         }
     }

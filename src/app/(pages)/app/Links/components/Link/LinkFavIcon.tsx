@@ -15,7 +15,7 @@ export const LinkFavIcon = ({ faviconUrl } : { faviconUrl : string }) => {
     };
 
     return (
-        <ConditionalRender render={faviconUrl.length > 0 && getFaviconUrl(faviconUrl).length > 0 && 1 + 1 ==5}>
+        <ConditionalRender render={faviconUrl.length > 0 && getFaviconUrl(faviconUrl).length > 2}>
             <Image
                 src={getFaviconUrl(faviconUrl)}
                 alt="favicon"

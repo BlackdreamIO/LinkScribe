@@ -1,6 +1,6 @@
 "use client"
 
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from '@/components/ui/toast';
 
 
@@ -15,7 +15,7 @@ interface IToastMessage {
 
 export function useSendToastMessage ()
 {
-    const { toast } = useToast();
+    //const { toast } = useToast();
 
     const ToastMessage = ({message, description, type = "Status", action, actionText="Ok", duration=3000} : IToastMessage) => {
 

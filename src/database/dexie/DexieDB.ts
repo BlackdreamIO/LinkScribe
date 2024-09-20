@@ -3,6 +3,8 @@ import { LinkScheme } from '@/scheme/Link';
 import { SectionScheme } from '@/scheme/Section';
 import { MainLayout } from '@/interface/MainLayout';
 import { AppTheme } from '@/interface/AppTheme';
+import { ICacheImage } from '@/scheme/CacheImage';
+
 
 // Define your database
 class LinkScribeDexie extends Dexie {
@@ -10,6 +12,7 @@ class LinkScribeDexie extends Dexie {
     links: Dexie.Table<LinkScheme, string>;
     appLayout : Dexie.Table<MainLayout, string>;
     appTheme : Dexie.Table<AppTheme, string>;
+    cacheImages : Dexie.Table<ICacheImage, string>;
 
     constructor() {
         super('LinkScribeDexie');
@@ -17,13 +20,15 @@ class LinkScribeDexie extends Dexie {
             sections: 'id, section_ref, title, created_at',
             links: 'id, section_ref, title, url, created_at',
             appLayout : '',
-            appTheme : ''
+            appTheme : '',
+            cacheImages : 'id, blob, ref, url'
         })
 
         this.sections = this.table('sections');
         this.links = this.table('links');
         this.appLayout = this.table("appLayout");
         this.appTheme = this.table("appTheme");
+        this.cacheImages = this.table("cacheImages");
     }
 }
 

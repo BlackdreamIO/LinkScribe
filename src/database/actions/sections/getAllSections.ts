@@ -18,6 +18,7 @@ export async function GetSections({ email, token, withLinks=true, onSuccess, onE
         const { data, error } = await CreateSupabaseServerDBClient(token)
             .from("sections")
             .select(`*,${withLinks ? "links(*)" : ""}`)
+            .order('created_at', { ascending: false })
             .eq("section_ref", email);
 
         if(!error && Array.isArray(data)) {

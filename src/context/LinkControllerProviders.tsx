@@ -10,6 +10,7 @@ import { RefineEmail, SynchronizeToDexieDB, FileToBase64 } from '@/helpers';
 import { useSendToastMessage } from '@/hook/useSendToastMessage';
 import { DeleteCloudinaryImage } from '@/app/actions/cloudnary/deleteImage';
 import { useSectionContainerContext } from './SectionContainerContext';
+import { DexieGetCacheImage } from '@/database/dexie/helper/DexieCacheImages';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,8 @@ interface LinkContextData {
 
     AddPreviewImage : ({ file, url, useFileMethod, link, autoSyncAfterUpload, onSucess, onError, onCallback } : IAddPreviewImage) => void;
     DeletePreviewImage : ({ link } : { link : LinkScheme, onSucess? : () => void, onError? : () => void }) => void;
+    GetCacheImage : ({ id } : { id : string }) => Promise<Blob | undefined>;
+    IncreaseViewCount : ({ link } : { link : LinkScheme }) => void;
 
     isloading : boolean;
     setIsLoading : Dispatch<SetStateAction<boolean>>
@@ -91,7 +94,8 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         catch (error : any) {
             RestoreContextSections();
             setIsLoading(false);
-            throw new Error(error);
+            //throw new Error(error);
+            ToastMessage({ message : "Failed To Perform Action", description : JSON.stringify(error), type : "Error" });
         }
     }
 
@@ -144,7 +148,8 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
         catch (error : any) {
             RestoreContextSections();
-            throw new Error(error);
+            //throw new Error(error);
+            ToastMessage({ message : "Failed To Perform Action", description : JSON.stringify(error), type : "Error" });
         }
     }
 
@@ -175,7 +180,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
         catch (error : any) {
             RestoreContextSections();
-            throw new Error(error);
+            ToastMessage({ message : "Failed To Perform Action", description : JSON.stringify(error), type : "Error" });
         }
     }
 
@@ -286,6 +291,24 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
     }
 
+    const GetCacheImage = async ({ id } : { id : string }) => {
+        if(user && user.primaryEmailAddress) {
+            const cacheImage = await DexieGetCacheImage({ id : id, email : user.primaryEmailAddress.emailAddress });
+            return cacheImage;
+        }
+    }
+
+    const IncreaseViewCount = ({ link } : { link : LinkScheme }) => {
+        UpdateLink({
+            currentLink : link,
+            sectionID : link.ref,
+            updatedLink : {
+                ...link,
+                visitCount : link.visitCount + 1
+            }
+        })
+    }
+
     const contextValue: LinkContextType = {
        CreateLink,
        UpdateLink,
@@ -293,6 +316,8 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
        AddPreviewImage,
        DeletePreviewImage,
+       GetCacheImage,
+       IncreaseViewCount,
 
        isloading,
        setIsLoading

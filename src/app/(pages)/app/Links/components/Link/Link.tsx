@@ -11,7 +11,7 @@ import { Box, useOutsideClick } from "@chakra-ui/react";
 import { LinkContextMenuWrapper } from "./LinkContextMenuWrapper";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
-const LinkQuickLook = dynamic(() => import('./LinkQuickLook').then((mod) => mod.LinkQuickLook), { ssr: true });
+import { LinkQuickLook } from "./LinkQuickLook";
 const LinkPrimarySide = dynamic(() => import('./LinkPrimarySide').then((mod) => mod.LinkPrimarySide), { ssr: true });
 const LinkSecondarySide = dynamic(() => import('./LinkSecondarySide').then((mod) => mod.LinkSecondarySide), { ssr: true });
 const LinkMobileDropdown = dynamic(() => import('./LinkMobileDropdown').then((mod) => mod.LinkMobileDropdown), { ssr: true });

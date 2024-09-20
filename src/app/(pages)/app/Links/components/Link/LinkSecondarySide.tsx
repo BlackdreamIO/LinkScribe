@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useLinkController } from "@/context/LinkControllerProviders";
 
 import { Box, HStack } from "@chakra-ui/react";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,13 @@ import { EllipsisVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
-import { useLinkController } from "@/context/LinkControllerProviders";
+
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+  } from "@/components/ui/hover-card"
+import Image from "next/image";
 
 type LinkSecondarySideProps = {
     link : LinkScheme;
@@ -35,8 +42,9 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
     const { link, sectionID, urlEditMode, showMobileOptions, layout, onUrlEditMode, onDelete, onTitleEditMode, onQuickLook  } = props;
 
     const [linkUrl, setLinkUrl] = useState(link.url);
+    const [previewImage, setPreviewImage] = useState<string>("");
 
-    const { UpdateLink } = useLinkController()!;
+    const { UpdateLink, GetCacheImage, IncreaseViewCount } = useLinkController()!;
     const linkRef = useRef<HTMLInputElement>(null);
 
     const HandleRenameUrl = () => {
@@ -53,17 +61,6 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
         })
     }
 
-    const handleLinkVisit = () => {
-        UpdateLink({
-            currentLink : link,
-            sectionID : sectionID,
-            updatedLink : {
-                ...link,
-                visitCount : link.visitCount + 1
-            }
-        })
-    }
-
     useEffect(() => {
         if (urlEditMode && linkRef.current) {
             const currentTimout = setTimeout(() => {
@@ -74,6 +71,17 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
             return () => clearTimeout(currentTimout);
         }
     }, [urlEditMode]);
+
+    useEffect(() => {
+        const getImage = async () => {
+            const cacheImage = await GetCacheImage({ id : link.id });
+            if(cacheImage) {
+                const url = URL.createObjectURL(cacheImage);
+                setPreviewImage(url);
+            }   
+        }
+        getImage();
+    }, [link])
 
     const DropdownContents = () => {
         return (
@@ -121,13 +129,22 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
                     )
                 }
                 <ConditionalRender render={!urlEditMode && (layout.layout == "Grid Detailed" || layout.layout == "List Detailed")}>
-                    <Link
-                        target="_blank"
-                        href={linkUrl}
-                        onClick={handleLinkVisit}
-                        className="text-base max-lg:text-sm max-sm:text-xs max-tiny:!text-xxs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
-                            {linkUrl}
-                    </Link>
+                    <HoverCard openDelay={300} closeDelay={100}>
+                        <HoverCardTrigger>
+                            <Link
+                                target="_blank"
+                                href={link.url}
+                                onClick={() => IncreaseViewCount({ link })}
+                                className="text-sm text-end max-lg:text-xs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
+                                    {link.url}
+                            </Link>
+                        </HoverCardTrigger>
+                        <HoverCardContent align="start" className={`bg-theme-bgSecondary border-2 border-theme-primaryAccent rounded-lg ${previewImage ? "" : "hidden"}`}>
+                            {
+                                previewImage && <Image width={100} height={100} src={previewImage} alt="image not found" unoptimized className="w-full" />
+                            }
+                        </HoverCardContent>
+                    </HoverCard>
                 </ConditionalRender>
             </Box>
             <ConditionalRender render={!showMobileOptions && (layout.layout == "Grid Detailed" || layout.layout == "List Detailed")}>

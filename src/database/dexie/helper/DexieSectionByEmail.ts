@@ -1,11 +1,25 @@
-import { DexieDB } from "@/database/dexie";
 import { RefineEmail } from "@/helpers";
+import { DexieDB } from "../DexieDB";
+import { SectionScheme } from "@/scheme/Section";
 
-export async function DexieGetSectionsByEmail(emai : string)
+interface IDexieGetSectionsByEmail {
+    email : string;
+    onSuccess? : (data : SectionScheme[]) => void;
+    onError? : (error : any) => void;
+}
+
+export async function DexieGetSectionsByEmail({ email, onSuccess, onError } : IDexieGetSectionsByEmail) : Promise<SectionScheme[] | undefined>
 {
-    if(!emai) return;
+    try {
+        if(!email) return;
 
-    const sections = await DexieDB.sections.toArray();
-    const filteredSection = sections.filter(section => section.section_ref === RefineEmail(emai));
-    return filteredSection;
+        const sections = await DexieDB.sections.toArray();
+        const filteredSection = sections.filter(section => section.section_ref === RefineEmail(email));
+        onSuccess?.(filteredSection);
+        return filteredSection;
+    }
+    catch (error) {
+        onError?.(error);
+        return undefined;
+    }
 }

@@ -5,7 +5,6 @@ import { Cloudinary, cloudinaryConfig } from "@/lib/Cloudinary";
 
 interface IGetCloudinaryImage {
     publicID : string;
-    userEmail : string;
 }
 
 interface IGetCloudinaryImageOutput {
@@ -22,34 +21,32 @@ interface IGetCloudinaryImageOutput {
  */
 export async function GetCloudinaryImage(args : IGetCloudinaryImage) : Promise<IGetCloudinaryImageOutput>
 {
-    if(args.publicID.length < 1 || args.userEmail.length < 1)
+    if(args.publicID.length < 1)
     {
         return {
             imageURL : "",
             error : "Missing Required Parameters",
             hasError : true
-        }
+    }
     }
 
     try
     {
-        const result = await Cloudinary.api.resource(`${RefineEmail(args.userEmail)}/${args.publicID}`);
+        const result = await Cloudinary.api.resource(args.publicID, {transformations : []});
 
-        if(result.error.http_code !== 200) {
+        if (result.error) {
             return {
                 imageURL : "",
-                error : result?.error?.message,
+                error : result.error.message,
                 hasError: true
             }
         }
 
-        else {   
-            return {
-                imageURL : result?.secure_url ? result.secure_url : "",
-                error : null,
-                hasError: false
-            };
-        }
+        return {
+            imageURL : result.secure_url || "",
+            error : null,
+            hasError: false
+        };
     }
     catch (error : any) {
         return {
