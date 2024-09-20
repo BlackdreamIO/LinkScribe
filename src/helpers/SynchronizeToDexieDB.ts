@@ -10,7 +10,7 @@ interface ISynchronizeToDexieDB {
 
 export async function SynchronizeToDexieDB({ sections, email } : ISynchronizeToDexieDB) {
     // Get all current sections in DexieDB
-    const currentSections = await DexieGetSectionsByEmail(email) ?? [];
+    const currentSections = await DexieGetSectionsByEmail({email}) ?? [];
     const currentSectionIds = new Set(currentSections.map(section => section.id));
 
     try {
