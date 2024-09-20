@@ -56,7 +56,7 @@ export class ImageCacheManager {
             const cacheImage = await DexieGetCacheImage({ id, email : this.email });
             
             if(cacheImage) {
-                await DexieDB.cacheImages.delete(cacheImage.id);
+                await DexieDB.cacheImages.delete(id);
             }
             else {
                 // not found
@@ -73,7 +73,7 @@ export class ImageCacheManager {
 
             if(cacheImage) {
                 await DexieDB.cacheImages.delete(id);
-                await DexieDB.cacheImages.add(cacheImage);
+                //await DexieDB.cacheImages.add(cacheImage);
             }
         }
         catch (error) {

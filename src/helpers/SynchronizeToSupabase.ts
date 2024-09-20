@@ -50,7 +50,7 @@ export async function SynchronizeToSupabase({ email, token, onSyncError, onStatu
             onError: (error) => console.error("Error fetching sections from Supabase:", error)
         });
 
-        const dexieSections = await DexieGetSectionsByEmail(email) ?? [];
+        const dexieSections = await DexieGetSectionsByEmail({email}) ?? [];
 
         const { createdIDS, updatedIDS, deletedIDS } = GetSectionIDS({ dexieSections : dexieSections, supabaseSections : supabaseSections });
 
