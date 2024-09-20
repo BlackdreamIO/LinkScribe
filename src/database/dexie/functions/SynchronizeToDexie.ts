@@ -11,7 +11,7 @@ interface ISynchronizeToDexieDB {
 
 export async function SynchronizeToDexieDB({ email, sections }: ISynchronizeToDexieDB) {
 
-    const currentSections = await DexieGetSectionsByEmail(email) ?? [];
+    const currentSections = await DexieGetSectionsByEmail({email}) ?? [];
     const currentSectionIds = new Set(currentSections.map(section => section.id));
 
     await SectionManagerDexie.syncSections(sections, currentSectionIds);
