@@ -19,6 +19,7 @@ import {
     HoverCardTrigger,
   } from "@/components/ui/hover-card"
 import Image from "next/image";
+import { useCopyToClipboard } from "@/hook/useCopyToClipboard";
 
 type LinkSecondarySideProps = {
     link : LinkScheme;
@@ -44,6 +45,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
     const [linkUrl, setLinkUrl] = useState(link.url);
     const [previewImage, setPreviewImage] = useState<string>("");
 
+    const [ copyToClipboard ] = useCopyToClipboard();
     const { UpdateLink, GetCacheImage, IncreaseViewCount } = useLinkController()!;
     const linkRef = useRef<HTMLInputElement>(null);
 
@@ -94,7 +96,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
                 <DropdownMenuItem onClick={() => onUrlEditMode(true)} className={dropdownMenuItemStyle}>
                     Update Url
                 </DropdownMenuItem>
-                <DropdownMenuItem className={dropdownMenuItemStyle}>
+                <DropdownMenuItem className={dropdownMenuItemStyle} onClick={() => copyToClipboard(link.url)}>
                     Copy URL
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onQuickLook()} className={dropdownMenuItemStyle}>

@@ -43,15 +43,6 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
         onToggle : setShowMobileOptions
     })
 
-    const handleEsacapeOutline = (e : KeyboardEvent | any) => {
-        if (e.key == "Enter" && !titleEditMode && !urlEditMode) {
-            window.open(url);
-        }
-        if(e.key == "Escape") {
-            (document.activeElement as HTMLElement)?.blur();
-        }
-    }
-
 
     // dark:bg-black/10 !backdrop-filter !backdrop-blur-xl
     return (

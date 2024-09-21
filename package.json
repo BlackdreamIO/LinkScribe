@@ -51,6 +51,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "dexie": "^4.0.8",
+    "eslint-plugin-react-hooks": "^5.1.0-rc-e4953922-20240919",
     "firebase": "^10.12.1",
     "framer-motion": "^11.2.10",
     "fs": "^0.0.1-security",

@@ -4,14 +4,18 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useLinkController } from "@/context/LinkControllerProviders";
 import { useSendToastMessage } from "@/hook/useSendToastMessage";
+import { useCopyImageToClipboard } from "@/hook/useCopyImageToClipboard";
 
 import { LinkScheme } from "@/scheme/Link";
 import Image from "next/image";
 
 import { GetCloudinaryImage } from "@/app/actions/cloudnary/getImage";
+import { RefineEmail } from "@/helpers";
+import { DexieGetCacheImage } from "@/database/dexie/helper/DexieCacheImages";
+import { ImageCacheManager } from "@/database/managers/ImageCacheMnager";
 
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
-import { Box, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, HStack, Text, VStack } from "@chakra-ui/react";
 import { Button } from "@/components/ui/button";
 
 import { Settings } from "lucide-react";
@@ -19,15 +23,12 @@ import { Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 
+import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 import blankImage from "../../../../../../../public/images/blankImage.webp";
+
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
-import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
-import { CompressImageFromUrl } from "@/helpers/CompressImageAutoFromUrl";
-import { DexieDB } from "@/database/dexie/DexieDB";
-import { RefineEmail } from "@/helpers";
-import { ICacheImage } from "@/scheme/CacheImage";
-import { DexieGetCacheImage } from "@/database/dexie/helper/DexieCacheImages";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "../Section/DynamicImport";
 
 
 type LinkQuickLookProps = {
@@ -42,6 +43,9 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     
     const { link, open, onClose } = props;
 
+    const [showImageProcessingStatus, setShowImageProcessingStatus] = useState<boolean>(false);
+    const [imageProcessingStatus, setImageProcessingStatus] = useState("Processing");
+
     const [openSettings, setOpenSettings] = useState(false);
     const [linkPreviewImage, setLinkPreviewImage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -50,9 +54,10 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     const [uploadedImageURL, setUploadedImageURL] = useState<string>("");
     const [isImageUrlValid, setIsImageUrlValid] = useState<boolean>(false);
     
-    const { user, isSignedIn } = useUser();
+    const { user } = useUser();
     const { UpdateLink, AddPreviewImage, DeletePreviewImage } = useLinkController();
     const { ToastMessage } = useSendToastMessage();
+    const [ copyImageToClipboard ] = useCopyImageToClipboard();
 
     useEffect(() => {
         if(uploadedFile !== undefined) {
@@ -76,41 +81,60 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
 
         if(!link || !user) return;
 
-        if(1+1 == 4 && link.image !== "" && link.image.includes("https")) return setLinkPreviewImage(link.image);
+        const cacheImage = await DexieGetCacheImage({
+            id : link.id,
+            email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
+            revalidation : {
+                image_url : link.url,
+                revalidate : false
+            },
+            onError(error) {
+                ToastMessage({ message : "Please Free Up Storage Space On Your Device", description : error.message ?? '', type : "Error" })
+                console.error(error);
+            },
+        });
 
-        else {
+        if(cacheImage) {
+            const imageURL = URL.createObjectURL(cacheImage);
+            setLinkPreviewImage(imageURL);
+            return;
+        }
 
-            const cacheImage = await DexieGetCacheImage({ id : link.id, email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
+        else
+        {
+            setShowImageProcessingStatus(true);
+            setImageProcessingStatus("Requesting Image...");
+            const { imageURL, hasError } = await GetCloudinaryImage({ publicID : link.image });
 
-            if(cacheImage) {
-                const imageURL = URL.createObjectURL(cacheImage);
-                setLinkPreviewImage(imageURL);
+            if(hasError || imageURL == "") {
+                setShowImageProcessingStatus(false);
                 return;
             }
+            setImageProcessingStatus("Sucessfully Fetched Image...");
 
-            else
-            {
-                console.log("Requesting Cloudinary Image...");
-                const { imageURL, hasError } = await GetCloudinaryImage({ publicID : link.image });
-
-                if(hasError) return;
-                console.log("Sucessfully Fetched Image...");
-
-                console.log("Running Compression...");
-                const compressedOutput = await CompressImageFromUrl(imageURL);
-                console.log("Compression Done...");
-
-                const cacheImage : ICacheImage = {
+            ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
+            await ImageCacheManager.uploadToCache({
+                image : imageURL,
+                cacheEncoderDecoder : "blob",
+                compressMode : "UTC",
+                metaData : {
                     id : link.id,
-                    blob : compressedOutput,
                     ref : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
                     url : imageURL
+                },
+                onCallback(callbackStatus) {
+                    setImageProcessingStatus(callbackStatus);
+                },
+                onError : (error) => {
+                    ToastMessage({ message : JSON.stringify(error.message), type : "Error" });
+                    console.error(error)
                 }
+            });
 
-                await DexieDB.cacheImages.add(cacheImage);
+            setImageProcessingStatus("Image Cached...");
+            setShowImageProcessingStatus(false);
 
-                setLinkPreviewImage(imageURL);
-            }
+            setLinkPreviewImage(imageURL);
         }
     }
 
@@ -152,7 +176,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
 
     return (
         <Dialog open={open} onOpenChange={() => onClose(false)} modal={true}>
-            <DialogContent className="dark:bg-theme-bgSecondary rounded-xl max-h-[90%] space-y-4 overflow-y-scroll no-scrollbar" onContextMenu={(e) => e.preventDefault()}>
+            <DialogContent className="select-none dark:bg-theme-bgSecondary rounded-xl max-h-[90%] space-y-4 overflow-y-scroll no-scrollbar" onContextMenu={(e) => e.preventDefault()}>
                 <ErrorManager>
                 <HStack justifyContent={"space-between"}>
                     <DialogTitle className="text-2xl text-center">{link.title}</DialogTitle>
@@ -162,19 +186,49 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                 </HStack>
                 <ConditionalRender render={!openSettings}>
                     <Box className="w-full flex flex-col items-center justify-center space-y-4">
-                        <Image
-                            src={linkPreviewImage.length > 2 ? linkPreviewImage : blankImage.src}
-                            alt="image not found"
-                            width={1920}
-                            height={1080}
-                            unoptimized
-                            quality={100}
-                            loading="lazy"
-                            className={`
-                                ${linkPreviewImage.length > 2 ? "w-full" : "w-6/12"} rounded-md 
-                                ${linkPreviewImage.length > 2 ? `border-4 ${isLoading ? 'dark:border-neutral-500' : 'dark:border-theme-primaryAccent shadow-lg shadow-theme-primaryAccent'}` : ""}
-                            `}
-                        />
+                        <ConditionalRender render={showImageProcessingStatus}>
+                            <Center className="w-full p-4 bg-neutral-300 rounded-xl h-96">
+                                <Text className="text-2xl text-black font-semibold">{imageProcessingStatus}</Text>
+                            </Center>
+                        </ConditionalRender>
+                        <ConditionalRender render={!showImageProcessingStatus}>
+                            <ContextMenu>
+                                <ContextMenuTrigger className="w-full flex flex-col items-center justify-center">
+                                    <ErrorManager>
+                                        <Image
+                                            src={linkPreviewImage.length > 2 ? linkPreviewImage : blankImage.src}
+                                            alt="image not found"
+                                            width={1920}
+                                            height={1080}
+                                            unoptimized
+                                            quality={100}
+                                            loading="lazy"
+                                            className={`
+                                                ${linkPreviewImage.length > 2 ? "w-full" : "w-6/12"} rounded-md 
+                                                ${linkPreviewImage.length > 2 ? `border-4 ${isLoading ? 'dark:border-neutral-500' : 'dark:border-theme-primaryAccent shadow-lg shadow-theme-primaryAccent'}` : ""}
+                                            `}
+                                        />
+                                    </ErrorManager>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent className="dark:bg-black/30 backdrop-filter backdrop-blur-md py-2 rounded-xl">
+                                    <ErrorManager>
+                                        <ConditionalRender render={linkPreviewImage?.length > 1}>
+                                            <ContextMenuItem onClick={() => {
+                                                window.open(linkPreviewImage, "_blank")
+                                            }} className="w-full dark:hover:bg-neutral-500/30 px-4 py-2">
+                                                Open In New Tab
+                                            </ContextMenuItem>
+                                            <ContextMenuItem
+                                                onClick={() => copyImageToClipboard(linkPreviewImage)}
+                                                className="w-full dark:hover:bg-neutral-500/30 px-4 py-2"
+                                            >
+                                                Copy
+                                            </ContextMenuItem>
+                                        </ConditionalRender>
+                                    </ErrorManager>
+                                </ContextMenuContent>
+                            </ContextMenu>
+                        </ConditionalRender>
                     </Box>
                 </ConditionalRender>
 
@@ -191,7 +245,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                                             <span className="font-semibold">Click to upload </span> 
                                             or drag and drop
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                                        <Text className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</Text>
                                     </Box>
                                     <Input
                                         id="dropzone-file"

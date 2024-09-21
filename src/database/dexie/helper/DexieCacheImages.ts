@@ -15,9 +15,37 @@ export async function DexieGetCacheImages({ email } : { email : string}) : Promi
     return filteredCacheImages;
 }
 
-export async function DexieGetCacheImage({ id, email } : {id: string, email: string})
+interface IDexieGetCacheImage {
+    id: string;
+    email: string;
+    revalidation? : {
+        revalidate : boolean;
+        image_url : string;
+    }
+    onError? : (error : any) => void;
+}
+
+export async function DexieGetCacheImage({ id, email, onError, revalidation } : IDexieGetCacheImage) : Promise<Blob | undefined>
 {
-    const refinedCachedImages = await DexieGetCacheImages({ email });
-    const filteredCacheImages = refinedCachedImages.find(cacheImage => cacheImage.id === id)?.blob;
-    return filteredCacheImages;
+    try
+    {
+        const refinedCachedImages = await DexieGetCacheImages({ email });
+        const targetCache = refinedCachedImages.find(cacheImage => cacheImage.id === id);
+
+        if(revalidation && revalidation.revalidate) {
+            if(!revalidation.image_url) onError?.("Image URL needed to track");
+            console.log({
+                targetCache : targetCache?.url,
+                revalidation : revalidation.image_url,
+                isSame : revalidation.image_url == targetCache?.url
+            })
+            return targetCache?.url === revalidation.image_url ? targetCache.blob : undefined;
+        }
+
+        return targetCache?.blob;
+    }
+    catch (error) {
+        onError?.(error);
+        return undefined;
+    }
 }

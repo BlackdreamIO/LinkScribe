@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { Eye, EllipsisVertical } from "lucide-react";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
+import { useCopyToClipboard } from "@/hook/useCopyToClipboard";
 
 type LinkMobileDropdownProps = {
     layout : LinkLayout;
@@ -23,7 +24,8 @@ const dropdownMenuItemStyle = `text-md max-sm:text-xs py-2 font-normal rounded-l
 
 export const LinkMobileDropdown = (props : LinkMobileDropdownProps) => {
 
-    const { showMobileOptions, layout, onTitleEditMode, onLinkEditMode, handleDeleteLink, link : { visitCount, created_at } } = props;
+    const { showMobileOptions, layout, onTitleEditMode, onLinkEditMode, handleDeleteLink, link : { visitCount, created_at, url } } = props;
+    const [copyToClipboard] = useCopyToClipboard();
 
     return (
         <ConditionalRender render={showMobileOptions && (layout.layout == "Grid Detailed" || layout.layout == "List Detailed")}>
@@ -54,7 +56,7 @@ export const LinkMobileDropdown = (props : LinkMobileDropdownProps) => {
                         <DropdownMenuItem onClick={() => onLinkEditMode(true)} className={dropdownMenuItemStyle}>
                             Update Url
                         </DropdownMenuItem>
-                        <DropdownMenuItem className={dropdownMenuItemStyle}>
+                        <DropdownMenuItem className={dropdownMenuItemStyle} onClick={() => copyToClipboard(url)}>
                             Copy URL
                         </DropdownMenuItem>
                         <DropdownMenuItem className={dropdownMenuItemStyle}>
