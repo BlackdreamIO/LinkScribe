@@ -22,8 +22,13 @@ interface IUploadToCache
 export class ImageCacheManager {
 
     private static email : string;
+    private cacheEncoderDecoder: "binary" | "blob" | "base64" = "blob"; // default
 
-    constructor() {};
+    constructor({ cacheEncoderDecoder }: { email: string, cacheEncoderDecoder?: "binary" | "blob" | "base64" }) {
+        if (cacheEncoderDecoder) {
+            this.cacheEncoderDecoder = cacheEncoderDecoder;
+        }
+    }
 
     public static InitializeCacheManager ({ email } : { email : string }) {
         ImageCacheManager.email = email;
@@ -47,9 +52,9 @@ export class ImageCacheManager {
                         return;
                     }
 
-                    onCallback?.("Compressing...")
+                    onCallback?.("Compressing...");
                     const compressedOutput = await CompressImageFromUrl(image);
-                    onCallback?.("Compressed")
+                    onCallback?.("Compressed");
 
                     const convertedImage : ICacheImage = {
                         id : metaData.id,
@@ -59,6 +64,7 @@ export class ImageCacheManager {
                     }
 
                     onCallback?.("Caching Started");
+                    await this.revalidateCache({ id : metaData.id, onError });
                     await DexieDB.cacheImages.add(convertedImage);
                     onCallback?.("Cached");
                 }
@@ -68,7 +74,7 @@ export class ImageCacheManager {
                         onError?.("File is required when compressMode is FTC [FILE TO COMPRESS AND CACHE]");
                         return;
                     }
-                    onCallback?.("Compressing From File")
+                    onCallback?.("Compressing From File");
                     const compressedOutput = await CompressImageToBlob(image as File);
                     onCallback?.("Compression Complete")
                     const convertedImage : ICacheImage = {
@@ -78,9 +84,10 @@ export class ImageCacheManager {
                         url : metaData.url
                     }
 
-                    onCallback?.("Caching Started")
+                    onCallback?.("Caching Started");
+                    await this.revalidateCache({ id : metaData.id, onError });
                     await DexieDB.cacheImages.add(convertedImage);
-                    onCallback?.("Cached")
+                    onCallback?.("Cached");
                 }
             }
             catch (error) {
@@ -105,7 +112,10 @@ export class ImageCacheManager {
                         return;
                     }});
 
-                    if(!hasError) await DexieDB.cacheImages.add(image);   
+                    if(!hasError) {
+                        await this.revalidateCache({ id : image.id, onError });
+                        await DexieDB.cacheImages.add(image);
+                    }
                 }
                 catch (error) {
                     onError?.(error);
@@ -114,8 +124,9 @@ export class ImageCacheManager {
             else {
                 try {
                     onCallback?.("Caching Started");
+                    await this.revalidateCache({ id : image.id, onError });
                     await DexieDB.cacheImages.add(image);
-                    onCallback?.("Cached")
+                    onCallback?.("Cached");
                 }
                 catch (error) {
                     onError?.(error);
@@ -147,7 +158,6 @@ export class ImageCacheManager {
 
             if(cacheImage) {
                 await DexieDB.cacheImages.delete(id);
-                //await DexieDB.cacheImages.add(cacheImage);
             }
         }
         catch (error) {

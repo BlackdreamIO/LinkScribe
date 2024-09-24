@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import dynamic from 'next/dynamic';
+import { useThemeContext } from "@/context/ThemeContextProvider";
 import { useLinkController } from "@/context/LinkControllerProviders";
 import { useWindowResize } from "@/hook/useWindowResize";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
 
-import { Box, useOutsideClick } from "@chakra-ui/react";
+import dynamic from 'next/dynamic';
+
+import { Box } from "@chakra-ui/react";
 
 import { LinkContextMenuWrapper } from "./LinkContextMenuWrapper";
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
@@ -28,6 +30,7 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
 
     const [showMobileOptions, setShowMobileOptions] = useState(false);
 
+    const { linkGlassmorphismEnabled } = useThemeContext();
     const { DeleteLink } = useLinkController()!;
     const linkRef = useRef<HTMLDivElement>(null);
 
@@ -43,8 +46,6 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
         onToggle : setShowMobileOptions
     })
 
-
-    // dark:bg-black/10 !backdrop-filter !backdrop-blur-xl
     return (
         <LinkContextMenuWrapper
             onContextMenu={setShowContextMenuOutline}
@@ -57,8 +58,7 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
                 role="tab"
                 id="link"
                 ref={linkRef}
-                // onKeyDown={handleEsacapeOutline}
-                className={`w-full dark:bg-theme-bgFourth flex flex-col items-center justify-center py-2 px-4 rounded-xl
+                className={`w-full ${linkGlassmorphismEnabled ? "backdrop-filter backdrop-blur-md dark:bg-black/50" : "dark:bg-theme-bgFourth"} flex flex-col items-center justify-center py-2 px-4 rounded-xl
                 shadow-sm shadow-black transition-all duration-150 !outline-none !ring-0
                 ${layout.layout == "Grid Detailed" || layout.layout == "List Detailed" ? "space-y-4" : "space-y-0"}
                 ${showContextMenuOutline ? "border-2 !border-indigo-300" : "border-[1px] dark:border-neutral-700 focus:outline-none focus-visible:!outline-4 focus-visible:!outline-theme-borderNavigation"}`

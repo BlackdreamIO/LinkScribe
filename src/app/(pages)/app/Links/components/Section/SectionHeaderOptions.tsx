@@ -23,6 +23,8 @@ import { useSectionContext } from "@/context/SectionContextProvider";
 import { useSectionController } from "@/context/SectionControllerProviders";
 import { LinkLayout } from "@/scheme/Link";
 import { useSendToastMessage } from "@/hook/useSendToastMessage";
+import { useThemeContext } from "@/context/ThemeContextProvider";
+import { cn } from "@/utils/utils";
 
 type SectionHeaderOptionsProsp = {
     minimized : boolean;
@@ -52,6 +54,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
     const { linkLayoutDefaultSize } = useSettingContext()!;
     const { currentSection, setOpenLinkCreateDrawer, setOpenSectionTransferer, openLinkSearch, setOpenLinkSearch } = useSectionContext();
     const { UpdateSection } = useSectionController();
+    const { sectionGlassmorphismEnabled } = useThemeContext();
 
     const { ToastMessage } = useSendToastMessage();
     
@@ -71,7 +74,15 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
     }
 
     return (
-        <Stack ref={parentRef} direction={"row"} role="tablist" tabIndex={1} className="z-0 space-x-2 border-2 !outline-none !border-transparent focus-visible:!border-theme-borderKeyboardParentNavigation rounded-xl">
+        <Stack
+            ref={parentRef}
+            direction={"row"}
+            role="tablist"
+            tabIndex={1}
+            className={`z-0 space-x-2 border-2 !outline-none !border-transparent focus-visible:!border-theme-borderKeyboardParentNavigation rounded-xl
+                ${sectionGlassmorphismEnabled ? "bg-theme-bgFourth/50 bg-neutral-100 px-4 py-2" : ""}
+            `}
+        >
             <ConditionalRender render={showLinkCount}>
                 <Text role="tab" className="dark:text-neutral-500 max-sm:text-sm">{currentSection.links.length}</Text>
             </ConditionalRender>
@@ -98,7 +109,7 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                     side="bottom" 
                     sideOffset={15}
                     align="start" 
-                    className="w-60 z-50 border-neutral-600 dark:bg-theme-bgFourth mr-5 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black"
+                    className={`w-60 z-50 border-neutral-600 ${sectionGlassmorphismEnabled ? "backdrop-filter backdrop-blur-xl dark:bg-black/30" : "dark:bg-theme-bgFourth"} mr-8 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black`}
                 >
                     <DropdownMenuLabel className="text-lg max-sm:text-sm">Layout</DropdownMenuLabel>
                     <DropdownMenuSeparator/>
@@ -107,33 +118,33 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                         onClick={() => {
                             handleUpdateLinkLayout({ layout : "Grid Detailed", size : linkLayoutDefaultSize });
                         }}
-                        className={dropdownMenuItemStyle}>
+                        className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                             Grid {"(Large)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => {
                             handleUpdateLinkLayout({ layout : "Grid Compact", size : linkLayoutDefaultSize });
                         }}
-                        className={dropdownMenuItemStyle}>
+                        className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                             Grid {"(Compact)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => {
                             handleUpdateLinkLayout({ layout : "List Compact", size : 1 });
                         }}
-                        className={dropdownMenuItemStyle}>
+                        className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                             List {"(Compact)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => {
                             handleUpdateLinkLayout({ layout : "List Detailed", size : 1 });
                         }}
-                        className={dropdownMenuItemStyle}>
+                        className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                             List {"(Large)"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => handleUpdateLinkLayout({ layout : "Compact", size : linkLayoutDefaultSize })}
-                        className={dropdownMenuItemStyle}>
+                        className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                             Compact
                     </DropdownMenuItem>
                     <DropdownMenuSeparator/>
@@ -164,20 +175,20 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
                     <EllipsisVertical className={`z-0 max-sm:w-4`} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="bottom" sideOffset={15} align="start" 
-                    className="w-60 z-50 border-neutral-600 dark:bg-theme-bgFourth mr-5 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black"
+                    className={`w-60 z-50 border-neutral-600 ${sectionGlassmorphismEnabled ? "backdrop-filter backdrop-blur-xl dark:bg-black/30" : "dark:bg-theme-bgFourth"} mr-8 space-y-2 rounded-xl p-2 shadow-lg dark:shadow-black`}
                 >
                     <DropdownMenuLabel className="text-lg max-sm:text-sm">Setting</DropdownMenuLabel>
                     <DropdownMenuSeparator/>
-                    <DropdownMenuItem onClick={() => onTitleEditMode(true)} className={dropdownMenuItemStyle}>
+                    <DropdownMenuItem onClick={() => onTitleEditMode(true)} className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                         Rename Section
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={dropdownMenuItemStyle}>
+                    <DropdownMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                         Add New Link
                     </DropdownMenuItem>
-                    <DropdownMenuItem className={dropdownMenuItemStyle}>
+                    <DropdownMenuItem className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                         Collapse/Expand Section
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setOpenSectionTransferer(true)} className={dropdownMenuItemStyle}>
+                    <DropdownMenuItem onClick={() => setOpenSectionTransferer(true)} className={cn(dropdownMenuItemStyle, `${sectionGlassmorphismEnabled ? "dark:hover:!bg-neutral-400/20 data-[highlighted]:!bg-neutral-400/20" : ""}`)}>
                         Share
                     </DropdownMenuItem>
                     <DropdownMenuSeparator/>

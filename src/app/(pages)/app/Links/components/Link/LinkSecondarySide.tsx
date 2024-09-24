@@ -1,8 +1,12 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useLinkController } from "@/context/LinkControllerProviders";
+import { useCopyToClipboard } from "@/hook/useCopyToClipboard";
+import { LinkLayout, LinkScheme } from "@/scheme/Link";
+
+import Image from "next/image";
+import Link from "next/link";
 
 import { Box, HStack } from "@chakra-ui/react";
 import { Input } from "@/components/ui/input";
@@ -11,15 +15,12 @@ import { EllipsisVertical } from "lucide-react";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
-import { LinkLayout, LinkScheme } from "@/scheme/Link";
 
 import {
     HoverCard,
     HoverCardContent,
     HoverCardTrigger,
-  } from "@/components/ui/hover-card"
-import Image from "next/image";
-import { useCopyToClipboard } from "@/hook/useCopyToClipboard";
+  } from "@/components/ui/hover-card";
 
 type LinkSecondarySideProps = {
     link : LinkScheme;
@@ -74,15 +75,16 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
         }
     }, [urlEditMode]);
 
-    useEffect(() => {
-        const getImage = async () => {
-            const cacheImage = await GetCacheImage({ id : link.id });
-            if(cacheImage) {
-                const url = URL.createObjectURL(cacheImage);
-                setPreviewImage(url);
-            }   
+    const getPreviewImage = async () => {
+        const cacheImage = await GetCacheImage({ id : link.id });
+        if(cacheImage) {
+            const url = URL.createObjectURL(cacheImage);
+            setPreviewImage(url);
         }
-        getImage();
+    }
+
+    useEffect(() => {
+        getPreviewImage();
     }, [link])
 
     const DropdownContents = () => {
@@ -132,7 +134,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
                 }
                 <ConditionalRender render={!urlEditMode && (layout.layout == "Grid Detailed" || layout.layout == "List Detailed")}>
                     <HoverCard openDelay={300} closeDelay={100}>
-                        <HoverCardTrigger>
+                        <HoverCardTrigger onMouseEnter={getPreviewImage}>
                             <Link
                                 target="_blank"
                                 href={link.url}

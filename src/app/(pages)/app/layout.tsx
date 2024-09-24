@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { LinkControllerProvider } from "@/context/LinkControllerProviders";
 import { SettingContextProvider } from "@/context/SettingContextProvider";
 import { SectionContainerContextProvider } from "@/context/SectionContainerContext";
+import { ThemeContextProvider } from "@/context/ThemeContextProvider";
 //import { KeyboardNavigationContextProvider } from "@/context/KeyboardNavigationContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -29,21 +30,23 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
     return (
         <section>
             <DBContextProvider>
-                <SectionControllerProvider>
-                    <SectionContainerContextProvider>
-                        <LinkControllerProvider>
-                            <SettingContextProvider>
-                                <Flex flexDir="row" className="no-scrollbar">
-                                    <Sidebar />
-                                    <Box className="w-full p-0 overflow-hidden !select-none">
-                                        {children}
-                                    </Box>
-                                </Flex>
-                                <Toaster />
-                            </SettingContextProvider>
-                        </LinkControllerProvider>
-                    </SectionContainerContextProvider>
-                </SectionControllerProvider>
+                <ThemeContextProvider>
+                    <SectionControllerProvider>
+                        <SectionContainerContextProvider>
+                            <LinkControllerProvider>
+                                <SettingContextProvider>
+                                    <Flex flexDir="row" className="no-scrollbar">
+                                        <Sidebar />
+                                        <Box className="w-full p-0 overflow-hidden !select-none">
+                                            {children}
+                                        </Box>
+                                    </Flex>
+                                    <Toaster />
+                                </SettingContextProvider>
+                            </LinkControllerProvider>
+                        </SectionContainerContextProvider>
+                    </SectionControllerProvider>
+                </ThemeContextProvider>
             </DBContextProvider>
         </section>
     )

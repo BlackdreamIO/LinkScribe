@@ -61,7 +61,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
     }
 
     return (
-        <ContextMenu onOpenChange={onContextMenu} modal={false}>
+        <ContextMenu onOpenChange={onContextMenu} modal>
             <ContextMenuTrigger>
                 <Box className="w-full flex flex-col items-start justify-center space-y-6 py-4 max-sm:py-2">
                     <HStack justifyContent={"space-between"} className="w-full px-4 group">
@@ -118,7 +118,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                 <SectionHeaderLinkDrawer/>
                 
             </ContextMenuTrigger>
-            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth bg-neutral-50 dark:shadow-black border dark:border-neutral-700 z-20">
+            <ContextMenuContent className="w-60 space-y-2 rounded-xl p-2 shadow-lg dark:bg-theme-bgFourth bg-neutral-50 dark:shadow-black border dark:border-neutral-700 z-50">
                 <ContextMenuItem onClick={() => setTitleEditMode(true)} className={DropdownMenuItemStyle}>Rename Section</ContextMenuItem>
                 <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={DropdownMenuItemStyle}>Add Link</ContextMenuItem>
                 <ContextMenuItem className={DropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>

@@ -14,6 +14,7 @@ import BarLoader from "react-spinners/BarLoader";
 import { Skeleton } from '@/components/ui/skeleton';
 import { DBLoadComponent } from '../DBLoadComponent';
 import { SectionContextProvider } from '@/context/SectionContextProvider';
+import { useThemeContext } from '@/context/ThemeContextProvider';
 
 const Section = dynamic(() => import('../Section/Section').then((mod) => mod.Section),
 { ssr : true, loading : () => <Skeleton className='w-full dark:bg-theme-bgFourth animate-none h-16 rounded-xl' /> });
@@ -28,6 +29,7 @@ export const SectionContainer = () => {
     const { isSignedIn, isLoaded } = useUser();
     const { contextSections } = useSectionController();
     const { databaseExist, isLoading } = useDBController();
+    const { appBackgroundColor } = useThemeContext();
 
     const MemoizedContentDisplay = useMemo(() => {
         return contextSections.map((section, i) => (
@@ -54,7 +56,7 @@ export const SectionContainer = () => {
 
     return (
         <SectionContainerContextWrapper>
-            <Box className='w-full h-[93vh]'>
+            <Box className='w-full h-[93vh]' background={appBackgroundColor}>
                 <VStack className='p-4 h-full overflow-y-scroll scrollbar-dark' gap={50}>
                     {
                         !databaseExist ? <DBLoadComponent/> : <RenderSections/>

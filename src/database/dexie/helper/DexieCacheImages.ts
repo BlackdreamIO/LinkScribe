@@ -36,7 +36,7 @@ export async function DexieGetCacheImage({ id, email, onError, revalidation } : 
             if(!revalidation.image_url) onError?.("Image URL needed to track");
             console.log({
                 targetCache : targetCache?.url,
-                revalidation : revalidation.image_url,
+                revalidation : revalidation?.image_url,
                 isSame : revalidation.image_url == targetCache?.url
             })
             return targetCache?.url === revalidation.image_url ? targetCache.blob : undefined;

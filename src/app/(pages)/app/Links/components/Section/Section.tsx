@@ -14,6 +14,7 @@ import { ConditionalRender } from '@/components/ui/conditionalRender';
 import { SectionHeader } from './SectionHeader';
 import { LinksLayout } from '../Link/LinksLayout';
 import ErrorManager from '../../../components/ErrorHandler/ErrorManager';
+import { useThemeContext } from '@/context/ThemeContextProvider';
 
 // Deep comparison function to avoid unnecessary re-renders
 const areSectionsEqual = (prevProps: { section: SectionScheme }, nextProps: { section: SectionScheme }) => {
@@ -27,6 +28,7 @@ const NonMemSection = ({ section }: { section: SectionScheme }) => {
     const { setCurrentSection, currentSection, setOriginalSection } = useSectionContext();
     const { sectionHighlighted } = useSectionContainerContext();
     const { showLinkCount } = useSettingContext();
+    const { sectionGlassmorphismEnabled } = useThemeContext();
 
     useEffect(() => {
         if(section) {
@@ -39,9 +41,8 @@ const NonMemSection = ({ section }: { section: SectionScheme }) => {
     return (
         <Box
             onContextMenu={(e) => e.preventDefault()}
-            id="section"
-            className={`w-full dark:bg-theme-bgFourth bg-white border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
-                ${contextMenuOpen && !sectionHighlighted ? 'border-indigo-300' : sectionHighlighted ? 'dark:border-white border-black ' : 'dark:border-neutral-900 '}
+            className={`w-full ${sectionGlassmorphismEnabled ? "dark:bg-black/30 backdrop-filter backdrop-blur-xl z-0" : "dark:bg-theme-bgFourth"} bg-white border-[2px] rounded-2xl flex flex-col justify-center space-y-4 transition-all duration-300
+                ${contextMenuOpen && !sectionHighlighted ? 'border-indigo-300' : sectionHighlighted ? 'dark:border-white border-black ' : sectionGlassmorphismEnabled ? "" : 'dark:border-neutral-900 '}
                 ${sectionHighlighted ? 'pointer-events-none' : 'pointer-events-auto'} dark:shadow-none shadow-sm shadow-black`}
             >
             <ErrorManager>

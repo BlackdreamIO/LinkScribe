@@ -43,6 +43,8 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@supabase/supabase-js": "^2.45.0",
+    "@uiw/react-color": "^2.3.0",
+    "@uiw/react-color-circle": "^2.3.0",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^2.4.0",

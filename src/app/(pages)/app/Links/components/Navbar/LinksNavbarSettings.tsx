@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/menubar";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ThemeCustomizerDialog } from "./ThemeCustomizer/ThemeCustomizerDialog";
 
 
 const MenubarTriggerStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dark:hover:text-theme-textSecondary 
@@ -41,11 +42,11 @@ const MenubarContentStyle = `dark:bg-theme-bgSecondary bg-neutral-50 border-2 da
 export default function LinksNavbarSettings()
 {
     const [menubarOpen, setMenubarOpen] = useState(false);
-    
+    const [openThemeCustomizer, setOpenThemeCustomizer] = useState(false);
+
     const [_, setTheme] = useTheme();
     const [fullscreen, setFullscreen] = useFullscreenToggle();
     const { GetSections, contextSections } = useSectionController()!;
-    //const { setOpenCreatorDialog } = useSectionContext()!;
     const { isLoaded, isSignedIn } = useUser();
 
     const handleMenubarOpen = (value : string) => setMenubarOpen(value != '');
@@ -55,7 +56,7 @@ export default function LinksNavbarSettings()
     }
 
     const handleForceReload = async () => {
-        await GetSections(true);
+        GetSections(true);
     }
 
     const handleTheme = (theme : "dark" | "light") => {
@@ -74,7 +75,7 @@ export default function LinksNavbarSettings()
     
 
     return (
-        <Box>
+        <Box className="w-full">
             <ConditionalRender render={isLoaded && isSignedIn}>
                 <Menubar tabIndex={0} role="tablist" onValueChange={handleMenubarOpen} className="border-none !bg-transparent">
                     <MenubarMenu>
@@ -117,18 +118,14 @@ export default function LinksNavbarSettings()
                     <MenubarMenu>
                         <MenubarTrigger role="tab" className={MenubarTriggerStyle}>Preference</MenubarTrigger>
                         <MenubarContent className={MenubarContentStyle}>
-                            <MenubarSub>
-                                <MenubarSubTrigger className={MenubarTriggerStyle}>Theme</MenubarSubTrigger>
-                                <MenubarSubContent>
-                                    <MenubarItem className={MenuItemStyle} onClick={() => handleTheme('dark')}>Dark</MenubarItem>
-                                    <MenubarItem className={MenuItemStyle} onClick={() => handleTheme('light')}>Light</MenubarItem>
-                                </MenubarSubContent>
-                            </MenubarSub>
+                            <MenubarItem onClick={() => setOpenThemeCustomizer(true)} className={MenuItemStyle}> Theme Maneger</MenubarItem>
                             <MenubarItem className={MenubarTriggerStyle}>Clear Cache</MenubarItem>
                         </MenubarContent>
                     </MenubarMenu>
                 </Menubar>
             </ConditionalRender>
+
+            <ThemeCustomizerDialog open={openThemeCustomizer} onClose={() => setOpenThemeCustomizer(false)} />
             <div className={`${menubarOpen ? 'dark:opacity-100 opacity-0' : 'dark:opacity-0 opacity-0 pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150`}></div>
             
             {

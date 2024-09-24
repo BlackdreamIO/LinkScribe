@@ -10,7 +10,7 @@ const SectionCreator = dynamic(() => import('./components/Section/SectionCreator
 export default function LinkPage() 
 {
     return (
-        <Box onContextMenu={(e) => e.preventDefault()} className="w-full h-screen overflow-scroll no-scrollbar dark:bg-black bg-neutral-100">
+        <Box onContextMenu={(e) => e.preventDefault()} className="w-full h-screen overflow-scroll no-scrollbar transition-all duration-150">
             <LinksNavbar />
             <SectionContainer/>
             <SectionCreator />

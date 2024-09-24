@@ -13,6 +13,7 @@ import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layout : LinkLayout, id : string }) => {
 
     const parentRef = useRef<HTMLDivElement>(null);
+    
     useKeyboardNavigation({
         parentRef : parentRef,
         role : "tab",
