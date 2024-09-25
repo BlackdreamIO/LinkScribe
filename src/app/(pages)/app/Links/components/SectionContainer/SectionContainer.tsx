@@ -4,6 +4,7 @@ import { CSSProperties, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useSectionController } from '@/context/SectionControllerProviders';
 import { useDBController } from '@/context/DBContextProvider';
+import { useThemeContext } from '@/context/ThemeContextProvider';
 import dynamic from 'next/dynamic';
 
 import { Box, Text, VStack } from '@chakra-ui/react';
@@ -14,7 +15,7 @@ import BarLoader from "react-spinners/BarLoader";
 import { Skeleton } from '@/components/ui/skeleton';
 import { DBLoadComponent } from '../DBLoadComponent';
 import { SectionContextProvider } from '@/context/SectionContextProvider';
-import { useThemeContext } from '@/context/ThemeContextProvider';
+import { useLowDiskError } from '@/hook/useLowDiskError';
 
 const Section = dynamic(() => import('../Section/Section').then((mod) => mod.Section),
 { ssr : true, loading : () => <Skeleton className='w-full dark:bg-theme-bgFourth animate-none h-16 rounded-xl' /> });
@@ -30,6 +31,8 @@ export const SectionContainer = () => {
     const { contextSections } = useSectionController();
     const { databaseExist, isLoading } = useDBController();
     const { appBackgroundColor } = useThemeContext();
+
+    const lowDiskError = useLowDiskError();
 
     const MemoizedContentDisplay = useMemo(() => {
         return contextSections.map((section, i) => (
@@ -57,7 +60,7 @@ export const SectionContainer = () => {
     return (
         <SectionContainerContextWrapper>
             <Box className='w-full h-[93vh]' background={appBackgroundColor}>
-                <VStack className='p-4 h-full overflow-y-scroll scrollbar-dark' gap={50}>
+                <VStack className={`p-4 h-full overflow-y-scroll scrollbar-dark ${lowDiskError ? "!hidden opacity-50" : ""} `} gap={50}>
                     {
                         !databaseExist ? <DBLoadComponent/> : <RenderSections/>
                     }

@@ -1,7 +1,7 @@
 import { ICacheImage } from "@/scheme/CacheImage";
 import { DexieDB } from "../DexieDB";
-import { LinkScheme } from "@/scheme/Link";
 import { RefineEmail } from "@/helpers";
+import { WatchDexieOperation } from "@/helpers/WatchDexieOperation";
 
 export async function DexieGetCacheImages({ email } : { email : string}) : Promise<ICacheImage[]>
 {
@@ -9,10 +9,16 @@ export async function DexieGetCacheImages({ email } : { email : string}) : Promi
         console.error("An email is required to obtain cache images");
         return [];
     }
+    const result = WatchDexieOperation(async () => {
+        const cacheImages = await DexieDB.cacheImages.toArray();
+        const filteredCacheImages = cacheImages.filter(cacheImage => cacheImage.ref === RefineEmail(email));
+        return filteredCacheImages;
+    })
+    .catch(() => {
+        return [];
+    })
 
-    const cacheImages = await DexieDB.cacheImages.toArray();
-    const filteredCacheImages = cacheImages.filter(cacheImage => cacheImage.ref === RefineEmail(email));
-    return filteredCacheImages;
+    return result;
 }
 
 interface IDexieGetCacheImage {
@@ -27,8 +33,7 @@ interface IDexieGetCacheImage {
 
 export async function DexieGetCacheImage({ id, email, onError, revalidation } : IDexieGetCacheImage) : Promise<Blob | undefined>
 {
-    try
-    {
+    const result = WatchDexieOperation(async () => {
         const refinedCachedImages = await DexieGetCacheImages({ email });
         const targetCache = refinedCachedImages.find(cacheImage => cacheImage.id === id);
 
@@ -43,9 +48,11 @@ export async function DexieGetCacheImage({ id, email, onError, revalidation } : 
         }
 
         return targetCache?.blob;
-    }
-    catch (error) {
+    })
+    .catch((error) => {
         onError?.(error);
         return undefined;
-    }
+    })
+
+    return result;
 }

@@ -51,7 +51,7 @@ export const CreateThemeTab = ({ tabValue="createTab" }) => {
                 <Box className="w-full flex flex-row items-center justify-between space-x-2 px-4 py-2 dark:bg-black">
                     <Text className="text-sm dark:text-neutral-300">Select Color</Text>
                     <Circle
-                        colors={[ '#67e8f9', '#2563eb', '#4f46e5', '#7c3aed', '#10b981', '#4ade80', '#64748B', '#475569', '#334155', '#6B7280', '#4B5563', '#374151', '#737373', '#525252', '#404040', '#71717A', '#52525B', '#3F3F46', '#06B6D4', '#0891B2', '#0E7490', '#3B82F6', '#2563EB', '#1D4ED8', '#6366F1', '#4F46E5' ]}
+                        colors={[ '#67e8f9', '#2563eb', '#4f46e5', '#7c3aed', '#10b981', '#4ade80', '#64748B', '#475569', '#334155', '#6B7280', '#4B5563', '#374151', '#737373', '#525252', '#404040', '#71717A', '#52525B', '#000', '#3F3F46', '#06B6D4', '#0891B2', '#0E7490', '#3B82F6', '#2563EB', '#1D4ED8', '#6366F1', '#4F46E5' ]}
                         color={hex}
                         onChange={(color) => {
                             setHex(color.hex);

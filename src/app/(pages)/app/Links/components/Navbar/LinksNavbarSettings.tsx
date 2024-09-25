@@ -126,7 +126,7 @@ export default function LinksNavbarSettings()
             </ConditionalRender>
 
             <ThemeCustomizerDialog open={openThemeCustomizer} onClose={() => setOpenThemeCustomizer(false)} />
-            <div className={`${menubarOpen ? 'dark:opacity-100 opacity-0' : 'dark:opacity-0 opacity-0 pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150`}></div>
+            {/* <div className={`${menubarOpen ? 'dark:opacity-100 opacity-0' : 'dark:opacity-0 opacity-0 pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150`}></div> */}
             
             {
                 !isLoaded && (

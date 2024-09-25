@@ -6,7 +6,7 @@ import { useLinkController } from "@/context/LinkControllerProviders";
 
 import Link from "next/link";
 
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, HStack, Portal, Text } from "@chakra-ui/react";
 import { Input } from "@/components/ui/input";
 
 import { Eye } from "lucide-react";
@@ -124,10 +124,12 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
                                     Visit
                             </Link>
                         </HoverCardTrigger>
-                        <HoverCardContent>
-                            {
-                                previewImage && <Image width={100} height={100} src={previewImage} alt="image not found" unoptimized className="w-full" />
-                            }
+                        <HoverCardContent style={{ zIndex: 9999}} className="!absolute">
+                            <Portal>
+                                {
+                                    previewImage && <Image width={100} height={100} src={previewImage} alt="image not found" unoptimized className="w-full" />
+                                }
+                            </Portal>
                         </HoverCardContent>
                     </HoverCard>
                 </Box>

@@ -2,7 +2,7 @@ import Dexie from 'dexie';
 import { LinkScheme } from '@/scheme/Link';
 import { SectionScheme } from '@/scheme/Section';
 import { MainLayout } from '@/interface/MainLayout';
-import { AppTheme } from '@/interface/AppTheme';
+import { IAppTheme } from '@/interface/AppTheme';
 import { ICacheImage } from '@/scheme/CacheImage';
 
 
@@ -11,7 +11,7 @@ class LinkScribeDexie extends Dexie {
     sections: Dexie.Table<SectionScheme, string>;
     links: Dexie.Table<LinkScheme, string>;
     appLayout : Dexie.Table<MainLayout, string>;
-    appTheme : Dexie.Table<AppTheme, string>;
+    appTheme : Dexie.Table<IAppTheme, string>;
     cacheImages : Dexie.Table<ICacheImage, string>;
 
     constructor() {
@@ -21,7 +21,7 @@ class LinkScribeDexie extends Dexie {
             links: 'id, section_ref, title, url, created_at',
             appLayout : '',
             appTheme : '',
-            cacheImages : 'id, blob, ref, url'
+            cacheImages : 'id, blob, ref, url',
         })
 
         this.sections = this.table('sections');
