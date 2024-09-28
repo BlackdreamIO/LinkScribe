@@ -75,7 +75,7 @@ export const LinkNavbarAdditionals = () => {
             <HStack
                 ref={parentRef}
                 role="tablist"
-                tabIndex={0}
+                tabIndex={lowDiskError ? -1 : 0}
                 className={`space-x-4 outline-2 outline-offset-4 outline-double rounded-lg outline-transparent focus:!outline-theme-borderKeyboardParentNavigation !ring-0
                     ${lowDiskError ? "opacity-50 pointer-events-none" : ""}
             `}>
@@ -83,7 +83,7 @@ export const LinkNavbarAdditionals = () => {
                 <TooltipProvider>
                     <Tooltip delayDuration={200}>
                         <TooltipTrigger tabIndex={-1}>
-                            <Button role="tab" className={`!bg-transparent w-auto h-auto p-0 m-auto grid place-content-center ${TooltipTriggerStyle}`}>
+                            <Button tabIndex={lowDiskError ? -1 : 0} role="tab" className={`!bg-transparent w-auto h-auto p-0 m-auto grid place-content-center ${TooltipTriggerStyle}`}>
                                 <Brain className="text-[mediumspringgreen]" />
                             </Button>
                         </TooltipTrigger>
@@ -98,7 +98,7 @@ export const LinkNavbarAdditionals = () => {
                 <TooltipProvider>
                     <Tooltip delayDuration={200}>
                         <TooltipTrigger tabIndex={-1}>
-                            <Button role="tab" disabled={syncStatus == "Syncing"} onClick={Sync} className={`!bg-transparent w-auto h-auto p-0 m-auto grid place-content-center ${TooltipTriggerStyle}`}>
+                            <Button role="tab" tabIndex={lowDiskError ? -1 : 0} disabled={syncStatus == "Syncing"} onClick={Sync} className={`!bg-transparent w-auto h-auto p-0 m-auto grid place-content-center ${TooltipTriggerStyle}`}>
                                 <RefreshCcwDot
                                     className={syncStatus == "Syncing" ? "animate-spin text-neutral-500" : syncStatus == "Synced" ? "text-theme-textSecondary" : "text-red-600"}
                                 />
@@ -114,7 +114,7 @@ export const LinkNavbarAdditionals = () => {
 
                 <TooltipProvider>
                     <Tooltip delayDuration={200}>
-                        <TooltipTrigger role="tab" className={TooltipTriggerStyle}>
+                        <TooltipTrigger tabIndex={lowDiskError ? -1 : 0} role="tab" className={TooltipTriggerStyle}>
                             <Network className={`${isLocalySynced ? "text-theme-primaryAccent" : "text-red-600"}`} />
                         </TooltipTrigger>
                         <TooltipContent className="dark:bg-theme-bgSecondary">
@@ -126,7 +126,7 @@ export const LinkNavbarAdditionals = () => {
                 </TooltipProvider>
                 <TooltipProvider>
                     <Tooltip delayDuration={200}>
-                        <TooltipTrigger role="tab" className={TooltipTriggerStyle}>
+                        <TooltipTrigger tabIndex={lowDiskError ? -1 : 0} role="tab" className={TooltipTriggerStyle}>
                             <DatabaseZap className={`${databaseExist ? "text-theme-primaryAccent" : "text-red-600"}`} />
                         </TooltipTrigger>
                         <TooltipContent className="dark:bg-theme-bgSecondary">

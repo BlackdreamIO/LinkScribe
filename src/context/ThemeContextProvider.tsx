@@ -2,6 +2,7 @@
 
 import useLocalStorage from '@/hook/useLocalStorage';
 import { IAppTheme } from '@/interface/AppTheme';
+import { PREDEFINED_THEMES } from '@/utils/appThemes';
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,12 @@ interface ThemeContextData {
 
     linkGlassmorphismEnabled : boolean;
     setLinkGlassmorphismEnabled : Dispatch<SetStateAction<boolean>>;
+
+    currentConfigureableTheme : IAppTheme;
+    setCurrentConfigureableTheme : Dispatch<SetStateAction<IAppTheme>>;
+
+    themes : IAppTheme[];
+    setThemes : Dispatch<SetStateAction<IAppTheme[]>>;
 }
 
 interface ThemeContextVoids {
@@ -35,10 +42,13 @@ export const useThemeContext = () => useContext(ThemeContext)!;
 
 export const ThemeContextProvider = ({children} : ThemeContextProviderProps) => {
 
+    const [themes, setThemes] = useState<IAppTheme[]>(PREDEFINED_THEMES);
     const [appBackgroundColor, setAppBackgroundColor] = useState<string>("#000");
 
     const [sectionGlassmorphismEnabled, setSectionGlassmorphismEnabled] = useState<boolean>(false);
     const [linkGlassmorphismEnabled, setLinkGlassmorphismEnabled] = useState<boolean>(false);
+
+    const [currentConfigureableTheme, setCurrentConfigureableTheme] = useState<IAppTheme>({} as IAppTheme);
 
     const [currentTheme, setCurrentTheme] = useLocalStorage("appTheme", JSON.stringify({
         appBackgroundColor : "#000",
@@ -75,8 +85,14 @@ export const ThemeContextProvider = ({children} : ThemeContextProviderProps) => 
     }, [appBackgroundColor, sectionGlassmorphismEnabled, linkGlassmorphismEnabled, currentTheme]);
 
     const CreateTheme = () => {};
-    const ConfigureTheme = () => {};
-    const ResetTheme = () => {};
+
+    const ConfigureTheme = (theme : IAppTheme) => {
+        setCurrentConfigureableTheme(theme);
+    };
+
+    const ResetTheme = () => {
+        setCurrentConfigureableTheme({} as IAppTheme);
+    };
 
     const contextValue: ThemeContextType = {
         appBackgroundColor,
@@ -87,9 +103,14 @@ export const ThemeContextProvider = ({children} : ThemeContextProviderProps) => 
         sectionGlassmorphismEnabled,
         setSectionGlassmorphismEnabled,
 
+        currentConfigureableTheme,
+        setCurrentConfigureableTheme,
+        themes,
+        setThemes,
+
         CreateTheme,
         ConfigureTheme,
-        ResetTheme
+        ResetTheme,
     };
 
     return (

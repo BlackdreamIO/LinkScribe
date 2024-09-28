@@ -19,10 +19,10 @@ export const ThemeCustomizerDialog = (props : ThemeCustomizerDialogProps) => {
     const [previewMode, setPreviewMode] = useState(false);
 
     return (
-        <Box className="w-full">
+        <Box className="w-full select-none">
             { open &&!previewMode && <Box className="fixed inset-0 bg-transparent z-50"></Box>}
             <Dialog open={open} onOpenChange={() => { if(!previewMode) onClose(); }} modal={false}>
-                <DialogContent className={`
+                <DialogContent className={`select-none
                     ${ previewMode ? 'w-96 max-sm:w-52 !fixed !top-14 h-[80px] border-4 dark:border-theme-primaryAccent overflow-hidden dark:bg-theme-bgFourth' : 'h-[90%] overflow-scroll dark:bg-theme-bgSecondary w-8/12'}
                     max-w-none  rounded-xl !ring-0 !outline-none space-y-4 no-scrollbar
                 `}

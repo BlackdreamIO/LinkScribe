@@ -1,7 +1,16 @@
+"use client"
+
+import { useState } from "react";
+
 import { Box } from "@chakra-ui/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrowseThemeTab, CreateThemeTab } from ".";
+import { useThemeContext } from "@/context/ThemeContextProvider";
+
+
 export const ThemeTabManager = () => {
+
+    const { ConfigureTheme } = useThemeContext();
 
     const TriggerStyle = `w-full data-[state=active]:text-black data-[state=active]:bg-theme-primaryAccent py-2`;
 
@@ -13,8 +22,7 @@ export const ThemeTabManager = () => {
                     <TabsTrigger className={TriggerStyle} value="createTheme">Create Theme</TabsTrigger>
                     <TabsTrigger className={TriggerStyle} value="uploadWalpaper">Upload Walpaper</TabsTrigger>
                 </TabsList>
-                <TabsContent value="password">Change your password here.</TabsContent>
-                <BrowseThemeTab tabValue="browseTab" />
+                <BrowseThemeTab tabValue="browseTab"/>
                 <CreateThemeTab tabValue="createTheme" />
             </Tabs>
         </Box>
