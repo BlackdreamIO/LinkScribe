@@ -32,22 +32,5 @@ export async function SynchronizeToDexieDB({ email, sections }: ISynchronizeToDe
         return currentCachedImage?.url;
     });
 
-    const { imageURL } = await GetCloudinaryImage({ publicID : links[0].image });
-
-    console.log({
-        imageToCache : imageToCache, 
-        
-        // imageToRevalidate : cached.filter((cacheImage, index, CI) => {
-        //     const targetImage = links.findIndex(link => link.id === cacheImage.id);
-        //     if(targetImage) {
-        //         if(cacheImage.url !== links[targetImage].image) {
-        //             return cacheImage.id;
-        //         }
-        //         return false;
-        //     }
-        //     return false;
-        // })
-
-        imageToRevalidate : [cached[0]?.url, [0], imageURL]
-    })
+    //const { imageURL } = await GetCloudinaryImage({ publicID : links[0].image });
 }

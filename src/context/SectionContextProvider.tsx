@@ -31,9 +31,14 @@ interface SectionContextData {
 
     openLinkSearch : boolean;
     setOpenLinkSearch : Dispatch<SetStateAction<boolean>>;
+
+    minimized : boolean;
+    setMinimized : Dispatch<SetStateAction<boolean>>;
 }
 
-interface SectionContextVoids { };
+interface SectionContextVoids { 
+    MinimizeSection: () => void;
+};
 
 const defaultSectionData : SectionScheme = {
     id : "",
@@ -63,13 +68,13 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
     const [originalSection, setOriginalSection] = useState<SectionScheme>(defaultSectionData);
     const [openCreatorDialog, setOpenCreatorDialog] = useState<boolean>(false);
     const [collapseContexts, setCollapseContexts] = useState<boolean>(false);
+    const [minimized, setMinimized] = useState<boolean>(false);
 
     const [openLinkSearch, setOpenLinkSearch] = useState<boolean>(false);
 
     const [openLinkCreateDrawer, setOpenLinkCreateDrawer] = useState<boolean>(false);
     const [openSectionTransferer, setOpenSectionTransferer] = useState<boolean>(false);
     const [sectionToTransfer, setSectionToTransfer] = useState<SectionScheme>(defaultSectionData);
-
     const { sectionHighlighted, setSelectedSections } = useSectionContainerContext();
 
     useEffect(() => {    
@@ -77,8 +82,19 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
             sectionHighlighted  ? [...prev, currentSection].filter((v, i, a) => a.indexOf(v) === i) 
             : prev.filter(section => section !== currentSection)
         );
+    }, [sectionHighlighted, currentSection]);
 
-    }, [sectionHighlighted, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
+    // useEffect(() => {
+    //     if(minimizeAllSection) {
+    //         setMinimized(true);
+    //     }
+    // }, [minimizeAllSection])
+
+    const MinimizeSection = () => {
+        setMinimized(!minimized);
+        console.log("minizimg")
+    }
+    
 
     const contextValue: SectionContextType = {
         collapseContexts,
@@ -96,9 +112,13 @@ export const SectionContextProvider = ({children} : SectionContextProviderProps)
         setOpenSectionTransferer,
         openLinkSearch,
         setOpenLinkSearch,
+        minimized,
+        setMinimized,
 
         originalSection,
         setOriginalSection,
+
+        MinimizeSection,
     };
 
     return (

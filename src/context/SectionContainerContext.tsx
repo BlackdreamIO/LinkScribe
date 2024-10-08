@@ -16,22 +16,17 @@ interface SectionContainerContextData {
 
     selectedSections : SectionScheme[];
     setSelectedSections : Dispatch<SetStateAction<SectionScheme[]>>;
+
+    minimizeAllSections : boolean;
+    setMinimizeAllSections : Dispatch<SetStateAction<boolean>>;
 }
 
-const initialLinksTargetSection : SectionScheme = {
-    id : "",
-    title : "",
-    section_ref : "",
-    links : [],
-    totalLinksCount : 0,
-    selfLayout : "",
-    _deleted : false,
-    minimized : false,
-    created_at : '',
-    links_layout : { layout : "Compact", size : 2 }
+interface SectionContainerContextVoid {
+    SelectAllSection : () => void;
+    DselectAllSection : () => void;
 }
 
-export interface SectionContextType extends SectionContainerContextData {};
+export interface SectionContextType extends SectionContainerContextData, SectionContainerContextVoid {};
 
 type SectionContextProviderProps = { children : ReactNode };
 
@@ -43,9 +38,8 @@ export const SectionContainerContextProvider = ({children} : SectionContextProvi
 
     const [sectionHighlighted, setSectionHighlighted] = useState(false);
     const [selectedSections, setSelectedSections] = useState<SectionScheme[]>([]);
-
     const [openCreatorDialog, setOpenCreatorDialog] = useState(false);
-
+    const [minimizeAllSections, setMinimizeAllSections] = useState(false);
 
     useKeyPress({
         mode : "Multi Key",
@@ -53,7 +47,7 @@ export const SectionContainerContextProvider = ({children} : SectionContextProvi
         enable : true,
         key : ["Control", "a"],
         callback() {
-            setSectionHighlighted(!sectionHighlighted);
+            sectionHighlighted ? DselectAllSection() : SelectAllSection();
         },
     })
 
@@ -69,10 +63,15 @@ export const SectionContainerContextProvider = ({children} : SectionContextProvi
     })
 
     useEffect(() => {
-        
         //console.log("Section Highlight : ", sectionHighlighted ? selectedSections.map((x) => x.title) : []);
-        
     }, [sectionHighlighted, selectedSections])
+
+    const SelectAllSection = () => {
+        setSectionHighlighted(true);
+    }
+    const DselectAllSection = () => {
+        setSectionHighlighted(false);
+    }
     
     
     const contextValue: SectionContextType = {
@@ -82,6 +81,11 @@ export const SectionContainerContextProvider = ({children} : SectionContextProvi
         setOpenCreatorDialog,
         selectedSections,
         setSelectedSections,
+        minimizeAllSections,
+        setMinimizeAllSections,
+
+        SelectAllSection,
+        DselectAllSection,
     };
 
     return (

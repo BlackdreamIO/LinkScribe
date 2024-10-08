@@ -27,17 +27,8 @@ const dropdownMenuItemStyle = `text-sm py-2 font-normal rounded-lg px-2 transiti
 export const SectionContainerContextWrapper = (props : SectionContainerContextWrapperProps) => {
 
     const { children } = props;
-    
-    // const { 
-    //     highlightContexts,
-    //     setHighlightContexts,
-    //     openCreatorDialog,
-    //     setOpenCreatorDialog,
-    //     collapseContexts,
-    //     setCollapseContexts 
-    // } = useSectionContext()!;
 
-    const { setOpenCreatorDialog } = useSectionContainerContext();
+    const { setOpenCreatorDialog, sectionHighlighted, setSectionHighlighted, SelectAllSection, DselectAllSection, setMinimizeAllSections, minimizeAllSections } = useSectionContainerContext();
 
     const {
         contextSections,
@@ -76,10 +67,12 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
     useKeyPress({
         mode :"Multi Key",
         key : ["Control", "Shift", "c"],
-        preventDefault : false,
+        preventDefault : true,
         preventElementFocus : false,
         enable : keyboardShortcutStatus == "Full Controll",
-        callback: () => {}
+        callback: () => {
+
+        }
     })
 
     // Mac
@@ -100,9 +93,9 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
         preventElementFocus : false,
         enable : keyboardShortcutStatus == "Full Controll",
         callback: () => {
-            // if(highlightContexts) {
-            //     setCollapseContexts(!collapseContexts);
-            // }
+            if(sectionHighlighted) {
+                setMinimizeAllSections(!minimizeAllSections);
+            }
         }
     })
 
@@ -146,11 +139,15 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
                     Sort By <Labelkey label=""/>
                 </ContextMenuItem>
                 <Separator/>
-                <ContextMenuItem onClick={() => {}} className={dropdownMenuItemStyle}>
-                    {!true ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="ESC"/></>}
+                <ContextMenuItem onClick={() => setSectionHighlighted(!sectionHighlighted)} className={dropdownMenuItemStyle}>
+                    {!sectionHighlighted ? <>Select All <Labelkey label="CTRL + A"/></> : <>Deselect All <Labelkey label="ESC"/></>}
                 </ContextMenuItem>
-                <ContextMenuItem disabled={!true} onClick={() => {}} className={dropdownMenuItemStyle}>
-                    {true ? "Expand All" : "Collapse All"} <Labelkey label="CTRL + M"/>
+                <ContextMenuItem disabled={!sectionHighlighted} onClick={(e) => {
+                        e.preventDefault();
+                        setMinimizeAllSections(!minimizeAllSections);
+                    }}
+                    className={dropdownMenuItemStyle}>
+                    {!minimizeAllSections && sectionHighlighted ? "Expand All" : "Collapse All"} <Labelkey label="CTRL + M"/>
                 </ContextMenuItem>
                 <ContextMenuSub>
                     <ContextMenuSubTrigger className={dropdownMenuItemStyle}>

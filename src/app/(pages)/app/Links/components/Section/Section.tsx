@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useRef } from 'react';
 import { SectionScheme } from '@/scheme/Section';
 
 import { useSettingContext } from '@/context/SettingContextProvider';
 import { useSectionContext } from '@/context/SectionContextProvider';
 import { useSectionContainerContext } from '@/context/SectionContainerContext';
+import { useThemeContext } from '@/context/ThemeContextProvider';
+import { useSectionController } from '@/context/SectionControllerProviders';
 
 import { Box } from '@chakra-ui/react';
 
@@ -14,7 +16,6 @@ import { ConditionalRender } from '@/components/ui/conditionalRender';
 import { SectionHeader } from './SectionHeader';
 import { LinksLayout } from '../Link/LinksLayout';
 import ErrorManager from '../../../components/ErrorHandler/ErrorManager';
-import { useThemeContext } from '@/context/ThemeContextProvider';
 
 // Deep comparison function to avoid unnecessary re-renders
 const areSectionsEqual = (prevProps: { section: SectionScheme }, nextProps: { section: SectionScheme }) => {
@@ -25,17 +26,38 @@ const NonMemSection = ({ section }: { section: SectionScheme }) => {
     const [minimize, setMinimize] = useState(section.minimized || false);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
+    const { UpdateSection } = useSectionController();
     const { setCurrentSection, currentSection, setOriginalSection } = useSectionContext();
-    const { sectionHighlighted } = useSectionContainerContext();
+    const { sectionHighlighted, minimizeAllSections } = useSectionContainerContext();
     const { showLinkCount } = useSettingContext();
     const { sectionGlassmorphismEnabled } = useThemeContext();
+
+    const skippedInitialRender = useRef(false);
+    const wasInitialRender = useRef(false);
 
     useEffect(() => {
         if(section) {
             setCurrentSection(section);
             setOriginalSection(section);
         }
-    }, [section]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [section]);
+    
+    useEffect(() => {
+        if(skippedInitialRender.current) {
+            console.log(minimizeAllSections);
+            setMinimize(minimizeAllSections);
+            UpdateSection({
+                currentSection : section,
+                updatedSection : {...section, minimized : true}
+            })
+            return;
+        }
+        const currentTimeout = setTimeout(() => {
+            wasInitialRender.current = true;
+            skippedInitialRender.current = true;
+        }, 200);
+        return () => clearTimeout(currentTimeout);
+    }, [minimizeAllSections])
     
 
     return (

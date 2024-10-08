@@ -27,6 +27,7 @@ import {
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeCustomizerDialog } from "./ThemeCustomizer/ThemeCustomizerDialog";
+import { useSectionContainerContext } from "@/context/SectionContainerContext";
 
 
 const MenubarTriggerStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dark:hover:text-theme-textSecondary 
@@ -37,7 +38,8 @@ const MenuItemStyle = `dark:bg-theme-bgSecondary dark:hover:bg-theme-bgThird dar
 data-[highlighted]:dark:bg-theme-bgThird data-[highlighted]:dark:text-theme-textSecondary hover:bg-neutral-900
 text-sm max-sm:text-xs max-xl:text-sm rounded-lg py-2`;
 
-const MenubarContentStyle = `dark:bg-theme-bgSecondary bg-neutral-50 border-2 dark:border-neutral-800 border-black mt-3 min-w-80 max-sm:min-w-0 p-2 space-y-3 rounded-xl`;
+const MenubarContentStyle = `dark:bg-theme-bgSecondary bg-neutral-50 border dark:border-neutral-600 border-black mt-3 min-w-80 max-sm:min-w-0 p-2 space-y-3 rounded-xl
+                            shadow-md shadow-black`;
 
 export default function LinksNavbarSettings()
 {
@@ -47,6 +49,7 @@ export default function LinksNavbarSettings()
     const [_, setTheme] = useTheme();
     const [fullscreen, setFullscreen] = useFullscreenToggle();
     const { GetSections, contextSections } = useSectionController()!;
+    const { SelectAllSection, DselectAllSection, setMinimizeAllSections, sectionHighlighted } = useSectionContainerContext();
     const { isLoaded, isSignedIn } = useUser();
 
     const handleMenubarOpen = (value : string) => setMenubarOpen(value != '');
@@ -112,6 +115,11 @@ export default function LinksNavbarSettings()
                             <MenubarItem className={MenubarTriggerStyle} onClick={() => handleNormalReload()}>Reload</MenubarItem>
                             <MenubarItem className={MenubarTriggerStyle} onClick={() => handleForceReload()}>Force Reload {'(Fetch Again)'}</MenubarItem>
                             <MenubarSeparator className="dark:bg-neutral-800 bg-neutral-400"/>
+                            <MenubarItem disabled={!sectionHighlighted} className={MenuItemStyle} onClick={() => setMinimizeAllSections((prev) => !prev)}>Minimize All</MenubarItem>
+                            <MenubarItem className={MenuItemStyle} onClick={() => !sectionHighlighted ? SelectAllSection() : DselectAllSection()}>
+                                {sectionHighlighted ? "Deselect All" : "Select All"}
+                            </MenubarItem>
+                            <MenubarSeparator className="dark:bg-neutral-800 bg-neutral-400"/>
                             <MenubarItem className={MenubarTriggerStyle} onClick={() => setFullscreen(!fullscreen)}>Toggle Fullscreen</MenubarItem>
                         </MenubarContent>
                     </MenubarMenu>
@@ -126,15 +134,15 @@ export default function LinksNavbarSettings()
             </ConditionalRender>
 
             <ThemeCustomizerDialog open={openThemeCustomizer} onClose={() => setOpenThemeCustomizer(false)} />
-            {/* <div className={`${menubarOpen ? 'dark:opacity-100 opacity-0' : 'dark:opacity-0 opacity-0 pointer-events-none'} fixed bg-black/60 w-full h-screen z-30 -top-0 transition-all duration-150`}></div> */}
+            <div className={`${menubarOpen ? 'dark:opacity-100 opacity-0' : 'dark:opacity-0 opacity-0 pointer-events-none'} fixed bg-black/40 backdrop-filter backdrop-blur-sm w-[105%] h-screen z-30 -top-0 -left-5 transition-all duration-150`}></div>
             
             {
                 !isLoaded && (
                     <HStack>
-                        <Skeleton className="w-14 h-5 dark:bg-neutral-800" />
-                        <Skeleton className="w-14 h-5 dark:bg-neutral-800" />
-                        <Skeleton className="w-14 h-5 dark:bg-neutral-800" />
-                        <Skeleton className="w-14 h-5 dark:bg-neutral-800" />
+                        <Skeleton className="w-14 max-sm:w-1/2 h-5 dark:bg-neutral-800" />
+                        <Skeleton className="w-14 max-sm:w-1/2 h-5 dark:bg-neutral-800" />
+                        <Skeleton className="w-14 max-sm:w-1/2 h-5 dark:bg-neutral-800" />
+                        <Skeleton className="w-14 max-sm:w-1/2 h-5 dark:bg-neutral-800" />
                     </HStack>
                 )
             }

@@ -33,6 +33,7 @@ const config = {
                 textLink : "#90c1f8",
 
                 primaryAccent : "#C8BCF6",
+                secondaryAccent : "#00fa9a",
 
                 borderSecondary : "#C8BCF6",
                 borderNavigation : "#38bdf8",
@@ -93,11 +94,16 @@ const config = {
               '0%, 100%': { opacity: '0' },
               '50%': { opacity: '1' },
             },
+            'border-color': {
+              '0%, 100%': { borderColor: '#C8BCF6' }, // Blue
+              '50%': { borderColor: '#00fa9a' }, // Red
+            },
         },
         animation: {
             "accordion-down": "accordion-down 0.2s ease-out",
             "accordion-up": "accordion-up 0.2s ease-out",
             'fade-in-out': 'fade-in-out 3s ease-in-out infinite',
+            'border-color': 'border-color 3s ease infinite',
         },
         maxWidth : {
             'tiny' : '480px',

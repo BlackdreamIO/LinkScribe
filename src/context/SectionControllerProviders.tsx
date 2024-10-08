@@ -268,13 +268,6 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
     useEffect(() => {
         GetSections();
     }, [isSignedIn, isLoaded, user]);
-
-    useEffect(() => {
-        const filteredContextSection = contextSections.sort(
-            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        setContextSections(filteredContextSection);          
-    }, [contextSections])
     
     
     useEffect(() => {

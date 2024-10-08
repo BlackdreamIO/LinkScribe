@@ -21,7 +21,6 @@ export const SectionCreator = () => {
     const { openCreatorDialog, setOpenCreatorDialog } = useSectionContainerContext();
 
     const handleCreateSection = () => {
-        //setOpenCreatorDialog(false);
         if(user && user.primaryEmailAddress && sectionTitle) {
             CreateSection({
                 newSection : {
@@ -40,6 +39,7 @@ export const SectionCreator = () => {
                 }
             });
         }
+        setOpenCreatorDialog(false);
     }
 
     return (
@@ -63,7 +63,7 @@ export const SectionCreator = () => {
                     <Button
                         variant={"ghost"}
                         className="w-56 dark:bg-theme-bgFifth dark:hover:bg-theme-bgThird border-[1px] dark:border-neutral-800 rounded-lg"
-                        onClick={() => {}}>
+                        onClick={() => setOpenCreatorDialog(false)}>
                             Close
                     </Button>
                 </DialogFooter>

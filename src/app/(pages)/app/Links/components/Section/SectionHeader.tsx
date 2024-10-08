@@ -1,11 +1,9 @@
 'use client'
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import { useSectionContext } from "@/context/SectionContextProvider";
 import { useSectionController } from "@/context/SectionControllerProviders";
-
-import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 
 import { Box, Divider, HStack } from "@chakra-ui/react";  
 import { Input } from "@/components/ui/input";
@@ -42,14 +40,15 @@ export const SectionHeader = (props : SectionHeaderProps) => {
     const [currentSectionTitle, setCurrentSectionTitle] = useState(section.title);
     const [titleEditMode, setTitleEditMode] = useState(false);
 
-    const parentRef = useRef<HTMLDivElement>(null);
-    useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "both" });
-
     const { UpdateSection, DeleteSections } = useSectionController();
     const { setOpenLinkCreateDrawer, currentSection } = useSectionContext();
 
     const handleMinimzie = () => {
         onMinimize();
+        UpdateSection({
+            currentSection : currentSection,
+            updatedSection : {...currentSection, minimized : !isMinimzied}
+        })
     }
 
     const handleRename = (newTitle : string) => {

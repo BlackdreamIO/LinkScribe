@@ -17,7 +17,7 @@ class LinkScribeDexie extends Dexie {
     constructor() {
         super('LinkScribeDexie');
         this.version(1).stores({
-            sections: 'id, section_ref, title, created_at',
+            sections: 'id, section_ref, title, created_at, minimized, links_layout, totalLinksCount',
             links: 'id, section_ref, title, url, created_at',
             appLayout : '',
             appTheme : '',
