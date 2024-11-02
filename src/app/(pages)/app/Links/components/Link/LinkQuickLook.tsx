@@ -29,6 +29,7 @@ import blankImage from "../../../../../../../public/images/blankImage.webp";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "../Section/DynamicImport";
+import { UploadLinkPreviewImage } from "@/app/actions/database/media/links/uploadLinkPreviewImage";
 
 
 type LinkQuickLookProps = {
@@ -142,17 +143,27 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
         //DeletePreviewImage({link : link})
     }
 
-    const handleSave = () => {
-        AddPreviewImage({
-            file : uploadedFile,
-            url : uploadedImageURL,
-            useFileMethod : uploadedImageURL.length < 5,
-            autoSyncAfterUpload : true,
-            link : link,
-            onSucess: () => onClose(true),
-            onCallback: ({ loading }) => setIsLoading(loading),
-            onError: () => onClose(false),
-        })
+    const handleSave = async () => {
+        //AddPreviewImage({
+        //    file : uploadedFile,
+        //    url : uploadedImageURL,
+        //    useFileMethod : uploadedImageURL.length < 5,
+        //    autoSyncAfterUpload : true,
+        //    link : link,
+        //    onSucess: () => onClose(true),
+        //    onCallback: ({ loading }) => setIsLoading(loading),
+        //    onError: () => onClose(false),
+        //})
+
+        console.log(uploadedFile)
+        if(!uploadedFile) return;
+
+        try {
+            //await UploadLinkPreviewImage();
+            
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     async function checkImage(url : string)

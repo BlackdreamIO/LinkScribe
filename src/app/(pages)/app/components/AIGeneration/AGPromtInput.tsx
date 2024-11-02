@@ -12,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 
 export const AGPromtInput = () => {
 
-    const { prompt, setPrompt, setGeneratedLinks, loading, setLoading } = useAGContextWrapper();
+    const { prompt, setPrompt, setGeneratedLinks, loading, setLoading, setSelectedLinks } = useAGContextWrapper();
 
     const { ToastMessage } = useSendToastMessage();
 
@@ -44,8 +44,10 @@ export const AGPromtInput = () => {
             setLoading(false);
         }
 
-        console.log(links);
-        setGeneratedLinks(links);
+        const filterLinks = links.map(link => ({...link, visitCount : 0, created_at : new Date(link.created_at)}));
+
+        setGeneratedLinks(filterLinks);
+        setSelectedLinks(filterLinks.map((link) => ({...link, selected : true})));
         setLoading(false);
     }
 
@@ -64,7 +66,7 @@ export const AGPromtInput = () => {
             <Box className="w-full space-y-2">
                 <Textarea
                     placeholder="Example : Generate 5 Usefull Link or 5 Useful Link For Productivtiy"
-                    className="w-full dark:bg-theme-bgFifth h-48 resize-none focus-visible:ring-theme-textSecondary"
+                    className="w-full dark:bg-theme-bgFifth h-32 resize-none focus-visible:ring-theme-textSecondary"
                     onChange={(e) => setPrompt(e.target.value)}
                     value={prompt}
                 />

@@ -1,9 +1,11 @@
 'use client'
 
 import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
-import { AutoSyncTimeType, DefaultExportType, KeyboardShortcutStatusType, LinkLayoutType } from '@/types/SettingTypes';
-import useLocalStorage from '@/hook/useLocalStorage';
 import { LinkScheme } from '@/scheme/Link';
+
+interface AGLink extends LinkScheme {
+    selected : boolean;
+}
 
 export interface IAGContext {
     prompt : string;
@@ -17,6 +19,11 @@ export interface IAGContext {
 
     generatedLinks : LinkScheme[];
     setGeneratedLinks: Dispatch<SetStateAction<LinkScheme[]>>;
+
+    selectedLinks : AGLink[];
+    setSelectedLinks: Dispatch<SetStateAction<AGLink[]>>;
+
+    selectAllLinks : () => void;
 };
 
 type SettingContextProviderProps = {
@@ -33,6 +40,7 @@ export const AGContextWrapper = ({children} : SettingContextProviderProps) => {
     const [loading, setLoading] = useState(false);
     const [selectedSectionID, setSelectedSectionID] = useState<string>("");
     const [generatedLinks, setGeneratedLinks] = useState<LinkScheme[]>([]);
+    const [selectedLinks, setSelectedLinks] = useState<AGLink[]>([]);
 
     const contextValue: IAGContext = {
         prompt,
@@ -41,8 +49,13 @@ export const AGContextWrapper = ({children} : SettingContextProviderProps) => {
         setSelectedSectionID,
         generatedLinks,
         setGeneratedLinks,
+        selectedLinks,
+        setSelectedLinks,
         loading,
-        setLoading
+        setLoading,
+        selectAllLinks : () => {
+            setSelectedLinks(generatedLinks.map((link) => ({...link, selected : true})));
+        }
     };
 
     return (

@@ -70,8 +70,6 @@ export async function generateAILinks({ userId, prompt, maxGeneration } : IGener
 
         const result = await response.json();
         
-        console.log(result);
-
         if(result.error) {
             return {
                 error : result.error,
