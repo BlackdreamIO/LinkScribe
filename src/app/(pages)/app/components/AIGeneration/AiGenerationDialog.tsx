@@ -29,7 +29,7 @@ export const AiGenerationDialog = () => {
             if(currentSection) {
                 const filteredLinks = selectedLinks
                     .filter(link => link.selected == true)
-                    .map(({selected, ...link}) => ({...link, ref : selectedSectionID}))
+                    .map(({selected, ...link}) => ({...link, ref : selectedSectionID, visitCount : 0, image : '', id : crypto.randomUUID()}))
                     .filter(link => !currentSection.links.some(existingLink => existingLink.id === link.id));
                 const updatedSection = {...currentSection, links : [...currentSection.links, ...filteredLinks]};
                 

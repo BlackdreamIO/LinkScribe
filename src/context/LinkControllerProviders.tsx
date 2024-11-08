@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, ReactNode, useState, Dispatch, SetStateAction } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { useSectionController } from './SectionControllerProviders';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
@@ -11,6 +11,8 @@ import { useSendToastMessage } from '@/hook/useSendToastMessage';
 import { DeleteCloudinaryImage } from '@/app/actions/cloudnary/deleteImage';
 import { useSectionContainerContext } from './SectionContainerContext';
 import { DexieGetCacheImage } from '@/database/dexie/helper/DexieCacheImages';
+import { ImageCacheManager } from "@/database/managers/ImageCacheMnager";
+import { useFetch } from '@/hook/useFetch';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +35,7 @@ interface LinkContextData {
     AddPreviewImage : ({ file, url, useFileMethod, link, autoSyncAfterUpload, onSucess, onError, onCallback } : IAddPreviewImage) => void;
     DeletePreviewImage : ({ link } : { link : LinkScheme, onSucess? : () => void, onError? : () => void }) => void;
     GetCacheImage : ({ id } : { id : string }) => Promise<Blob | undefined>;
+    GetPreviewImage : ({ link, onSucess, onError } : { link : LinkScheme, onCallback? : (status : string) => void, onSucess? : (src : string) => void, onError? : () => void }) => void;
     IncreaseViewCount : ({ link } : { link : LinkScheme }) => void;
 
     isloading : boolean;
@@ -51,8 +54,11 @@ export const useLinkController = () => useContext(LinkController)!;
 
 export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
-    const { isSignedIn, isLoaded, user } = useUser();
     const [isloading, setIsLoading] = useState(true);
+
+    const { isSignedIn, isLoaded, user } = useUser();
+    const { getToken } = useAuth();
+    const { fetchGet, fetchPost } = useFetch();
 
     const { SaveContextSections, RestoreContextSections, contextSections, setContextSections, Sync } = useSectionController();
     const { ToastMessage } = useSendToastMessage();
@@ -185,34 +191,51 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
     }
 
     const AddPreviewImage = async ({ file, url, useFileMethod, autoSyncAfterUpload, link, onSucess, onError, onCallback } : IAddPreviewImage) => {
-        if(user && isSignedIn && user.primaryEmailAddress)
+        
+        const token = await getToken({ template : "linkscribe-supabase" });
+                    
+        if(user && isSignedIn && user.primaryEmailAddress && token)
         {
             try{
                 if(file !== undefined)
                 {
+                    const formData = new FormData();
+                    formData.append("previewImage", file);
+                    formData.append("email", RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''));
+                    formData.append("id", link.id);
+    
                     onCallback?.({ loading : true });
-                    const convertedBase64 = await FileToBase64(file);
-                    const { error, publicID } = await UploadImageToCloudinary({
-                        file : convertedBase64,
-                        filename : link.id,
-                        folder : RefineEmail(user.primaryEmailAddress.emailAddress),
+                    /*
+                    const response = await fetch("http://localhost:5000/media", {
+                        method : "POST",
+                        headers : { 'Authorization': `Bearer ${token}`},
+                        body : formData
                     });
-                    onCallback?.({ loading : false });
+    
+                    const data = await response.json();
 
-                    if(error) {
-                        console.error(error);
-                        onError?.();
-                        return;
-                    }
+                    console.log(data);
+                    */
 
-                    UpdateLink({
-                        currentLink : link,
-                        sectionID : link.ref,
-                        updatedLink : {
-                            ...link,
-                            image : publicID,
+                    ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
+                    await ImageCacheManager.uploadToCache({
+                        image : file,
+                        cacheEncoderDecoder : "blob",
+                        compressMode : "FTC",
+                        metaData : {
+                            id : link.id,
+                            ref : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
+                            url : 'response?.data?.url'
+                        },
+                        onCallback(callbackStatus) {
+                            //setImageProcessingStatus(callbackStatus);
+                        },
+                        onError : (error) => {
+                            ToastMessage({ message : JSON.stringify(error.message), type : "Error", duration : 5000 });
                         }
-                    })
+                    });
+                    
+                    onCallback?.({ loading : false });
 
                     autoSyncAfterUpload && Sync();
                     ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
@@ -222,32 +245,48 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                 {
                     onCallback?.({ loading : true });
 
-                    // Convert the fetched image to blob
                     const imageBlob = await fetch(url).then(res => res.blob());
-                    const convertedBase64 = await FileToBase64(imageBlob);
 
-                    const { publicID, error } = await UploadImageToCloudinary({
-                        file : convertedBase64,
-                        filename : link.id,
-                        folder : RefineEmail(user.primaryEmailAddress.emailAddress)
+                    const convertedFile = new File([imageBlob], `${link.id}.webp`, {
+                        type: imageBlob.type,
                     });
 
-                    onCallback?.({ loading : false });
+                    console.log(convertedFile)
 
-                    if(error) {
-                        console.error(error);
-                        onError?.();
-                        return;
-                    }
+                    const formData = new FormData();
+                    formData.append("previewImage", convertedFile);
+                    formData.append("email", RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''));
+                    formData.append("id", link.id);
 
-                    UpdateLink({
-                        currentLink : link,
-                        sectionID : link.ref,
-                        updatedLink : {
-                            ...link,
-                            image : publicID,
+                    const response = await fetch("http://localhost:5000/media", {
+                        method : "POST",
+                        headers : { 'Authorization': `Bearer ${token}`},
+                        body : formData
+                    });
+
+                    const data = await response.json();
+
+                    console.log(data);
+
+                    ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
+                    await ImageCacheManager.uploadToCache({
+                        image : imageBlob,
+                        cacheEncoderDecoder : "blob",
+                        compressMode : "BTC",
+                        metaData : {
+                            id : link.id,
+                            ref : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
+                            url : 'response?.data?.url'
+                        },
+                        onCallback(callbackStatus) {
+                            //setImageProcessingStatus(callbackStatus);
+                        },
+                        onError : (error) => {
+                            ToastMessage({ message : JSON.stringify(error.message), type : "Error", duration : 5000 });
                         }
-                    })
+                    });
+                    
+                    onCallback?.({ loading : false });
 
                     autoSyncAfterUpload && Sync();
                     ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
@@ -291,6 +330,62 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
         }
     }
 
+    const GetPreviewImage = async ({ link, onSucess, onError, onCallback } : { link : LinkScheme, onCallback? : (status : string) => void, onSucess? : (src : string) => void, onError? : () => void }) => {
+        if(user && user.primaryEmailAddress) {
+            const cacheImage = await DexieGetCacheImage({
+                id : link.id,
+                email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
+                revalidation : {
+                    image_url : link.url,
+                    revalidate : false
+                },
+                onError(error) {
+                    ToastMessage({ message : "Please Free Up Storage Space On Your Device", description : error.message ?? '', type : "Error" })
+                    console.error(error);
+                },
+            });
+
+            if(cacheImage) {
+                const imageURL = URL.createObjectURL(cacheImage);
+                onSucess?.(imageURL);
+                return imageURL;
+            }
+            else {
+                const path = `${RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '')}/links/${link.id}.webp`;
+
+                const res = await fetch(`http://localhost:5000/media/?path=${path}`, {
+                    method : "GET",
+                    cache : "no-store",
+                    next : { revalidate : 0 }
+                })
+                const json = await res.json();
+
+                if(json?.data?.url) {
+                    const blob = await fetch(json?.data?.url).then(res => res.blob());
+
+                    ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
+                    await ImageCacheManager.uploadToCache({
+                        image : blob,
+                        cacheEncoderDecoder : "blob",
+                        compressMode : "BTC",
+                        metaData : {
+                            id : link.id,
+                            ref : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
+                            url : json?.data?.url
+                        },
+                        onCallback : onCallback,
+                        onError : (error) => {
+                            ToastMessage({ message : JSON.stringify(error.message), type : "Error", duration : 5000 });
+                        }
+                    });
+                }
+                else {
+                    ToastMessage({ message : "Preview Image Not Found", type : "Warning" });
+                }
+            }
+        }
+    }
+
     const GetCacheImage = async ({ id } : { id : string }) => {
         if(user && user.primaryEmailAddress) {
             const cacheImage = await DexieGetCacheImage({ id : id, email : user.primaryEmailAddress.emailAddress });
@@ -317,6 +412,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
        AddPreviewImage,
        DeletePreviewImage,
        GetCacheImage,
+       GetPreviewImage,
        IncreaseViewCount,
 
        isloading,

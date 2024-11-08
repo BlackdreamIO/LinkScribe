@@ -4,17 +4,19 @@ import { ICacheImage } from "@/scheme/CacheImage";
 import { CompressImageFromUrl } from "../../helpers/CompressImageAutoFromUrl";
 import { RefineEmail } from "../../helpers/RefineEmail";
 import { CompressImageToBlob } from "../../helpers/CompressImageToBlob";
+import { DetermineInputSource } from "@/helpers/ICM/DetermineInputSource";
+import { AddImageToCache } from "@/helpers/Dexie/AddImageToCache";
 
 interface IUploadToCache
 {
     cacheEncoderDecoder? : "binary" | "blob" | "base64";
-    compressMode? : "UTC" | "FTC" | "auto",
+    compressMode? : "UTC" | "FTC" | "BTC" | "auto",
     metaData? : {
         id : string;
         ref : string;
         url : string;
     };
-    image : ICacheImage | string | File;
+    image : ICacheImage | string | File | Blob;
     onCallback? : (callbackStatus : string) => void;
     onError? : (error : any) => void;
 }
@@ -30,6 +32,10 @@ export class ImageCacheManager {
         }
     }
 
+    private static getExistingCacheImages() {
+        return DexieGetCacheImages({ email : this.email });
+    }
+
     public static InitializeCacheManager ({ email } : { email : string }) {
         ImageCacheManager.email = email;
     }
@@ -37,101 +43,59 @@ export class ImageCacheManager {
 
     static async uploadToCache ({ image, onError, compressMode, metaData, onCallback } : IUploadToCache) {
         
-        if(typeof image == "string" || image instanceof File) {
-            try
-            {
-                if(!metaData) {
-                    onError?.("metaData is required when compressMode is UTC | FTC");
-                    return;
-                }
+        const { type } = DetermineInputSource({ image : image as File | Blob | string });
 
-                if(compressMode == "UTC") {
-                    
-                    if(image instanceof File) {
-                        onError?.("URL is required when compressMode is UTC [URL TO COMPRESS AND CACHE]");
-                        return;
-                    }
+        if(type == "File" && compressMode == "FTC") {
 
-                    onCallback?.("Compressing...");
-                    const compressedOutput = await CompressImageFromUrl(image);
-                    onCallback?.("Compressed");
-
-                    const convertedImage : ICacheImage = {
-                        id : metaData.id,
-                        blob : compressedOutput,
-                        ref : RefineEmail(metaData.ref),
-                        url : image
-                    }
-
-                    onCallback?.("Caching Started");
-                    await this.revalidateCache({ id : metaData.id, onError });
-                    await DexieDB.cacheImages.add(convertedImage);
-                    onCallback?.("Cached");
-                }
-
-                else if(compressMode == "FTC") {
-                    if(typeof image == "string") {
-                        onError?.("File is required when compressMode is FTC [FILE TO COMPRESS AND CACHE]");
-                        return;
-                    }
-                    onCallback?.("Compressing From File");
-                    const compressedOutput = await CompressImageToBlob(image as File);
-                    onCallback?.("Compression Complete")
-                    const convertedImage : ICacheImage = {
-                        id : metaData.id,
-                        blob : compressedOutput,
-                        ref : RefineEmail(metaData.ref),
-                        url : metaData.url
-                    }
-
-                    onCallback?.("Caching Started");
-                    await this.revalidateCache({ id : metaData.id, onError });
-                    await DexieDB.cacheImages.add(convertedImage);
-                    onCallback?.("Cached");
-                }
+            if(!metaData) {
+                onError?.("metaData is required when compressMode is UTC | FTC");
+                return;
             }
-            catch (error) {
-                onError?.(error);
-                console.error(error);
-                return;   
+
+            onCallback?.("Compressing...");
+            const compressedOutput = await CompressImageToBlob(image as File);
+            onCallback?.("Compression Complete")
+            const cacheEntry : ICacheImage = {
+                id : metaData.id,
+                blob : compressedOutput,
+                ref : RefineEmail(metaData.ref),
+                url : metaData.url
             }
+            AddImageToCache({ cacheEntry, options : { overwrite : true } })
         }
 
-        if (typeof image !== "string" && ('id' in image) && image.id) {
-            const existingCacheImage = await DexieDB.cacheImages.toArray();
-
-            if(existingCacheImage.find(x => x.id === image.id))
-            {
-                try
-                {
-                    let hasError = false;
-                    onCallback?.("RM RF -- OLD_CACHE");
-                    await this.deleteFromCache({ id : image.id, onError(error) {
-                        hasError = true;
-                        onError?.(error);
-                        return;
-                    }});
-
-                    if(!hasError) {
-                        await this.revalidateCache({ id : image.id, onError });
-                        await DexieDB.cacheImages.add(image);
-                    }
-                }
-                catch (error) {
-                    onError?.(error);
-                }
+        if(type == "Blob" && compressMode == "BTC") {
+            if(!metaData) {
+                onError?.("metaData is required when compressMode is UTC | FTC");
+                return;
             }
-            else {
-                try {
-                    onCallback?.("Caching Started");
-                    await this.revalidateCache({ id : image.id, onError });
-                    await DexieDB.cacheImages.add(image);
-                    onCallback?.("Cached");
-                }
-                catch (error) {
-                    onError?.(error);
-                }
+            onCallback?.("Caching Started");
+            const cacheEntry : ICacheImage = {
+                id : metaData.id,
+                blob : image as Blob,
+                ref : RefineEmail(metaData.ref),
+                url : metaData.url
             }
+            AddImageToCache({ cacheEntry, options : { overwrite : true } })
+        }
+
+        if(type == "URL" && compressMode == "UTC") {
+            if(!metaData) {
+                onError?.("metaData is required when compressMode is UTC | FTC");
+                return;
+            }
+
+            onCallback?.("Compressing...");
+            const compressedOutput = await CompressImageFromUrl(image as string);
+            onCallback?.("Compressed");
+
+            const cacheEntry : ICacheImage = {
+                id : metaData.id,
+                blob : compressedOutput,
+                ref : RefineEmail(metaData.ref),
+                url : image as string
+            }
+            AddImageToCache({ cacheEntry, options : { overwrite : true } })
         }
     }
 

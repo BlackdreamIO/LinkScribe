@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useLinkController } from "@/context/LinkControllerProviders";
 import { useSendToastMessage } from "@/hook/useSendToastMessage";
 import { useCopyImageToClipboard } from "@/hook/useCopyImageToClipboard";
@@ -13,6 +13,8 @@ import { GetCloudinaryImage } from "@/app/actions/cloudnary/getImage";
 import { RefineEmail } from "@/helpers";
 import { DexieGetCacheImage } from "@/database/dexie/helper/DexieCacheImages";
 import { ImageCacheManager } from "@/database/managers/ImageCacheMnager";
+import { ConvertBlobToUrl } from "@/helpers/ConvertBlobToUrl";
+import { IsValidImageUrl } from "@/helpers/IsValidImageUrl";
 
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Box, Center, HStack, Text, VStack } from "@chakra-ui/react";
@@ -56,7 +58,8 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     const [isImageUrlValid, setIsImageUrlValid] = useState<boolean>(false);
     
     const { user } = useUser();
-    const { UpdateLink, AddPreviewImage, DeletePreviewImage } = useLinkController();
+    const { getToken } = useAuth();
+    const { UpdateLink, AddPreviewImage, DeletePreviewImage, GetPreviewImage } = useLinkController();
     const { ToastMessage } = useSendToastMessage();
     const [ copyImageToClipboard ] = useCopyImageToClipboard();
 
@@ -68,11 +71,6 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     }, [uploadedFile]);
 
     useEffect(() => {
-        if(!open) {
-            if(linkPreviewImage !== link.image) {
-                //console.log(linkPreviewImage)
-            }
-        }
         if(open) {
             GetLinkPreviewImageByID();
         }
@@ -80,7 +78,59 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     
     const GetLinkPreviewImageByID = async () => {
 
-        if(!link || !user) return;
+        if(!user) return;
+
+        GetPreviewImage({
+            link : link,
+            onSucess : (src) => {
+                setLinkPreviewImage(src);
+            },
+            onCallback(status) {
+                setShowImageProcessingStatus(true);
+                setImageProcessingStatus(status);
+            },
+        })
+
+        setShowImageProcessingStatus(false);
+
+        /*
+        const cacheImage = await DexieGetCacheImage({
+            id : link.id,
+            email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
+            revalidation : {
+                image_url : link.url,
+                revalidate : false
+            },
+            onError(error) {
+                ToastMessage({ message : "Please Free Up Storage Space On Your Device", description : error.message ?? '', type : "Error" })
+                console.error(error);
+            },
+        });
+
+        console.log(cacheImage)
+
+        if(cacheImage) {
+            const imageURL = URL.createObjectURL(cacheImage);
+            setLinkPreviewImage(imageURL);
+            return;
+        }
+        */
+
+        /*
+        const path = `${RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '')}/links/${link.id}.webp`;
+
+        const res = await fetch(`http://localhost:5000/media/?path=${path}`, {
+            method : "GET",
+            cache : "no-store",
+            next : { revalidate : 0 }
+        })
+
+        const json = await res.json();
+        console.log(json?.data?.url);
+
+        const blob = await fetch(json?.data?.url).then(res => res.blob());
+
+        console.log(blob)
 
         const cacheImage = await DexieGetCacheImage({
             id : link.id,
@@ -100,43 +150,26 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
             setLinkPreviewImage(imageURL);
             return;
         }
-
-        else
-        {
-            setShowImageProcessingStatus(true);
-            setImageProcessingStatus("Requesting Image...");
-            const { imageURL, hasError } = await GetCloudinaryImage({ publicID : link.image });
-
-            if(hasError || imageURL == "") {
-                setShowImageProcessingStatus(false);
-                return;
-            }
-            setImageProcessingStatus("Sucessfully Fetched Image...");
-
+        else {
             ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
             await ImageCacheManager.uploadToCache({
-                image : imageURL,
+                image : blob,
                 cacheEncoderDecoder : "blob",
-                compressMode : "UTC",
+                compressMode : "BTC",
                 metaData : {
                     id : link.id,
                     ref : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
-                    url : imageURL
+                    url : json?.data?.url
                 },
                 onCallback(callbackStatus) {
                     setImageProcessingStatus(callbackStatus);
                 },
                 onError : (error) => {
-                    ToastMessage({ message : JSON.stringify(error.message), type : "Error" });
-                    console.error(error)
+                    ToastMessage({ message : JSON.stringify(error.message), type : "Error", duration : 5000 });
                 }
             });
-
-            setImageProcessingStatus("Image Cached...");
-            setShowImageProcessingStatus(false);
-
-            setLinkPreviewImage(imageURL);
         }
+        */
     }
 
     const handleDelete = async () => {
@@ -144,44 +177,30 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     }
 
     const handleSave = async () => {
-        //AddPreviewImage({
-        //    file : uploadedFile,
-        //    url : uploadedImageURL,
-        //    useFileMethod : uploadedImageURL.length < 5,
-        //    autoSyncAfterUpload : true,
-        //    link : link,
-        //    onSucess: () => onClose(true),
-        //    onCallback: ({ loading }) => setIsLoading(loading),
-        //    onError: () => onClose(false),
-        //})
+        //setIsLoading(true);
 
-        console.log(uploadedFile)
-        if(!uploadedFile) return;
-
-        try {
-            //await UploadLinkPreviewImage();
-            
-        } catch (error) {
-            console.error(error);
-        }
+        AddPreviewImage({
+            file : uploadedFile,
+            url : uploadedImageURL,
+            useFileMethod : false,
+            autoSyncAfterUpload : false,
+            link : link,
+            onSucess() {
+                ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
+            },
+            onError() {
+                
+            }
+        })
     }
 
-    async function checkImage(url : string)
-    {
-        try {
-            const res = await fetch(url);
-            const buff = await res.blob();
-            
-            const isImage = buff.type.startsWith('image/');
-            setIsImageUrlValid(isImage);
-        }
-        catch (error) {
-            setIsImageUrlValid(false);
-        }
+    const checkValidImageUrl = async () => {
+        const isValid = await IsValidImageUrl(uploadedImageURL);
+        setIsImageUrlValid(isValid);
     }
 
     useEffect(() => {
-        checkImage(uploadedImageURL);
+        checkValidImageUrl();
     }, [uploadedImageURL])
     
 

@@ -1,4 +1,4 @@
-import imageCompression from 'browser-image-compression';
+import imageCompression, { Options } from 'browser-image-compression';
 
 /**
  * Fetches an image from a URL and converts it to a Blob.
@@ -7,6 +7,7 @@ import imageCompression from 'browser-image-compression';
  */
 async function fetchImageAsBlob(imageUrl: string): Promise<Blob> {
   try {
+    console.log(imageUrl)
     const response = await fetch(imageUrl);
 
     if (!response.ok) {
@@ -36,12 +37,13 @@ export async function CompressImageFromUrl(
   try {
     // Fetch the image from URL and convert it to a Blob
     const imageBlob = await fetchImageAsBlob(imageUrl);
+    console.log(imageBlob)
 
     // Convert Blob to File
     const file = new File([imageBlob], 'image.jpg', { type: imageBlob.type });
 
     // Set compression options
-    const options = {
+    const options : Options = {
       maxSizeMB, // Maximum size of the compressed image
       maxWidthOrHeight, // Maximum width or height of the image
       useWebWorker: true, // Use web worker for processing
@@ -55,7 +57,35 @@ export async function CompressImageFromUrl(
 
     return compressedBlob;
   } catch (error) {
-    console.error('Error compressing image:', error);
+    console.error('Error compressing image: <CompressImageFromUrl> : ', error);
     throw new Error('Failed to compress image.');
   }
+}
+
+
+export async function CompressFromBlob(file: Blob, maxSizeMB: number = 1, maxWidthOrHeight: number = 1920 ): Promise<Blob> {
+    try
+    {
+        // Set compression options
+        const options : Options = {
+            maxSizeMB, // Maximum size of the compressed image
+            maxWidthOrHeight, // Maximum width or height of the image
+            useWebWorker: true, // Use web worker for processing
+        };
+
+        const fileBlob = new File([file], 'filename', { type: file.type });
+
+        // Compress the image file
+        const compressedFile = await imageCompression(fileBlob, options);
+
+        // Convert compressed file to Blob
+        const compressedBlob = new Blob([compressedFile], { type: compressedFile.type });
+
+        return compressedBlob;
+    }
+    catch (error) {
+        console.error('Error compressing image: <CompressFromBlob> : ', error);
+        throw new Error('Failed to compress image.');
+    }
+  
 }
