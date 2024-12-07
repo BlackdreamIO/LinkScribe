@@ -34,7 +34,7 @@ export const LinkNavbarAdditionals = () => {
     const { isSignedIn, isLoaded, user } = useUser();
     const [isLocalySynced, setIsLocallySynced] = useState(false);
 
-    const { contextSections, databaseContextSections, syncStatus, Sync } = useSectionController()!;
+    //const { contextSections, databaseContextSections, syncStatus, Sync } = useSectionController()!;
     const { databaseExist } = useDBController();
     const [_, __, getLocalStorageSectionByKey, ___] = useLocalStorage<SectionScheme[]>('sectionsCache', []);
 
@@ -43,6 +43,7 @@ export const LinkNavbarAdditionals = () => {
     useKeyboardNavigation({ role: 'tab', parentRef : parentRef, direction : "horizontal" });
 
 
+    /*
     useEffect(() => {
         const fieldsToExclude = ['created_at', 'visitCount']; // Fields to exclude
     
@@ -54,6 +55,7 @@ export const LinkNavbarAdditionals = () => {
         
         setIsLocallySynced(JSON.stringify(sortedLocalSections) == JSON.stringify(sortedDatabaseContextSections) || sortedLocalSections.length == sortedDatabaseContextSections.length);
     }, [contextSections, databaseContextSections]);
+    */
 
     return (
         <Box className="flex flex-grow items-center justify-end pr-4">
@@ -85,16 +87,22 @@ export const LinkNavbarAdditionals = () => {
                 <TooltipProvider>
                     <Tooltip delayDuration={200}>
                         <TooltipTrigger tabIndex={-1}>
-                            <Button role="tab" tabIndex={lowDiskError ? -1 : 0} disabled={syncStatus == "Syncing"} onClick={Sync} className={`!bg-transparent w-auto h-auto p-0 m-auto grid place-content-center ${TooltipTriggerStyle}`}>
-                                <RefreshCcwDot
+                            <Button
+                                role="tab"
+                                tabIndex={lowDiskError ? -1 : 0}
+                                //disabled={syncStatus == "Syncing"}
+                                //onClick={Sync}
+                                className={`!bg-transparent w-auto h-auto p-0 m-auto grid place-content-center ${TooltipTriggerStyle}`}
+                            >
+                                {/* <RefreshCcwDot
                                     className={syncStatus == "Syncing" ? "animate-spin text-neutral-500" : syncStatus == "Synced" ? "text-theme-textSecondary" : "text-red-600"}
-                                />
+                                /> */}
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent className="dark:bg-theme-bgSecondary">
-                            <Text className="dark:text-white">
+                            {/* <Text className="dark:text-white">
                                 {syncStatus}
-                            </Text>
+                            </Text> */}
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
@@ -109,22 +117,22 @@ export const LinkNavbarAdditionals = () => {
                         <Separator/>
                         <Box className="w-full flex flex-row items-center justify-between space-x-2">
                             <Text className="dark:text-black px-4 py-1 dark:bg-neutral-300 rounded-xl">
-                                {`Local : ${contextSections.length}`}
+                                {/* {`Local : ${contextSections.length}`} */}
                             </Text>
                             <Text className="dark:text-black px-4 py-1 dark:bg-neutral-300 rounded-xl">
-                                {`Server : ${databaseContextSections.length}`}
+                                {/* {`Server : ${databaseContextSections.length}`} */}
                             </Text>
                         </Box>
                         <Separator/>
                         <Box className="w-full flex flex-col items-center justify-between space-y-2">
                             <Text className="dark:text-green-500 text-xs px-4 py-1 dark:bg-black rounded-xl">
                                 {
-                                    contextSections && contextSections[0] ? `${contextSections[0].id.slice(0, 4)}/${new Date(contextSections[0].created_at).toISOString()}` : "NULL"
+                                    // contextSections && contextSections[0] ? `${contextSections[0].id.slice(0, 4)}/${new Date(contextSections[0].created_at).toISOString()}` : "NULL"
                                 }
                             </Text>
                             <Text className="dark:text-green-500 text-xs px-4 py-1 dark:bg-black rounded-xl">
                             {
-                                databaseContextSections && databaseContextSections[0] ? `${databaseContextSections[0].id.slice(0, 4)}/${new Date(databaseContextSections[0].created_at).toISOString()}` : "NULL"
+                                // databaseContextSections && databaseContextSections[0] ? `${databaseContextSections[0].id.slice(0, 4)}/${new Date(databaseContextSections[0].created_at).toISOString()}` : "NULL"
                             }
                             </Text>
                         </Box>

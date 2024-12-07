@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, Dispatch, SetStateAction, ReactNode, useEffect, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { SectionScheme } from '@/scheme/Section';
 
@@ -17,6 +17,7 @@ import { DexieGetSectionsByEmail } from '@/database/dexie/helper/DexieSectionByE
 import { SyncStatus } from '@/types/Sync';
 import { SynchronizeToDexieDB } from '@/database/dexie/functions/SynchronizeToDexie';
 import SynchronizeToSupabase from '@/database/supabase/functions/SynchronizeToSupabase';
+import { debounce } from 'lodash';
 
 //PouchDB.plugin(PouchDBLocalStorageAdapter);
 
@@ -83,9 +84,10 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                 return;
             }
 
-            setContextSections(prev => [...prev, newSection]);
-            await SynchronizeToDexieDB({ sections : [...contextSections, newSection], email : currentUserEmail })
-                .catch(() => ToastMessage({message : "Failed Create Section Please Try Again", description : "INTERNAL SERVER ERROR 500", type : "Error"}));
+            setContextSections((prev) => [...prev, newSection]);
+            
+            //await SynchronizeToDexieDB({ sections : [...contextSections, newSection], email : currentUserEmail })
+            //    .catch(() => ToastMessage({message : "Failed Create Section Please Try Again", description : "INTERNAL SERVER ERROR 500", type : "Error"}));
         }
     }
 
@@ -126,8 +128,8 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
                         setContextSections(sections);
                         setOriginalContextSections(sections);
                         setDatabaseContextSections(sections);
-                        await SynchronizeToDexieDB({ sections : sections, email : currentUserEmail })
-                            .catch(() => ToastMessage({message : "Failed To Sync Data Indexed DB", description : "STORAGE", type : "Error"}));
+                        //await SynchronizeToDexieDB({ sections : sections, email : currentUserEmail })
+                        //    .catch(() => ToastMessage({message : "Failed To Sync Data Indexed DB", description : "STORAGE", type : "Error"}));
                     },
                     onEmpty() {  },
                     onError(error) {
@@ -143,36 +145,55 @@ export const SectionControllerProvider = ({children} : SectionContextProviderPro
         return [];
     }
 
-    const UpdateSection = async ({currentSection, updatedSection} : { currentSection : SectionScheme, updatedSection : SectionScheme }) => {
-        
-        const currentUserEmail = RefineEmail(user?.primaryEmailAddress?.emailAddress || "");
-        
-        const updateSectionIndex = contextSections.findIndex((section) => section.id === updatedSection.id);
 
-        if (updateSectionIndex !== -1) {
-            // Create a new array with only the updated section
-            const updatedSections = [
-                ...contextSections.slice(0, updateSectionIndex),
-                updatedSection,
-                ...contextSections.slice(updateSectionIndex + 1)
-            ];
-        
-            setContextSections(updatedSections); // Update the state with the updated sections
-        }
-        
-        try
-        {
-            if(currentSection == updatedSection) return;
-            SaveContextSections();
-            await SynchronizeToDexieDB({ sections : contextSections, email : currentUserEmail })
-                .catch(() => ToastMessage({message : "Failed To Sync Data Indexed DB", description : "STORAGE", type : "Error"}));
-        }
-        catch (error : any) {
-            RestoreContextSections();
-            ToastMessage({ message : "Failed To Update Please Be Paitent Your Data Synced", description : "INTERNAL SERVER ERROR 500", type : "Error" })
-            console.error("Error While Updating Section : ", error);
-        }
-    }
+    const UpdateSection = useCallback(
+        async ({ currentSection, updatedSection } : {  currentSection: SectionScheme, updatedSection: SectionScheme }) => {
+            const currentUserEmail = RefineEmail(user?.primaryEmailAddress?.emailAddress || "");
+            
+            if (currentSection === updatedSection) return; // Skip if there’s no change
+
+            const updateSectionIndex = contextSections.findIndex((section) => section.id === updatedSection.id);
+            if (updateSectionIndex === -1) return; // Exit if the section isn’t found
+
+            // Update only the specific section in state without replacing the whole array
+            setContextSections((prevSections) => {
+                const updatedSections = [...prevSections];
+                updatedSections[updateSectionIndex] = updatedSection;
+                return updatedSections;
+            });
+
+            try {
+                // Debounce synchronization to prevent excessive calls
+                await debouncedSyncToDexieDB({ sections: contextSections, email: currentUserEmail });
+            } catch (error) {
+                RestoreContextSections(); // Rollback on error
+                ToastMessage({
+                    message: "Failed To Update. Please Be Patient. Data Sync Issue",
+                    description: "INTERNAL SERVER ERROR 500",
+                    type: "Error",
+                });
+                console.error("Error While Updating Section:", error);
+            }
+        },
+        [contextSections, user]
+    );
+
+    // Debounced sync function to prevent excessive calls
+    const debouncedSyncToDexieDB = debounce(
+        async (data) => {
+            try {
+                await SynchronizeToDexieDB(data);
+            } catch (error) {
+                ToastMessage({
+                    message: "Failed To Sync Data Indexed DB",
+                    description: "STORAGE",
+                    type: "Error",
+                });
+            }
+        },
+        500 // Adjust the debounce delay as needed
+    );
+
     
     const DeleteSections = async (id:string) => {
         if(isSignedIn && isLoaded && user.primaryEmailAddress)

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSectionContext } from "@/context/SectionContextProvider";
-import { useSectionController } from "@/context/SectionControllerProviders";
+//import { useSectionController } from "@/context/SectionControllerProviders";
 import { useUser } from "@clerk/nextjs";
 
 import useFullscreenToggle from "@/hook/useFulscreenToggle";
@@ -48,7 +48,7 @@ export default function LinksNavbarSettings()
 
     const [_, setTheme] = useTheme();
     const [fullscreen, setFullscreen] = useFullscreenToggle();
-    const { GetSections, contextSections } = useSectionController()!;
+    //const { GetSections, contextSections } = useSectionController()!;
     const { SelectAllSection, DselectAllSection, setMinimizeAllSections, sectionHighlighted } = useSectionContainerContext();
     const { isLoaded, isSignedIn } = useUser();
 
@@ -59,16 +59,16 @@ export default function LinksNavbarSettings()
     }
 
     const handleForceReload = async () => {
-        GetSections(true);
+        //GetSections(true);
     }
 
     const handleTheme = (theme : "dark" | "light") => {
         setTheme(theme);
     }
 
-    const handleExportAsJson = () => ConvertSectionToJSON(contextSections); // export json file
+    const handleExportAsJson = () => {} //ConvertSectionToJSON(contextSections); // export json file
 
-    const handleExportAsTxt = () => ConvertSectionToTxt(contextSections); // export txt file
+    const handleExportAsTxt = () => {} //ConvertSectionToTxt(contextSections); // export txt file
 
     useEffect(() => {
         window.addEventListener("online", () => console.log("online"));

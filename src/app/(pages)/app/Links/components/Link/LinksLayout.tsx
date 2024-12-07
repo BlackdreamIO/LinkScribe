@@ -1,13 +1,14 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
+import dynamic from "next/dynamic";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
 
 import { useKeyboardNavigation } from "@/hook/useKeyboardNavigation";
 import { useSectionContext } from "@/context/SectionContextProvider";
 
 import { Box, Text } from "@chakra-ui/react";
-import { LinkComponent } from "./Link";
+const LinkComponent = dynamic(() => import("./Link").then((mod) => mod.LinkComponent), { ssr: false });
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 
 export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layout : LinkLayout, id : string }) => {
@@ -37,7 +38,7 @@ export const LinksLayout = ({ links, id, layout } : { links : LinkScheme[], layo
         else {
             return <Text className="text-center mb-4 text-lg max-sm:text-xxs">EMPTY</Text>;
         }
-    }, [links, id, layout]);
+    }, [links, layout]);
 
     const GenerateLayoutGrid = () => {
         switch (layout.size) {

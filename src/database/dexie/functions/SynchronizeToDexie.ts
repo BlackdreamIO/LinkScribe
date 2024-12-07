@@ -2,7 +2,6 @@ import { DexieGetSectionsByEmail } from "@/database/dexie/helper/DexieSectionByE
 import { SectionScheme } from "@/scheme/Section";
 import { SectionManagerDexie } from "../helper/SectionManagerDexie";
 import { DexieGetCacheImages } from "../helper/DexieCacheImages";
-import { GetCloudinaryImage } from "@/app/actions/cloudnary/getImage";
 
 interface ISynchronizeToDexieDB {
     email: string;
@@ -32,5 +31,4 @@ export async function SynchronizeToDexieDB({ email, sections }: ISynchronizeToDe
         return currentCachedImage?.url;
     });
 
-    //const { imageURL } = await GetCloudinaryImage({ publicID : links[0].image });
 }

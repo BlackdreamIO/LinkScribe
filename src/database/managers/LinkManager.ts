@@ -2,7 +2,6 @@ import { CreateLink } from "@/database/actions/links/createLink";
 import { UpdateLink } from "@/database/actions/links/updateLink";
 import { DeleteLink } from "@/database/actions/links/deleteLink";
 import { LinkScheme } from "@/scheme/Link";
-import { DeleteCloudinaryImage } from "@/app/actions/cloudnary/deleteImage";
 
 interface ILinkManager {
     email : string;

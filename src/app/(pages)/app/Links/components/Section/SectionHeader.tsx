@@ -24,6 +24,8 @@ import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { SectionLinkSearch } from "./SectionLinkSearch";
 import { DropdownMenuItemStyle } from "@/styles/componentStyles";
+import { useAppDispatch } from "@/redux/hooks";
+import { deleteSection, updateSection } from "@/redux/features/section";
 
 type SectionHeaderProps = {
     section : SectionScheme;
@@ -40,23 +42,25 @@ export const SectionHeader = (props : SectionHeaderProps) => {
     const [currentSectionTitle, setCurrentSectionTitle] = useState(section.title);
     const [titleEditMode, setTitleEditMode] = useState(false);
 
-    const { UpdateSection, DeleteSections } = useSectionController();
+    //const { UpdateSection, DeleteSections } = useSectionController();
     const { setOpenLinkCreateDrawer, currentSection } = useSectionContext();
-
+    const dispatch = useAppDispatch();
     const handleMinimzie = () => {
+        // UpdateSection({
+        //     currentSection : currentSection,
+        //     updatedSection : {...currentSection, minimized : !isMinimzied}
+        // })
+        dispatch(updateSection({...section, minimized : !isMinimzied}));
         onMinimize();
-        UpdateSection({
-            currentSection : currentSection,
-            updatedSection : {...currentSection, minimized : !isMinimzied}
-        })
     }
 
     const handleRename = (newTitle : string) => {
         if(currentSectionTitle.length < 1) return;
-        UpdateSection({ 
-            currentSection : currentSection,
-            updatedSection : {...currentSection, title : newTitle}
-        })
+        // UpdateSection({ 
+        //     currentSection : currentSection,
+        //     updatedSection : {...currentSection, title : newTitle}
+        // })
+        dispatch(updateSection({...section, title : newTitle}));
     }
 
     return (
@@ -104,7 +108,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                                 showLinkCount={showLinkCount}
                                 handleMinimzie={handleMinimzie}
                                 onTitleEditMode={setTitleEditMode}
-                                onDelete={() => DeleteSections(currentSection.id)}
+                                onDelete={() => dispatch(deleteSection(section.id))}
                             />
                         </ErrorManager>
                     </HStack>
@@ -122,7 +126,7 @@ export const SectionHeader = (props : SectionHeaderProps) => {
                 <ContextMenuItem onClick={() => setOpenLinkCreateDrawer(true)} className={DropdownMenuItemStyle}>Add Link</ContextMenuItem>
                 <ContextMenuItem className={DropdownMenuItemStyle}>Collapse/Expand Section</ContextMenuItem>
                 <ContextMenuItem 
-                    onClick={() => DeleteSections(currentSection.id)} 
+                    onClick={() => dispatch(deleteSection(section.id))}
                     className={`${DropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
                         Delete
                 </ContextMenuItem>

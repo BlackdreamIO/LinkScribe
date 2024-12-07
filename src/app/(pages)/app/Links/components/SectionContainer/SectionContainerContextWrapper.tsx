@@ -1,7 +1,6 @@
 "use client"
 
 import { useRef } from "react";
-import { useSectionContext } from "@/context/SectionContextProvider";
 import { useSectionController } from "@/context/SectionControllerProviders";
 import { useSettingContext } from "@/context/SettingContextProvider";
 import { useKeyPress } from "@/hook/useKeyPress";
@@ -30,10 +29,10 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
 
     const { setOpenCreatorDialog, sectionHighlighted, setSectionHighlighted, SelectAllSection, DselectAllSection, setMinimizeAllSections, minimizeAllSections } = useSectionContainerContext();
 
-    const {
-        contextSections,
-        DeleteSections
-    } = useSectionController()!;
+    // const {
+    //     contextSections,
+    //     DeleteSections
+    // } = useSectionController()!;
 
     const { keyboardShortcutStatus } = useSettingContext()!;
 
@@ -119,8 +118,8 @@ export const SectionContainerContextWrapper = (props : SectionContainerContextWr
     })
 
     const handleDelete = async () => {
-        const updatedSections = contextSections.filter((section) => section !== contextSections.at(0));
-        console.log(updatedSections); 
+        //const updatedSections = contextSections.filter((section) => section !== contextSections.at(0));
+        //console.log(updatedSections); 
     }
 
     return (

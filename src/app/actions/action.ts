@@ -1,7 +1,6 @@
 "use server"
 
-import { db } from "@/database/firebase";
-import { addDoc, collection, getDocs, getDocsFromCache, getDocsFromServer } from "firebase/firestore";
+//import { addDoc, collection, getDocs, getDocsFromCache, getDocsFromServer } from "firebase/firestore";
 import { revalidatePath } from "next/cache";
 
 export async function getSections() 
@@ -16,16 +15,7 @@ export async function getSections()
     // })
 
     try {
-        const documentsCollectionRef = collection(db, 'document');
-        const documentsSnapshot = await getDocs(documentsCollectionRef);
-
-        const documents = documentsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-        }));
-    
-        revalidatePath('/');
-        return documents;
+       return []
     } 
     catch (error) {
         revalidatePath('/');
@@ -43,16 +33,7 @@ export async function getUserSections(userEmail : string)
 {
     try 
     {
-        const documentsCollectionRef = collection(db, userEmail);
-        const documentsSnapshot = await getDocsFromServer(documentsCollectionRef);
-
-        const documents = documentsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-        }));
-    
-        revalidatePath('/app/Links/');
-        return documents;
+        return []
     } 
     catch (error : any) {
         revalidatePath('/app/Links/');

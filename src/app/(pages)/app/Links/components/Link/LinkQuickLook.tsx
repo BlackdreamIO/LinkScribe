@@ -2,18 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { useLinkController } from "@/context/LinkControllerProviders";
+//import { useLinkController } from "@/context/LinkControllerProviders";
 import { useSendToastMessage } from "@/hook/useSendToastMessage";
 import { useCopyImageToClipboard } from "@/hook/useCopyImageToClipboard";
 
 import { LinkScheme } from "@/scheme/Link";
 import Image from "next/image";
 
-import { GetCloudinaryImage } from "@/app/actions/cloudnary/getImage";
-import { RefineEmail } from "@/helpers";
-import { DexieGetCacheImage } from "@/database/dexie/helper/DexieCacheImages";
-import { ImageCacheManager } from "@/database/managers/ImageCacheMnager";
-import { ConvertBlobToUrl } from "@/helpers/ConvertBlobToUrl";
 import { IsValidImageUrl } from "@/helpers/IsValidImageUrl";
 
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
@@ -59,7 +54,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     
     const { user } = useUser();
     const { getToken } = useAuth();
-    const { UpdateLink, AddPreviewImage, DeletePreviewImage, GetPreviewImage } = useLinkController();
+    //const { UpdateLink, AddPreviewImage, DeletePreviewImage, GetPreviewImage } = useLinkController();
     const { ToastMessage } = useSendToastMessage();
     const [ copyImageToClipboard ] = useCopyImageToClipboard();
 
@@ -80,6 +75,7 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
 
         if(!user) return;
 
+        /*
         GetPreviewImage({
             link : link,
             onSucess : (src) => {
@@ -89,87 +85,11 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
                 setShowImageProcessingStatus(true);
                 setImageProcessingStatus(status);
             },
+            onError : () => setShowImageProcessingStatus(false)
         })
+        */
 
         setShowImageProcessingStatus(false);
-
-        /*
-        const cacheImage = await DexieGetCacheImage({
-            id : link.id,
-            email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
-            revalidation : {
-                image_url : link.url,
-                revalidate : false
-            },
-            onError(error) {
-                ToastMessage({ message : "Please Free Up Storage Space On Your Device", description : error.message ?? '', type : "Error" })
-                console.error(error);
-            },
-        });
-
-        console.log(cacheImage)
-
-        if(cacheImage) {
-            const imageURL = URL.createObjectURL(cacheImage);
-            setLinkPreviewImage(imageURL);
-            return;
-        }
-        */
-
-        /*
-        const path = `${RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '')}/links/${link.id}.webp`;
-
-        const res = await fetch(`http://localhost:5000/media/?path=${path}`, {
-            method : "GET",
-            cache : "no-store",
-            next : { revalidate : 0 }
-        })
-
-        const json = await res.json();
-        console.log(json?.data?.url);
-
-        const blob = await fetch(json?.data?.url).then(res => res.blob());
-
-        console.log(blob)
-
-        const cacheImage = await DexieGetCacheImage({
-            id : link.id,
-            email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
-            revalidation : {
-                image_url : link.url,
-                revalidate : false
-            },
-            onError(error) {
-                ToastMessage({ message : "Please Free Up Storage Space On Your Device", description : error.message ?? '', type : "Error" })
-                console.error(error);
-            },
-        });
-
-        if(cacheImage) {
-            const imageURL = URL.createObjectURL(cacheImage);
-            setLinkPreviewImage(imageURL);
-            return;
-        }
-        else {
-            ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
-            await ImageCacheManager.uploadToCache({
-                image : blob,
-                cacheEncoderDecoder : "blob",
-                compressMode : "BTC",
-                metaData : {
-                    id : link.id,
-                    ref : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? ''),
-                    url : json?.data?.url
-                },
-                onCallback(callbackStatus) {
-                    setImageProcessingStatus(callbackStatus);
-                },
-                onError : (error) => {
-                    ToastMessage({ message : JSON.stringify(error.message), type : "Error", duration : 5000 });
-                }
-            });
-        }
-        */
     }
 
     const handleDelete = async () => {
@@ -177,8 +97,9 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
     }
 
     const handleSave = async () => {
-        //setIsLoading(true);
+        setIsLoading(true);
 
+        /*
         AddPreviewImage({
             file : uploadedFile,
             url : uploadedImageURL,
@@ -187,11 +108,13 @@ export const LinkQuickLook = (props : LinkQuickLookProps) => {
             link : link,
             onSucess() {
                 ToastMessage({ message : "Link Preview Image Added Successfully", type : "Success" });
+                setIsLoading(false);
             },
             onError() {
-                
+                setIsLoading(false);
             }
         })
+        */
     }
 
     const checkValidImageUrl = async () => {

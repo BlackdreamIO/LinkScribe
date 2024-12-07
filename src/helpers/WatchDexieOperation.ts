@@ -16,7 +16,7 @@ export async function WatchDexieOperation (operation: () => Promise<any>)
         
             case 'ConstraintError':
                 //console.error('Constraint violation:', error.message);
-                localStorage.setItem("dexieMemoryAllocationError", JSON.stringify(true));
+                //localStorage.setItem("dexieMemoryAllocationError", JSON.stringify(false));
                 break;
 
             case 'QuotaExceededError':
@@ -31,7 +31,7 @@ export async function WatchDexieOperation (operation: () => Promise<any>)
 
             default:
                 //console.error('Unexpected Dexie error:', error);
-                localStorage.setItem("dexieMemoryAllocationError", JSON.stringify(true));
+                //localStorage.setItem("dexieMemoryAllocationError", JSON.stringify(false));
                 break;
         }
     }

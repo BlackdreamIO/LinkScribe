@@ -3,41 +3,58 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useSectionController } from "@/context/SectionControllerProviders";
-import { v5 as uuidv5 } from "uuid";
 
 import { Box } from "@chakra-ui/react";
-import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
 import { RefineEmail } from "@/helpers";
 import { useSectionContainerContext } from "@/context/SectionContainerContext";
+import { useAppDispatch } from "@/redux/hooks";
+import { addSection } from "@/redux/features/section";
 
 export const SectionCreator = () => {
 
     const [sectionTitle, setSectionTitle] = useState("");
 
-    const { CreateSection } = useSectionController()!;
+    //const { CreateSection } = useSectionController()!;
     const { user } = useUser();
     const { openCreatorDialog, setOpenCreatorDialog } = useSectionContainerContext();
 
+    const dispatch = useAppDispatch();
+
     const handleCreateSection = () => {
         if(user && user.primaryEmailAddress && sectionTitle) {
-            CreateSection({
-                newSection : {
-                    id : crypto.randomUUID(), // gen 16 character long random string
-                    title : sectionTitle,
-                    links : [],
-                    totalLinksCount : 0,
-                    created_at : new Date().toString(),
-                    _deleted : false,
-                    links_layout : {
-                        layout : "List Detailed",
-                        size : 1
-                    },
-                    selfLayout : "Grid",
-                    section_ref : RefineEmail(user.primaryEmailAddress.emailAddress),
-                }
-            });
+            // CreateSection({
+            //     newSection : {
+            //         id : crypto.randomUUID(), // gen 16 character long random string
+            //         title : sectionTitle,
+            //         links : [],
+            //         totalLinksCount : 0,
+            //         created_at : new Date().toString(),
+            //         _deleted : false,
+            //         links_layout : {
+            //             layout : "List Detailed",
+            //             size : 1
+            //         },
+            //         selfLayout : "Grid",
+            //         section_ref : RefineEmail(user.primaryEmailAddress.emailAddress),
+            //     }
+            // });
+            dispatch(addSection({
+                id : crypto.randomUUID(),
+                title : sectionTitle,
+                links : [],
+                totalLinksCount : 0,
+                created_at : new Date().toString(),
+                _deleted : false,
+                links_layout : {
+                    layout : "List Detailed",
+                    size : 1
+                },
+                selfLayout : "Grid",
+                section_ref : RefineEmail(user.primaryEmailAddress.emailAddress),
+            }))
         }
         setOpenCreatorDialog(false);
     }

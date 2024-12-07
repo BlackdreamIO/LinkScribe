@@ -20,11 +20,13 @@ import {
 import { ConditionalRender } from "@/components/ui/conditionalRender";
 import { Button } from "@/components/ui/button";
 import { useSectionContext } from "@/context/SectionContextProvider";
-import { useSectionController } from "@/context/SectionControllerProviders";
+//import { useSectionController } from "@/context/SectionControllerProviders";
 import { LinkLayout } from "@/scheme/Link";
 import { useSendToastMessage } from "@/hook/useSendToastMessage";
 import { useThemeContext } from "@/context/ThemeContextProvider";
 import { cn } from "@/utils/utils";
+import { useAppDispatch } from "@/redux/hooks";
+import { updateSection } from "@/redux/features/section";
 
 type SectionHeaderOptionsProsp = {
     minimized : boolean;
@@ -53,23 +55,27 @@ export const SectionHeaderOptions = (props : SectionHeaderOptionsProsp) => {
 
     const { linkLayoutDefaultSize } = useSettingContext()!;
     const { currentSection, setOpenLinkCreateDrawer, setOpenSectionTransferer, openLinkSearch, setOpenLinkSearch } = useSectionContext();
-    const { UpdateSection } = useSectionController();
+    //const { UpdateSection } = useSectionController();
     const { sectionGlassmorphismEnabled } = useThemeContext();
 
     const { ToastMessage } = useSendToastMessage();
+
+    const dispatch = useAppDispatch();
     
     const handleUpdateLinkLayout = (layout : LinkLayout) => {
-        UpdateSection({
-            currentSection: currentSection,
-            updatedSection : { ...currentSection, links_layout : layout }
-        })
+        // UpdateSection({
+        //     currentSection: currentSection,
+        //     updatedSection : { ...currentSection, links_layout : layout }
+        // })
+        dispatch(updateSection({ ...currentSection, links_layout : layout }));
     }
 
     const handleDeleteAllLinks = () => {
-        UpdateSection({
-            currentSection: currentSection,
-            updatedSection : { ...currentSection, links : [] }
-        })
+        // UpdateSection({
+        //     currentSection: currentSection,
+        //     updatedSection : { ...currentSection, links : [] }
+        // })
+        dispatch(updateSection({ ...currentSection, links : [] }));
         ToastMessage({ message : "All links deleted", type : "Success" })
     }
 

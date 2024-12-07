@@ -14,6 +14,9 @@ import { AGOutput } from "./AGOutput";
 import { Button } from "@/components/ui/button";
 import { AGGenarationSettings } from "./AGGenarationSettings";
 import { useSectionController } from "@/context/SectionControllerProviders";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { RootState } from "@/redux/store";
+import { updateSection } from "@/redux/features/section";
 
 
 const TooltipTriggerStyle = "!ring-0 rounded-full outline-4 outline outline-transparent focus-visible:!outline-theme-borderNavigation";
@@ -21,11 +24,14 @@ const TooltipTriggerStyle = "!ring-0 rounded-full outline-4 outline outline-tran
 export const AiGenerationDialog = () => {
 
     const { loading, selectedSectionID, selectedLinks } = useAGContextWrapper();
-    const { UpdateSection, contextSections } = useSectionController();
+    //const { UpdateSection, contextSections } = useSectionController();
+
+    const sections = useAppSelector((state : RootState) => state.sectionSlice.sections);
+    const dispatch = useAppDispatch();
 
     const handleAddLinks = () => {
         if (selectedSectionID != "") {
-            const currentSection = contextSections.find(section => section.id == selectedSectionID);
+            const currentSection = sections.find(section => section.id == selectedSectionID);
             if(currentSection) {
                 const filteredLinks = selectedLinks
                     .filter(link => link.selected == true)
@@ -33,10 +39,12 @@ export const AiGenerationDialog = () => {
                     .filter(link => !currentSection.links.some(existingLink => existingLink.id === link.id));
                 const updatedSection = {...currentSection, links : [...currentSection.links, ...filteredLinks]};
                 
-                UpdateSection({
-                    currentSection : currentSection,
-                    updatedSection : updatedSection
-                });
+                // UpdateSection({
+                //     currentSection : currentSection,
+                //     updatedSection : updatedSection
+                // });
+
+                dispatch(updateSection({ ...currentSection, links : [...currentSection.links, ...filteredLinks]}));
             }
         }
     }

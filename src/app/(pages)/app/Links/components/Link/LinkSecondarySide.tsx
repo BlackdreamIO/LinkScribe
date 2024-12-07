@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react";
-import { useLinkController } from "@/context/LinkControllerProviders";
+//import { useLinkController } from "@/context/LinkControllerProviders";
 import { useCopyToClipboard } from "@/hook/useCopyToClipboard";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
 
@@ -21,6 +21,8 @@ import {
     HoverCardContent,
     HoverCardTrigger,
   } from "@/components/ui/hover-card";
+import { useAppDispatch } from "@/redux/hooks";
+import { deleteLink, updateLink } from "@/redux/features/section";
 
 type LinkSecondarySideProps = {
     link : LinkScheme;
@@ -31,7 +33,6 @@ type LinkSecondarySideProps = {
     onQuickLook: () => void;
     onTitleEditMode: (edit : boolean) => void;
     onUrlEditMode: (edit : boolean) => void;
-    onDelete: () => void;
 }
 
 const buttonStyle = `w-auto h-auto p-0 !bg-transparent dark:text-neutral-500 dark:hover:text-white text-black !ring-0 !border-none outline-none rounded-md focus-visible:!outline-theme-borderNavigation`;
@@ -41,27 +42,33 @@ const dropdownMenuItemStyle = `text-md max-sm:text-xs py-2 font-normal rounded-l
 
 export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
 
-    const { link, sectionID, urlEditMode, showMobileOptions, layout, onUrlEditMode, onDelete, onTitleEditMode, onQuickLook  } = props;
+    const { link, sectionID, urlEditMode, showMobileOptions, layout, onUrlEditMode, onTitleEditMode, onQuickLook  } = props;
 
     const [linkUrl, setLinkUrl] = useState(link.url);
     const [previewImage, setPreviewImage] = useState<string>("");
 
     const [ copyToClipboard ] = useCopyToClipboard();
-    const { UpdateLink, GetCacheImage, IncreaseViewCount } = useLinkController()!;
+    //const { UpdateLink, GetCacheImage, IncreaseViewCount } = useLinkController()!;
     const linkRef = useRef<HTMLInputElement>(null);
+
+    const dispatch = useAppDispatch();
 
     const HandleRenameUrl = () => {
         if(linkUrl.length < 6) return;
 
         onUrlEditMode(false);
-        UpdateLink({
-            currentLink : link,
-            sectionID : sectionID,
-            updatedLink : {
-                ...link,
-                url : linkUrl,
-            }
-        })
+        // UpdateLink({
+        //     currentLink : link,
+        //     sectionID : sectionID,
+        //     updatedLink : {
+        //         ...link,
+        //         url : linkUrl,
+        //     }
+        // })
+        dispatch(updateLink({
+            sectionId : sectionID,
+            link : { ...link, url : linkUrl }
+        }))
     }
 
     useEffect(() => {
@@ -76,11 +83,11 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
     }, [urlEditMode]);
 
     const getPreviewImage = async () => {
-        const cacheImage = await GetCacheImage({ id : link.id });
-        if(cacheImage) {
-            const url = URL.createObjectURL(cacheImage);
-            setPreviewImage(url);
-        }
+        // const cacheImage = await GetCacheImage({ id : link.id });
+        // if(cacheImage) {
+        //     const url = URL.createObjectURL(cacheImage);
+        //     setPreviewImage(url);
+        // }
     }
 
     useEffect(() => {
@@ -105,7 +112,7 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
                     Quick Look
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onDelete()} className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
+                <DropdownMenuItem onClick={() => dispatch(deleteLink({ sectionId : sectionID, linkId : link.id }))} className={`${dropdownMenuItemStyle} dark:hover:!bg-red-500 dark:hover:!text-white`}>
                     Delete
                 </DropdownMenuItem>
             </>
@@ -138,7 +145,10 @@ export const LinkSecondarySide = (props : LinkSecondarySideProps) => {
                             <Link
                                 target="_blank"
                                 href={link.url}
-                                onClick={() => IncreaseViewCount({ link })}
+                                onClick={() => dispatch(updateLink({
+                                    sectionId : sectionID,
+                                    link : { ...link, visitCount : link.visitCount + 1 }
+                                }))}
                                 className="text-sm text-end max-lg:text-xs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
                                     {link.url}
                             </Link>

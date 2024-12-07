@@ -5,10 +5,8 @@ import { useAuth, useUser } from '@clerk/nextjs';
 import { useSectionController } from './SectionControllerProviders';
 import { ConvertEmailString } from '@/global/convertEmailString';
 import { LinkScheme } from '@/scheme/Link';
-import { UploadImageToCloudinary } from '@/app/actions/cloudnary/uploadImage';
 import { RefineEmail, SynchronizeToDexieDB, FileToBase64 } from '@/helpers';
 import { useSendToastMessage } from '@/hook/useSendToastMessage';
-import { DeleteCloudinaryImage } from '@/app/actions/cloudnary/deleteImage';
 import { useSectionContainerContext } from './SectionContainerContext';
 import { DexieGetCacheImage } from '@/database/dexie/helper/DexieCacheImages';
 import { ImageCacheManager } from "@/database/managers/ImageCacheMnager";
@@ -54,6 +52,7 @@ export const useLinkController = () => useContext(LinkController)!;
 
 export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
+    /*
     const [isloading, setIsLoading] = useState(true);
 
     const { isSignedIn, isLoaded, user } = useUser();
@@ -205,7 +204,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     formData.append("id", link.id);
     
                     onCallback?.({ loading : true });
-                    /*
+                    
                     const response = await fetch("http://localhost:5000/media", {
                         method : "POST",
                         headers : { 'Authorization': `Bearer ${token}`},
@@ -215,7 +214,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
                     const data = await response.json();
 
                     console.log(data);
-                    */
+                    
 
                     ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
                     await ImageCacheManager.uploadToCache({
@@ -306,28 +305,7 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
     }
 
     const DeletePreviewImage = async ({ link, onSucess, onError } : { link : LinkScheme, onSucess? : () => void, onError? : () => void }) => {
-        if(user && isSignedIn && user.primaryEmailAddress) {
-            if(link.image !== "") {
-                const { sucess, error } = await DeleteCloudinaryImage({ publicID : `${RefineEmail(user.primaryEmailAddress.emailAddress)}/${link.id}` });
-
-                if(sucess) {
-                    UpdateLink({
-                        currentLink : link,
-                        sectionID : link.ref,
-                        updatedLink : {
-                            ...link,
-                            image : "",
-                        }
-                    })
-                    onSucess?.();
-                }
-                else {
-                    onError?.();
-                }
-                sucess ? ToastMessage({ message : "Link Preview Image Deleted Successfully", type : "Success" }) :
-                        ToastMessage({ message : "Something went wrong", description : error, type : "Error" });
-            }   
-        }
+        
     }
 
     const GetPreviewImage = async ({ link, onSucess, onError, onCallback } : { link : LinkScheme, onCallback? : (status : string) => void, onSucess? : (src : string) => void, onError? : () => void }) => {
@@ -362,6 +340,8 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
 
                 if(json?.data?.url) {
                     const blob = await fetch(json?.data?.url).then(res => res.blob());
+
+                    console.log({data : blob, url : json?.data?.url, linkId : link.id});
 
                     ImageCacheManager.InitializeCacheManager({ email : RefineEmail(user?.primaryEmailAddress?.emailAddress ?? '') });
                     await ImageCacheManager.uploadToCache({
@@ -424,4 +404,5 @@ export const LinkControllerProvider = ({children} : LinkProviderProps) => {
             {children}
         </LinkController.Provider>
     )
+    */
 }

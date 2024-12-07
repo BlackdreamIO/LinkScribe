@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import ErrorManager from "../../../components/ErrorHandler/ErrorManager";
+import { useAppDispatch } from "@/redux/hooks";
+import { addLink } from "@/redux/features/section";
 
 export const SectionHeaderLinkDrawer = () => {
 
@@ -22,15 +24,28 @@ export const SectionHeaderLinkDrawer = () => {
 
     const { user } = useUser();
 
-    const { CreateLink, isloading } = useLinkController();
+    //const { CreateLink, isloading } = useLinkController();
     const { currentSection, openLinkCreateDrawer, setOpenLinkCreateDrawer } = useSectionContext();
+    const dispatch = useAppDispatch();
 
     const handleCreateLink = async () => {
         if(user && user.primaryEmailAddress) {
             if(linkTitle.length > 3 && linkUrl.length > 5) {
-                await CreateLink({
-                    sectionID : currentSection.id,
-                    linkData : {
+                // await CreateLink({
+                //     sectionID : currentSection.id,
+                //     linkData : {
+                //         id : uuidv4().slice(0, 16),
+                //         title : linkTitle,
+                //         url : linkUrl,
+                //         visitCount : 0,
+                //         created_at : new Date(),
+                //         ref : currentSection.id,
+                //         image : ""
+                //     }
+                // });
+                dispatch(addLink({
+                    sectionId : currentSection.id,
+                    link : {
                         id : uuidv4().slice(0, 16),
                         title : linkTitle,
                         url : linkUrl,
@@ -39,7 +54,7 @@ export const SectionHeaderLinkDrawer = () => {
                         ref : currentSection.id,
                         image : ""
                     }
-                });
+                }))
                 setOpenLinkCreateDrawer(false);
             }
         }

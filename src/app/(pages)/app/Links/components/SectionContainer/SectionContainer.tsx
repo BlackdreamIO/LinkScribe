@@ -2,7 +2,7 @@
 
 import { CSSProperties, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useSectionController } from '@/context/SectionControllerProviders';
+//import { useSectionController } from '@/context/SectionControllerProviders';
 import { useDBController } from '@/context/DBContextProvider';
 import { useThemeContext } from '@/context/ThemeContextProvider';
 import dynamic from 'next/dynamic';
@@ -17,6 +17,8 @@ import { DBLoadComponent } from '../DBLoadComponent';
 import { SectionContextProvider } from '@/context/SectionContextProvider';
 import { useLowDiskError } from '@/hook/useLowDiskError';
 import { ConditionalRender } from '@/components/ui/conditionalRender';
+import { useAppSelector } from '@/redux/hooks';
+import { RootState } from '@/redux/store';
 
 const Section = dynamic(() => import('../Section/Section').then((mod) => mod.Section),
 { ssr : true, loading : () => <Skeleton className='w-full dark:bg-theme-bgFourth animate-none h-16 rounded-xl' /> });
@@ -29,30 +31,33 @@ const override: CSSProperties = {
 export const SectionContainer = () => {
 
     const { isSignedIn, isLoaded } = useUser();
-    const { contextSections } = useSectionController();
+    //const { contextSections, setContextSections } = useSectionController();
     const { databaseExist, isLoading } = useDBController();
     const { appBackgroundColor } = useThemeContext();
 
     const lowDiskError = useLowDiskError();
 
-    const MemoizedContentDisplay = useMemo(() => {
-        const filteredContextSection = contextSections.sort(
-            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    const sections = useAppSelector((state : RootState) => state.sectionSlice.sections);
+
+    const sortedSections = useMemo(() => {
+        return [...sections].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
-        return filteredContextSection.map((section, i) => (
-            <SectionContextProvider key={i}>
-                <ErrorManager key={section.id}>
-                    <Section
-                        section={section}
-                        key={section.id}
-                    />
+      }, [sections]);
+      
+
+    const MemoizedContentDisplay = useMemo(() => {
+        return sections.map((section) => (
+            <SectionContextProvider key={section.id}>
+                <ErrorManager>
+                    <Section section={section} key={section.id} />
                 </ErrorManager>
             </SectionContextProvider>
-        ))
-    }, [contextSections]);
+        ));
+    }, [sections]);
     
     const RenderSections = () => {
-        if(contextSections && contextSections.length > 0)
+        if(sections && sections.length > 0)
         {
             return isSignedIn && isLoaded ? <>{MemoizedContentDisplay}</> : <BarLoader color='white' cssOverride={override} />
         }

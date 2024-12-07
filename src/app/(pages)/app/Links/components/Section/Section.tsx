@@ -7,7 +7,6 @@ import { useSettingContext } from '@/context/SettingContextProvider';
 import { useSectionContext } from '@/context/SectionContextProvider';
 import { useSectionContainerContext } from '@/context/SectionContainerContext';
 import { useThemeContext } from '@/context/ThemeContextProvider';
-import { useSectionController } from '@/context/SectionControllerProviders';
 
 import { Box } from '@chakra-ui/react';
 
@@ -16,6 +15,8 @@ import { ConditionalRender } from '@/components/ui/conditionalRender';
 import { SectionHeader } from './SectionHeader';
 import { LinksLayout } from '../Link/LinksLayout';
 import ErrorManager from '../../../components/ErrorHandler/ErrorManager';
+import { useAppDispatch } from '@/redux/hooks';
+import { updateSection } from '@/redux/features/section';
 
 // Deep comparison function to avoid unnecessary re-renders
 const areSectionsEqual = (prevProps: { section: SectionScheme }, nextProps: { section: SectionScheme }) => {
@@ -26,7 +27,7 @@ const NonMemSection = ({ section }: { section: SectionScheme }) => {
     const [minimize, setMinimize] = useState(section.minimized || false);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
-    const { UpdateSection } = useSectionController();
+    //const { UpdateSection } = useSectionController();
     const { setCurrentSection, currentSection, setOriginalSection } = useSectionContext();
     const { sectionHighlighted, minimizeAllSections } = useSectionContainerContext();
     const { showLinkCount } = useSettingContext();
@@ -34,6 +35,8 @@ const NonMemSection = ({ section }: { section: SectionScheme }) => {
 
     const skippedInitialRender = useRef(false);
     const wasInitialRender = useRef(false);
+
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         if(section) {
@@ -44,12 +47,8 @@ const NonMemSection = ({ section }: { section: SectionScheme }) => {
     
     useEffect(() => {
         if(skippedInitialRender.current) {
-            console.log(minimizeAllSections);
             setMinimize(minimizeAllSections);
-            UpdateSection({
-                currentSection : section,
-                updatedSection : {...section, minimized : true}
-            })
+            dispatch(updateSection({...section, minimized : minimizeAllSections}));
             return;
         }
         const currentTimeout = setTimeout(() => {

@@ -1,0 +1,57 @@
+
+<Input placeholder='Import Bookmarks' className='h-14' type="file" accept=".html" onChange={handleFileChange} />
+
+    const handleFileChange = async (e : any) => {
+        const file = e.target.files[0];
+        if (file) {
+            const text = await file.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, "text/html");
+
+            // Parse sections and links from the HTML content
+            const sections : SectionScheme[] = [];
+            const sectionElements = doc.querySelectorAll('DT > H3');
+
+            sectionElements.forEach((sectionElement) => {
+                const sectionName = sectionElement.textContent;
+                const links : LinkScheme[] = [];
+
+                const sectionId = crypto.randomUUID();
+                
+                // Get all links within this section
+                let sibling = sectionElement.nextElementSibling;
+                if (sibling && sibling.tagName === 'DL') {
+                    const linkElements : any = sibling.querySelectorAll('DT > A');
+                    linkElements.forEach((linkElement : any) => {
+                        links.push({
+                            title: linkElement.textContent,
+                            url: linkElement.href,
+                            created_at : new Date(),
+                            id : crypto.randomUUID(),
+                            image : '',
+                            ref : sectionId,
+                            visitCount : 0
+                        });
+                    });
+                }
+
+                sections.push({ 
+                    id : sectionId,
+                    title : sectionName ?? "Untitled",
+                    links : links,
+                    created_at : new Date().toISOString(),
+                    totalLinksCount : links.length,
+                    section_ref : 'mdh560354gmailcom',
+                    minimized : false,
+                    links_layout : { layout : "Compact", size : 1 },
+                    _deleted : false,
+                    selfLayout : "Grid"
+                });
+            });
+
+            setBookmarks(sections);
+            setContextSections(sections)
+            console.log(sections);
+            
+        }
+    };

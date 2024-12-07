@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useSectionController } from "@/context/SectionControllerProviders";
+//import { useSectionController } from "@/context/SectionControllerProviders";
 import { useSectionContext } from "@/context/SectionContextProvider";
 
 import { LinkScheme } from "@/scheme/Link";
@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { ShareableLink } from "./SectionShare/ShareableLink";
 import { CustomLinkSelector } from "./SectionShare/CustomLinkSelector";
 import { TransferEmailSelector } from "./SectionShare/TransferEmailSelector";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+//import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ShareGeneralHeader } from "./SectionShare/ShareGeneralHeader";
 
 
@@ -37,18 +37,18 @@ export const SectionTransferer = () => {
     const [importSectionData, setImportSectionData] = useState(true);
     const [importLinksData, setImportLinksData] = useState(true);
 
-    const { TransferSection } = useSectionController()!;
+    //const { TransferSection } = useSectionController()!;
     const { currentSection, openSectionTransferer, setOpenSectionTransferer } = useSectionContext();
 
     
     const handleTransfer = async () => {
-        TransferSection({
-            email : selectedEmail,
-            sectionToTransfer : currentSection,
-            importCustomLinks : true,
-            importLinks : false,
-            links : selectedLinks
-        })
+        // TransferSection({
+        //     email : selectedEmail,
+        //     sectionToTransfer : currentSection,
+        //     importCustomLinks : true,
+        //     importLinks : false,
+        //     links : selectedLinks
+        // })
         setOpenSectionTransferer(false);
     }
 

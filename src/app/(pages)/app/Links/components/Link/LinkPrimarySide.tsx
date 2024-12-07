@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
-import { useLinkController } from "@/context/LinkControllerProviders";
+//import { useLinkController } from "@/context/LinkControllerProviders";
 
 import Link from "next/link";
 
@@ -22,6 +22,8 @@ import {
   } from "@/components/ui/hover-card"
 import { DexieGetCacheImage } from "@/database/dexie/helper/DexieCacheImages";
 import Image from "next/image";
+import { useAppDispatch } from "@/redux/hooks";
+import { updateLink } from "@/redux/features/section";
   
 
 type LinkPrimarySideProps = {
@@ -40,18 +42,24 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
     const [linkTitle, setLinkTitle] = useState(link.title);
     const [previewImage, setPreviewImage] = useState<string>("");
 
-    const { UpdateLink, GetCacheImage, IncreaseViewCount } = useLinkController()!;
+    //const { UpdateLink, GetCacheImage, IncreaseViewCount } = useLinkController()!;
     const titleRef = useRef<HTMLInputElement>(null);
+
+    const dispatch = useAppDispatch();
 
     const HandleRenameTitle = () => {
         if(linkTitle.length < 3) return;
         
         onTitleEditMode(false);
-        UpdateLink({
-            currentLink : link,
-            sectionID : sectionID,
-            updatedLink : { ...link, title : linkTitle, }
-        })
+        // UpdateLink({
+        //     currentLink : link,
+        //     sectionID : sectionID,
+        //     updatedLink : { ...link, title : linkTitle, }
+        // })
+        dispatch(updateLink({
+            sectionId : sectionID,
+            link : { ...link, title : linkTitle }
+        }))
     }
 
     useEffect(() => {
@@ -67,11 +75,11 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
 
     useEffect(() => {
         const getImage = async () => {
-            const cacheImage = await GetCacheImage({ id : link.id });
-            if(cacheImage) {
-                const url = URL.createObjectURL(cacheImage);
-                setPreviewImage(url);
-            }   
+            // const cacheImage = await GetCacheImage({ id : link.id });
+            // if(cacheImage) {
+            //     const url = URL.createObjectURL(cacheImage);
+            //     setPreviewImage(url);
+            // }   
         }
         getImage();
     }, [link])
@@ -80,7 +88,7 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
     return (
         <HStack className="w-full" justifyContent={"space-between"}>
             <Box className="flex flex-grow flex-row items-center justify-start">
-                <LinkFavIcon faviconUrl={link.url} />
+                {/* <LinkFavIcon faviconUrl={link.url} /> */}
                 <Input
                     tabIndex={5}
                     value={linkTitle}
@@ -119,7 +127,10 @@ export const LinkPrimarySide = (props : LinkPrimarySideProps) => {
                             <Link
                                 target="_blank"
                                 href={link.url}
-                                onClick={() => IncreaseViewCount({ link })}
+                                onClick={() => dispatch(updateLink({
+                                    sectionId : sectionID,
+                                    link : { ...link, visitCount : link.visitCount + 1 }
+                                }))}
                                 className="text-sm text-end max-lg:text-xs text-theme-textLink hover:text-[#a2c8f3] focus-visible:outline-theme-borderNavigation decoration-[#90c1f8] underline-offset-4 hover:underline mr-2 truncate">
                                     Visit
                             </Link>

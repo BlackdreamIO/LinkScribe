@@ -16,6 +16,7 @@ import { LinkControllerProvider } from "@/context/LinkControllerProviders";
 import { SettingContextProvider } from "@/context/SettingContextProvider";
 import { SectionContainerContextProvider } from "@/context/SectionContainerContext";
 import { ThemeContextProvider } from "@/context/ThemeContextProvider";
+import ReduxProviders from "@/providers/ReduxProvider";
 //import { KeyboardNavigationContextProvider } from "@/context/KeyboardNavigationContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -29,25 +30,27 @@ export default function LinksLayout({ children,}: Readonly<{children: React.Reac
 
     return (
         <section>
-            <DBContextProvider>
-                <ThemeContextProvider>
-                    <SectionControllerProvider>
-                        <SectionContainerContextProvider>
-                            <LinkControllerProvider>
-                                <SettingContextProvider>
-                                    <Flex flexDir="row" className="no-scrollbar">
-                                        <Sidebar />
-                                        <Box className="w-full p-0 overflow-hidden !select-none">
-                                            {children}
-                                        </Box>
-                                    </Flex>
-                                    <Toaster />
-                                </SettingContextProvider>
-                            </LinkControllerProvider>
-                        </SectionContainerContextProvider>
-                    </SectionControllerProvider>
-                </ThemeContextProvider>
-            </DBContextProvider>
+            <ReduxProviders>
+                <DBContextProvider>
+                    <ThemeContextProvider>
+                        {/* <SectionControllerProvider> */}
+                            <SectionContainerContextProvider>
+                                {/* <LinkControllerProvider> */}
+                                    <SettingContextProvider>
+                                        <Flex flexDir="row" className="no-scrollbar">
+                                            <Sidebar />
+                                            <Box className="w-full p-0 overflow-hidden !select-none">
+                                                {children}
+                                            </Box>
+                                        </Flex>
+                                        <Toaster />
+                                    </SettingContextProvider>
+                                {/* </LinkControllerProvider> */}
+                            </SectionContainerContextProvider>
+                        {/* </SectionControllerProvider> */}
+                    </ThemeContextProvider>
+                </DBContextProvider>
+            </ReduxProviders>
         </section>
     )
 }

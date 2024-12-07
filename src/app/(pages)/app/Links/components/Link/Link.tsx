@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { useThemeContext } from "@/context/ThemeContextProvider";
-import { useLinkController } from "@/context/LinkControllerProviders";
+//import { useLinkController } from "@/context/LinkControllerProviders";
 import { useWindowResize } from "@/hook/useWindowResize";
 import { LinkLayout, LinkScheme } from "@/scheme/Link";
 
@@ -18,9 +18,10 @@ const LinkPrimarySide = dynamic(() => import('./LinkPrimarySide').then((mod) => 
 const LinkSecondarySide = dynamic(() => import('./LinkSecondarySide').then((mod) => mod.LinkSecondarySide), { ssr: true });
 const LinkMobileDropdown = dynamic(() => import('./LinkMobileDropdown').then((mod) => mod.LinkMobileDropdown), { ssr: true });
 
-export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme, layout : LinkLayout, sectionID : string }) => {
+export const LinkComponent = memo(( { link, sectionID, layout } : { link : LinkScheme, layout : LinkLayout, sectionID : string }) => {
 
-    const { url, id } = link;
+    console.count(`${link.id.slice(0, 4)}`);
+    
 
     const [showContextMenuOutline, setShowContextMenuOutline] = useState(false);
     const [openQL, setOpenQL] = useState(false);
@@ -31,14 +32,9 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
     const [showMobileOptions, setShowMobileOptions] = useState(false);
 
     const { linkGlassmorphismEnabled } = useThemeContext();
-    const { DeleteLink } = useLinkController()!;
     const linkRef = useRef<HTMLDivElement>(null);
 
     const handleDeleteLink = async () => {
-        DeleteLink({
-            sectionID : sectionID,
-            linkId : id
-        })
     }
 
     useWindowResize({
@@ -81,7 +77,6 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
                     showMobileOptions={showMobileOptions}
                     onTitleEditMode={setTitleEditMode}
                     onUrlEditMode={setUrlEditMode}
-                    onDelete={handleDeleteLink}
                     onQuickLook={() => setOpenQL(true)}
                 />
 
@@ -105,5 +100,7 @@ export const LinkComponent = ( { link, sectionID, layout } : { link : LinkScheme
             </Box>
         </LinkContextMenuWrapper>
     )
-}
+}, (prev, next) => {
+    return prev.link.id == next.link.id
+})
 
